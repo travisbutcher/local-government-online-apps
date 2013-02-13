@@ -20,7 +20,7 @@ Currently, one application configuration is provided:
 
 * Parcel Viewer
 
-![HTML5 Powered with CSS3 / Styling, Device Access, and Graphics, 3D &amp; Effects](http://www.w3.org/html/logo/badge/html5-badge-h-css3-device-graphics.png "HTML5 Powered with CSS3 / Styling, Device Access, and Graphics, 3D &amp; Effects")
+![HTML5 Powered with CSS3 / Styling, Device Access, and Graphics, 3D & Effects](http://www.w3.org/html/logo/badge/html5-badge-h-css3-device-graphics.png "HTML5 Powered with CSS3 / Styling, Device Access, and Graphics, 3D & Effects")
 
 ## Instructions
 
