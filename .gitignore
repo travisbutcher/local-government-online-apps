@@ -4,3 +4,6 @@ __*
 
 # Snap backups
 *.7z
+
+# AGOL only
+readme.html
