@@ -4,7 +4,7 @@
         "titleBar.title": "Parcel Viewer",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "DarkGray",
-        "infoPod2.hint": "42757 Woodward Ave",
+        "searchBox.hint": "42757 Woodward Ave",
         "featureSearcher.searchLayerName": "TaxParcelPublishing",
         "featureSearcher.searchFields": "SITEADDRESS,CNVYNAME,PARCELID",
         "basemapBox.basemapgroupTitle": "",
@@ -59,7 +59,7 @@
         "category": "Map",
         "fields": [{
             "label": "Hint in search field",
-            "fieldName": "infoPod2.hint",
+            "fieldName": "searchBox.hint",
             "type": "string",
             "tooltip": "Text to display in the search entry field as a format hint"
         }, {
