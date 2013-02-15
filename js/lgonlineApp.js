@@ -829,29 +829,35 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             mapDiv = dojo.byId(this.mapRootId);
             mapObj = mapDiv.getLGObject();
             mapObj.ready.then(function () {
-                searchLayer = mapObj.getLayer(pThis.searchLayerName);
-                if (searchLayer && searchLayer.url) {
-                    pThis.searchURL = searchLayer.url;
+                try{
+                    searchLayer = mapObj.getLayer(pThis.searchLayerName);
+                    if (searchLayer && searchLayer.url) {
+                        pThis.searchURL = searchLayer.url;
 
-                    // Set up our query task now that we have the URL to the layer
-                    pThis.objectIdField = searchLayer.objectIdField;
-                    pThis.publishPointsOnly = (typeof pThis.publishPointsOnly === "boolean") ? pThis.publishPointsOnly : true;
+                        // Set up our query task now that we have the URL to the layer
+                        pThis.objectIdField = searchLayer.objectIdField;
+                        pThis.publishPointsOnly = (typeof pThis.publishPointsOnly === "boolean") ? pThis.publishPointsOnly : true;
 
-                    pThis.searcher = new esri.tasks.QueryTask(pThis.searchURL);
-                    pThis.searcher.outSpatialReference = new esri.SpatialReference({"wkid": pThis.outWkid});
+                        pThis.searcher = new esri.tasks.QueryTask(pThis.searchURL);
+                        pThis.searcher.outSpatialReference = new esri.SpatialReference({"wkid": pThis.outWkid});
 
-                    // Set up the general layer query task: pattern match
-                    pThis.generalSearchParams = new esri.tasks.Query();
-                    pThis.generalSearchParams.returnGeometry = false;
-                    pThis.generalSearchParams.outFields = [searchLayer.objectIdField].concat(pThis.searchFields);
+                        // Set up the general layer query task: pattern match
+                        pThis.generalSearchParams = new esri.tasks.Query();
+                        pThis.generalSearchParams.returnGeometry = false;
+                        pThis.generalSearchParams.outFields = [searchLayer.objectIdField].concat(pThis.searchFields);
 
-                    // Set up the specific layer query task: object id
-                    pThis.objectSearchParams = new esri.tasks.Query();
-                    pThis.objectSearchParams.returnGeometry = true;
+                        // Set up the specific layer query task: object id
+                        pThis.objectSearchParams = new esri.tasks.Query();
+                        pThis.objectSearchParams.returnGeometry = true;
 
-                    pThis.ready.resolve(pThis);
-                } else {
-                    pThis.ready.reject(pThis);
+                        pThis.log("Search layer " + pThis.searchLayerName + " set up for queries");
+                        pThis.ready.resolve(pThis);
+                    } else {
+                        pThis.log("Search layer " + pThis.searchLayerName + " not found in this map");
+                        pThis.ready.reject(pThis);
+                    }
+                }catch (error){
+                    pThis.log("Search layer: " + error, true);
                 }
             });
         },
@@ -975,7 +981,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     topic.publish(subject, representativeData);
                 } else {
                     // No-results failure
-                    pThis.log("LGSearchFeatureLayer_1", true);
+                    pThis.log("LGSearchFeatureLayer_1: no results", true);
                 }
 
                 if (pThis.busyIndicator) {
@@ -2124,24 +2130,24 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Returns the layer with the specified name.
          * @param {string} name Layer name to look for
          * @return {object} Layer or null
-         * @note Uses the map's list of graphics layer ids to ask the
-         *       map for a layer.
          * @memberOf js.LGMap#
          */
         getLayer: function (name) {
-            var layer,
-                pThis = this,
-                layerIds = this.mapInfo.map.graphicsLayerIds;
+            var layer, layerInternalName, pThis = this;
 
-            array.some(layerIds, function (id) {
-                var foundLayer = true;
-                layer = pThis.mapInfo.map.getLayer(id);
-                if (layer.name !== name) {
-                    foundLayer = false;
-                    layer = null;
+            // Use the webmap name for the layer to get the internal name
+            array.some(this.mapInfo.itemInfo.itemData.operationalLayers, function(layer) {
+                if (layer.title === name) {
+                    layerInternalName = layer.id;
+                    return true;
                 }
-                return foundLayer;
+                return false;
             });
+
+            // Get the layer using the internal name
+            if (layerInternalName) {
+                layer = pThis.mapInfo.map.getLayer(layerInternalName);
+            }
 
             return layer;
         },
