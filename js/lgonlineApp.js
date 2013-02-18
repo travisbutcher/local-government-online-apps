@@ -608,6 +608,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          */
         handleClick: function (evt) {
             var obj = evt.currentTarget.getLGObject();
+            topic.publish("command", obj.publish);
             topic.publish(obj.publish, obj.publishArg);
         }
 
@@ -1019,6 +1020,11 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
             // Start listening for activation/deactivation call
             if (this.trigger) {
+                topic.subscribe("command", function (sendingTrigger) {
+                    if (sendingTrigger !== pThis.trigger) {
+                        pThis.setIsVisible(false);
+                    }
+                });
                 topic.subscribe(this.trigger, function () {
                     pThis.toggleVisibility();
                 });
