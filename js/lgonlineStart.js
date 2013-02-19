@@ -29,6 +29,12 @@ require(["dojo/ready", "esri/arcgis/utils", "esri/map", "dojo/i18n"], function (
         this.agolOptions.sharingUrl = this.agolOptions.sharingUrl || location.protocol + '//' + location.host + "/sharing/content/items";
         utils.arcgisUrl = this.agolOptions.sharingUrl;
 
+        // By Pradeep Kumar Mishra
+        // http://stackoverflow.com/a/498995
+        if (!String.prototype.trim) {
+            String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g, '');};
+        }
+
         // Bring in language files
         dojo.requireLocalization("esriTemplate", "template");
 

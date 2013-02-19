@@ -871,8 +871,14 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @override
          */
         checkPrerequisites: function () {
+            var splitFields, pThis = this;
+
             if (this.values && this.values.searchFields && 0 < this.values.searchFields.length) {
-                this.searchFields = this.values.searchFields.split(",");
+                splitFields = this.values.searchFields.split(",");
+                this.searchFields = [];
+                array.forEach(splitFields, function (searchField) {
+                    pThis.searchFields.push(searchField.trim());
+                });
             } else {
                 this.log("missing search fields");
                 throw "missing search fields";
