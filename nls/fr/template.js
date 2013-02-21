@@ -17,11 +17,15 @@
     },
     prompts: {
         search: "Rechercher :",
-        markup: "Dessiner"
+        markup: "Dessiner",
+        mapLayers: "Couches cartographiques :",
+        layerFields: "Champs attributaires :"
     },
     messages: {
         geolocationDenied: "Ce site n'est pas autorisé à accéder à l'emplacement actuel",
         geolocationUnavailable: "Le navigateur n'a pas été en mesure d'obtenir l'emplacement actuel",
-        geolocationTimeout: "Le navigateur n'a pas été en mesure d'obtenir l'emplacement actuel en temps opportun"
+        geolocationTimeout: "Le navigateur n'a pas été en mesure d'obtenir l'emplacement actuel en temps opportun",
+        searchLayerMissing: "Cette couche n'a pas été trouvée dans la carte",
+        searchFieldMissing: "Ce champ attributaire n'a pas été trouvée dans la carte"
     }
 }));

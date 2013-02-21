@@ -18,12 +18,16 @@
         },
         prompts: {
             search: "Search:",
-            markup: "Draw"
+            markup: "Draw",
+            mapLayers: "Map layers:",
+            layerFields: "Search layer fields:"
         },
         messages: {
             geolocationDenied: "This site does not have permission to get the current location",
             geolocationUnavailable: "The browser was not able to get the current location",
-            geolocationTimeout: "The browser was not able to get the current location in a timely fashion"
+            geolocationTimeout: "The browser was not able to get the current location in a timely fashion",
+            searchLayerMissing: "This search layer was not found in the map",
+            searchFieldMissing: "This field was not found in the map search layer"
         }
     }),
     "ar": 1,
