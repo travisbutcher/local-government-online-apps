@@ -1,11 +1,11 @@
 ﻿{
     "values": {
-        "webmap": "03fbd0640ce04e82825cc6fa68bf9573",
+        "webmap": "0ebefb7ea74b425ebeb5853c42d01142",
         "titleBar.title": "Parcel Viewer",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "DarkGray",
         "searchBox.hint": "42757 Woodward Ave",
-        "featureSearcher.searchLayerName": "TaxParcelPublishing",
+        "featureSearcher.searchLayerName": "Parcel Details",
         "featureSearcher.searchFields": "SITEADDRESS,CNVYNAME,PARCELID",
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
@@ -236,6 +236,16 @@
             "horizOffset": -2,
             "vertOffset": 2,
             "trigger": "help"
+        }
+    }, {
+        "classname": "js.LGPublishEcho",
+        "config": {
+            "rootId": "diagMessageBox",
+            "parentDiv": "contentFrame",
+            "rootClass": "helpMessageBox",
+            "horizOffset": -2,
+            "vertOffset": 2,
+            "trigger": "error"
         }
     }, {
         "classname": "js.LGBasemapBox",
