@@ -25,6 +25,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
     dojo.require("esri.tasks.query");
     dojo.require("esri.dijit.BasemapGallery");
     dojo.require("esri.layout");
+    dojo.require("esri.dijit.Attribution");
 
     //========================================================================================================================//
 
@@ -209,16 +210,21 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             return objAtEnd;
         },
 
-        log: function (message, isError) {
-            if (isError) {
-                if (console) {
-                    console.error(message);
-                }
+        /**
+         * Displays a message to the console, and, optionally, also
+         * publishes it. If gLogMessageBox is defined, message is also
+         * appended to it.
+         * @param {string} message Message to write
+         * @param {boolean} publishError If true, message is also
+         *        published under the topic "error"
+         * @memberOf js.LGObject#
+         */
+        log: function (message, publishError) {
+            if (console) {
+                console.log(message);
+            }
+            if (publishError) {
                 topic.publish("error", message);
-            } else {
-                if (console) {
-                    console.log(message);
-                }
             }
             if (gLogMessageBox) {
                 gLogMessageBox.append(message);
@@ -830,10 +836,30 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             mapDiv = dojo.byId(this.mapRootId);
             mapObj = mapDiv.getLGObject();
             mapObj.ready.then(function () {
+                var reason, message, availableFields = ",";
                 try{
                     searchLayer = mapObj.getLayer(pThis.searchLayerName);
                     if (searchLayer && searchLayer.url) {
                         pThis.searchURL = searchLayer.url;
+
+                        // Check for existence of fields
+                        array.forEach(searchLayer.fields, function (layerField) {
+                            availableFields += layerField.name + ",";
+                        });
+                        if (!array.every(pThis.searchFields, function (searchField) {
+                                reason = searchField;
+                                return availableFields.indexOf("," + searchField + ",") >= 0;
+                            })) {
+
+                            // Failed to find the field in the search layer; provide some feedback
+                            message = "\"" + reason + "\"<br>";
+                            message += pThis.checkForI18n("@messages.searchFieldMissing") + "<br><hr><br>";
+                            message += pThis.checkForI18n("@prompts.layerFields") + "<br>";
+                            if (availableFields.length > 1) {
+                                message += availableFields.substring(1, availableFields.length - 1);
+                            }
+                            pThis.log(message, true);
+                        }
 
                         // Set up our query task now that we have the URL to the layer
                         pThis.objectIdField = searchLayer.objectIdField;
@@ -853,13 +879,25 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
                         pThis.log("Search layer " + pThis.searchLayerName + " set up for queries");
                         pThis.ready.resolve(pThis);
+                        return;
                     } else {
-                        pThis.log("Search layer " + pThis.searchLayerName + " not found in this map");
-                        pThis.ready.reject(pThis);
+                        reason = pThis.checkForI18n("@messages.searchLayerMissing");
                     }
                 }catch (error){
-                    pThis.log("Search layer: " + error, true);
+                    reason = error.toString();
                 }
+
+                // Failed to find the search layer; provide some feedback
+                message = "\"" + pThis.searchLayerName + "\"<br>";
+                message += reason + "<br><hr><br>";
+                message += pThis.checkForI18n("@prompts.mapLayers") + "<br><ul>";
+                array.forEach(mapObj.getLayerNameList(), function(layerName) {
+                    message += "<li>\"" + layerName + "\"</li>";
+                });
+                message += "</ul>";
+                pThis.log(message, true);
+
+                pThis.ready.reject(pThis);
             });
         },
 
@@ -935,6 +973,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                         }
                         return false;
                     });
+                    if (representativeLabel === "") representativeLabel = "result";
 
                     // Create the entry for this result
                     resultsList.push({
@@ -988,7 +1027,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     topic.publish(subject, representativeData);
                 } else {
                     // No-results failure
-                    pThis.log("LGSearchFeatureLayer_1: no results", true);
+                    pThis.log("LGSearchFeatureLayer_1: no results");
                 }
 
                 if (pThis.busyIndicator) {
@@ -996,7 +1035,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 }
             }, function (error) {
                 // Query failure
-                pThis.log("LGSearchFeatureLayer_2: " + error.message, true);
+                pThis.log("LGSearchFeatureLayer_2: " + error.message);
 
                 if (pThis.busyIndicator) {
                     pThis.busyIndicator.setIsVisible(false);
@@ -1031,10 +1070,19 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                         pThis.setIsVisible(false);
                     }
                 });
-                topic.subscribe(this.trigger, function () {
-                    pThis.toggleVisibility();
+                topic.subscribe(this.trigger, function (data) {
+                    pThis.handleTrigger(data);
                 });
             }
+        },
+
+        /**
+         * Handles a trigger by toggling visibility.
+         * @param {object} [data] Data accompanying trigger.
+         * @memberOf js.LGDropdownBox#
+         */
+        handleTrigger: function (data) {
+            this.toggleVisibility();
         }
     });
 
@@ -1047,7 +1095,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @constructor
          * @class
          * @name js.LGMessageBox
-         * @extends js.LGGraphic
+         * @extends js.LGDropdownBox
          * @classdesc
          * Provides a UI display of a chunk of HTML.
          */
@@ -1058,6 +1106,32 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             if (this.content && this.content.length > 0) {
                 this.rootDiv.innerHTML = this.content;
             }
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGPublishEcho", js.LGDropdownBox, {
+        /**
+         * Constructs an LGPublishEcho.
+         *
+         * @class
+         * @name js.LGPublishEcho
+         * @extends js.LGDropdownBox
+         * @classdesc
+         * Provides a UI display of a published message.
+         */
+
+        /**
+         * Handles a trigger by toggling visibility and displaying the
+         * trigger's data.
+         * @param {object} [data] Data accompanying trigger.
+         * @memberOf js.LGPublishEcho#
+         * @override
+         */
+        handleTrigger: function (data) {
+            this.rootDiv.innerHTML = data.toString();
+            this.toggleVisibility();
         }
     });
 
@@ -1201,7 +1275,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                                 }
                             }, function (error) {
                                 // Query failure
-                                pThis.log("LGSearchBoxByText_1: " + error.message, true);
+                                pThis.log("LGSearchBoxByText_1: " + error.message);
 
                                 lastSearchString = "";  // so that we can quickly repeat this search
                                 dojo.empty(tableBody);  // to get rid of searching indicator
@@ -1271,7 +1345,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @override
          */
         onMapReady: function () {
-            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup();
+            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup(), pThis = this;
 
             galleryId = this.rootId + "_gallery";
 
@@ -1370,7 +1444,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
                     // Try to get the current position
                     navigator.geolocation.getCurrentPosition(function (position) {
-                        pThis.log("go to " + position.coords.latitude + " " + position.coords.longitude);//???
+                        pThis.log("go to " + position.coords.latitude + " " + position.coords.longitude);
                         topic.publish(pThis.publish, new esri.geometry.Point(
                             position.coords.longitude,
                             position.coords.latitude,
@@ -1456,7 +1530,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                             topic.publish(pThis.publish, shareUrl);
                         }
                     } catch (error) {
-                        pThis.log("LGShare_1: " + error.toString(), true);
+                        pThis.log("LGShare_1: " + error.toString());
                     }
 
                     if (pThis.busyIndicator) {
@@ -1464,7 +1538,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     }
 
                 }, function (error) {
-                    pThis.log("LGShare_2: " + error.toString(), true);
+                    pThis.log("LGShare_2: " + error.toString());
 
                     if (pThis.busyIndicator) {
                         pThis.busyIndicator.setIsVisible(false);
@@ -1972,8 +2046,10 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 mapAttrs.geometryServiceURL = this.geometryServiceURL;
             }
 
-            // Override the initial extent from the configuration with URL extent values; need to have a complete set of the latter
             mapAttrs.mapOptions = this.mapOptions || {};
+            mapAttrs.mapOptions.showAttribution = true;
+
+            // Override the initial extent from the configuration with URL extent values; need to have a complete set of the latter
             if (this.values && this.values.ex) {
                 this.ex = this.values.ex;
             }
@@ -2002,14 +2078,14 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 mapAttrs.bingMapsKey = this.bingMapsKey;
             }
 
+            // Set defaults for missing params
+            this.lineHiliteColor = new Color(this.lineHiliteColor || "#00ffff");
+            this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 255, 255, 0.1]);
+
             // Create the map
             if (this.values && this.values.webmap) {
                 this.mapId = this.values.webmap;
             }
-
-            // Set defaults for missing params
-            this.lineHiliteColor = new Color(this.lineHiliteColor || "#00ffff");
-            this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 255, 255, 0.1]);
 
             utils.createMap(this.mapId, this.rootDiv, mapAttrs).then(
                 function (response) {
@@ -2165,6 +2241,21 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         },
 
         /**
+         * Returns the names of the operational layers in the map.
+         * @return {array} List of layers
+         * @memberOf js.LGMap#
+         */
+        getLayerNameList: function () {
+            var layerNameList = [];
+
+            array.forEach(this.mapInfo.itemInfo.itemData.operationalLayers, function(layer) {
+                layerNameList.push(layer.title);
+            });
+
+            return layerNameList;
+        },
+
+        /**
          * Creates a graphics layer for the object's map.
          * @param {string} layerId Name for layer
          * @return {GraphicsLayer} Created graphics layer
@@ -2294,7 +2385,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                             }
                         }
                     } catch (error) {
-                        pThis.log("LGCallMethods_1: " + error.toString(), true);
+                        pThis.log("LGCallMethods_1: " + error.toString());
                     }
                 });
             }
