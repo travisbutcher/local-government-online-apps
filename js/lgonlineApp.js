@@ -837,9 +837,11 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             mapObj = mapDiv.getLGObject();
             mapObj.ready.then(function () {
                 var reason, message, availableFields = ",";
-                try{
+                try {
                     searchLayer = mapObj.getLayer(pThis.searchLayerName);
-                    if (searchLayer && searchLayer.url) {
+                    if (!searchLayer || !searchLayer.url) {
+                        reason = pThis.checkForI18n("@messages.searchLayerMissing");
+                    } else {
                         pThis.searchURL = searchLayer.url;
 
                         // Check for existence of fields
@@ -880,10 +882,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                         pThis.log("Search layer " + pThis.searchLayerName + " set up for queries");
                         pThis.ready.resolve(pThis);
                         return;
-                    } else {
-                        reason = pThis.checkForI18n("@messages.searchLayerMissing");
                     }
-                }catch (error){
+                } catch (error) {
                     reason = error.toString();
                 }
 
@@ -891,7 +891,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 message = "\"" + pThis.searchLayerName + "\"<br>";
                 message += reason + "<br><hr><br>";
                 message += pThis.checkForI18n("@prompts.mapLayers") + "<br><ul>";
-                array.forEach(mapObj.getLayerNameList(), function(layerName) {
+                array.forEach(mapObj.getLayerNameList(), function (layerName) {
                     message += "<li>\"" + layerName + "\"</li>";
                 });
                 message += "</ul>";
@@ -973,7 +973,9 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                         }
                         return false;
                     });
-                    if (representativeLabel === "") representativeLabel = "result";
+                    if (representativeLabel === "") {
+                        representativeLabel = "result";
+                    }
 
                     // Create the entry for this result
                     resultsList.push({
@@ -1081,7 +1083,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {object} [data] Data accompanying trigger.
          * @memberOf js.LGDropdownBox#
          */
-        handleTrigger: function (data) {
+        handleTrigger: function () {
             this.toggleVisibility();
         }
     });
@@ -1345,7 +1347,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @override
          */
         onMapReady: function () {
-            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup(), pThis = this;
+            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup();
 
             galleryId = this.rootId + "_gallery";
 
@@ -2224,7 +2226,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             var layer, layerInternalName, pThis = this;
 
             // Use the webmap name for the layer to get the internal name
-            array.some(this.mapInfo.itemInfo.itemData.operationalLayers, function(layer) {
+            array.some(this.mapInfo.itemInfo.itemData.operationalLayers, function (layer) {
                 if (layer.title === name) {
                     layerInternalName = layer.id;
                     return true;
@@ -2248,7 +2250,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         getLayerNameList: function () {
             var layerNameList = [];
 
-            array.forEach(this.mapInfo.itemInfo.itemData.operationalLayers, function(layer) {
+            array.forEach(this.mapInfo.itemInfo.itemData.operationalLayers, function (layer) {
                 layerNameList.push(layer.title);
             });
 
