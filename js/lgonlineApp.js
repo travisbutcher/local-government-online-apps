@@ -1786,6 +1786,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
             // Create the table to hold the titlebar
             table = domConstruct.create("table", null, this.rootDiv);
+            this.applyTheme(false, table);
             dojo.connect(window, "resize", this, this.handleParentResize, true);
 
             /**
@@ -1821,6 +1822,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
              * @memberOf js.LGGallery#
              */
             this.leftArrow = domConstruct.create("td", arrowAttrs, this.galleryRow);
+            this.applyTheme(true, this.leftArrow);
             dojo.connect(this.leftArrow, "onclick", this, this.shiftLeft);
 
             arrowAttrs.innerHTML = "&gt;";
@@ -1832,6 +1834,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
              * @memberOf js.LGGallery#
              */
             this.rightArrow = domConstruct.create("td", arrowAttrs, this.galleryRow);
+            this.applyTheme(true, this.rightArrow);
             dojo.connect(this.rightArrow, "onclick", this, this.shiftRight);
 
             this.zeroItemWidth = dojo.marginBox(this.rootDiv).w;
