@@ -169,7 +169,6 @@
         "classname": "js.LGTitleBar",
         "styles": ".appTitleBar{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute}.titleIcon{height:48px;margin:4px;padding:0px;float:left}.titleText{height:48px;margin:4px;padding:0px;font-size:200%;vertical-align:middle;word-wrap:break-word;float:left}@media all and (max-width: 520px){.titleText{display:none}}",
         "config": {
-            "title": "values.titleBar.title",
             "rootId": "titleBar",
             "parentDiv": "headerFrame",
             "rootClass": "appTitleBar",
@@ -228,13 +227,13 @@
         }
     }, {
         "classname": "js.LGMessageBox",
-        "styles": ".helpMessageBox{display:none;max-width:400px;padding:16px;position:absolute;overflow:auto;z-index:40;word-wrap:break-word}.okIE .helpMessageBox{border-radius:8px}",
+        "styles": ".helpMessageBox{display:none;max-width:400px;max-height:300px;padding:16px;position:absolute;overflow:auto;z-index:40;word-wrap:break-word}.okIE .helpMessageBox{border-radius:8px}",
         "config": {
             "rootId": "helpMessageBox",
             "parentDiv": "contentFrame",
             "rootClass": "helpMessageBox",
             "horizOffset": -2,
-            "vertOffset": 2,
+            "vertOffset": [2, -2],
             "trigger": "help"
         }
     }, {
