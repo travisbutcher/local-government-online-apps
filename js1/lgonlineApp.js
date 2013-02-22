@@ -648,6 +648,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Formats results into a list of structures; each structure
          * contains a label and an optional datum structure.
          * @param {object} results Search-specific results
+         * @param {string} [searchText] Search text
          * @return {array} List of structures
          * @memberOf js.LGSearch#
          * @note Interface stub
@@ -764,6 +765,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Formats results into a list of structures; each structure
          * contains a label and an optional datum structure.
          * @param {object} results Search-specific results
+         * @param {string} [searchText] Search text
          * @return {array} List of structures
          * @memberOf js.LGSearchAddress#
          * @override
@@ -941,26 +943,29 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Formats results into a list of structures; each structure
          * contains a label and an optional datum structure.
          * @param {object} results Search-specific results
+         * @param {string} searchText Search text
          * @return {array} List of structures
          * @memberOf js.LGSearchFeatureLayer#
          * @override
          */
-        toList: function (results) {
-            var pThis = this, resultsList = [], representativeLabel;
+        toList: function (results, searchText) {
+            var pThis = this, resultsList = [], representativeLabel, upperSearchText = searchText.toUpperCase();
             if (results && results.features && 0 < results.features.length) {
                 // Create the results list
                 array.forEach(results.features, function (item) {
 
-                    // Find a label from the first non-null search field that appears
-                    // in the results
+                    // Test each non-null search field result and pick the first one
+                    // that contains the search string as our label
                     representativeLabel = "";
                     array.some(pThis.searchFields, function (searchField) {
-                        if (item.attributes[searchField]) {
+                        if (item.attributes[searchField]
+                                && item.attributes[searchField].toUpperCase().indexOf(upperSearchText) >= 0) {
                             representativeLabel = item.attributes[searchField];
                             return true;
                         }
                         return false;
                     });
+
                     if (representativeLabel === "") {
                         representativeLabel = "result";
                     }
@@ -1237,7 +1242,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
                                 // Show results
                                 dojo.empty(tableBody);  // to get rid of searching indicator
-                                resultsList = searcher.toList(results);
+                                resultsList = searcher.toList(results, searchText);
 
                                 now = (new Date()).getTime();
                                 pThis.log("retd " + resultsList.length + " items in " + (now - thisSearchTime) / 1000 + " secs");
