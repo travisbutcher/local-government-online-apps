@@ -251,10 +251,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 pThis = this,
                 colors = ["#fff", "#333333", "#5d5d5d"];  // make sure that we have something
 
-            if (this.values && this.values.theme) {
-                this.theme = this.values.theme;
-            }
-
             // Retrieve the theme definition from the color table
             array.some(this.colorTable, function (themeDefn) {
                 if (pThis.theme === themeDefn.theme) {
@@ -267,7 +263,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             // Set the theme
             styleString += ".appTheme{color:" + colors[0] + ";background-color:" + colors[1] + "}";
             styleString += ".appThemeHover:hover{background-color:" + colors[2] + "}";
-            //??? styleString += "@media print{.appTheme{color:black;background-color:white}}"
             this.injectCSS(styleString);
         }
     });
@@ -565,9 +560,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             this.applyTheme(true);
 
             // If we have an icon, add it to the face of the button
-            if (this.values && this.values.iconUrl) {
-                this.iconUrl = this.values.iconUrl;
-            }
             if (this.iconUrl) {
                 attrs = {src: this.iconUrl};
                 if (this.iconClass) {
@@ -827,10 +819,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             var mapDiv, mapObj, searchLayer, pThis = this;
             this.ready = new dojo.Deferred();
 
-            if (this.values.searchLayerName) {
-                this.searchLayerName = this.values.searchLayerName;
-            }
-
             // Get the URL of the search layer from the associated map, but we have to wait
             // until the map is ready before asking it
             mapDiv = dojo.byId(this.mapRootId);
@@ -911,8 +899,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         checkPrerequisites: function () {
             var splitFields, pThis = this;
 
-            if (this.values && this.values.searchFields && 0 < this.values.searchFields.length) {
-                splitFields = this.values.searchFields.split(",");
+            if (this.searchFields && 0 < this.searchFields.length) {
+                splitFields = this.searchFields.split(",");
                 this.searchFields = [];
                 array.forEach(splitFields, function (searchField) {
                     pThis.searchFields.push(searchField.trim());
@@ -1102,12 +1090,10 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Provides a UI display of a chunk of HTML.
          */
         constructor: function () {
-            if (this.values && this.values.content) {
-                this.content = this.values.content;
-            }
             if (this.content && this.content.length > 0) {
                 this.rootDiv.innerHTML = this.content;
             }
+            touchScroll(this.rootDiv);
         }
     });
 
@@ -1196,11 +1182,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
             textBoxId = this.rootId + "_entry";
 
-            // Override config with online hint
-            if (this.values && this.values.hint) {
-                this.hint = this.values.hint;
-            }
-
             domConstruct.create("label",
                 {"for": textBoxId, innerHTML: this.checkForI18n(this.showPrompt)}, this.rootId);
             searchEntryTextBox = new dijit.form.TextBox({
@@ -1258,8 +1239,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                                 dojo.empty(tableBody);  // to get rid of searching indicator
                                 resultsList = searcher.toList(results);
 
-                                now = (new Date()).getTime();//???
-                                pThis.log("retd " + resultsList.length + " items in " + (now - thisSearchTime) / 1000 + " secs");//???
+                                now = (new Date()).getTime();
+                                pThis.log("retd " + resultsList.length + " items in " + (now - thisSearchTime) / 1000 + " secs");
 
                                 if (resultsList.length > 0) {
                                     array.forEach(resultsList, function (item) {
@@ -1371,16 +1352,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         getBasemapGroup: function () {
             var basemapGroup = null;
 
-            if (this.values) {
-                if (this.values.basemapgroupTitle) {
-                    this.basemapgroupTitle = this.values.basemapgroupTitle;
-                }
-                if (this.values.basemapgroupOwner) {
-                    this.basemapgroupOwner = this.values.basemapgroupOwner;
-                }
-            }
-
-            if (this.basemapgroupTitle && this.basemapgroupOwner && this.basemapgroupTitle.length > 0 && this.basemapgroupOwner.length > 0) {
+            if (this.basemapgroupTitle && this.basemapgroupOwner &&
+                    this.basemapgroupTitle.length > 0 && this.basemapgroupOwner.length > 0) {
                 basemapGroup = {
                     "title": this.basemapgroupTitle,
                     "owner": this.basemapgroupOwner
@@ -2055,9 +2028,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             mapAttrs.mapOptions.showAttribution = true;
 
             // Override the initial extent from the configuration with URL extent values; need to have a complete set of the latter
-            if (this.values && this.values.ex) {
-                this.ex = this.values.ex;
-            }
             if (this.ex) {
                 extents = this.ex.split(",");
                 try {
@@ -2088,8 +2058,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 255, 255, 0.1]);
 
             // Create the map
-            if (this.values && this.values.webmap) {
-                this.mapId = this.values.webmap;
+            if (this.webmap) {
+                this.mapId = this.webmap;
             }
 
             utils.createMap(this.mapId, this.rootDiv, mapAttrs).then(
@@ -2329,9 +2299,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             var iconAttrs, titleAttrs;
 
             // If we have an icon, add it to the title bar
-            if (this.values && this.values.iconUrl) {
-                this.iconUrl = this.values.iconUrl;
-            }
             if (this.iconUrl && this.iconUrl.length > 0) {
                 iconAttrs = {src: this.iconUrl};
                 if (this.iconClass) {
@@ -2341,9 +2308,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             }
 
             // If we have a title, add it to the title bar
-            if (this.values && this.values.title) {
-                this.title = this.values.title;
-            }
             if (this.title && this.title.length > 0) {
                 titleAttrs = {innerHTML: this.title};
                 if (this.titleClass) {

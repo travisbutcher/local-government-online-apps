@@ -513,12 +513,11 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
                     this.injectCSS(objectDescription.styles);
                 }
 
-                // Add the value override parameters into the object configuration for
-                // objects that can use them
+                // Apply the value override parameters into the object configuration
                 if (objectDescription.config && objectDescription.config.rootId) {
                     objectDescription.config.i18n = this.i18n;
-                    objectDescription.config.values = this.getValues(objectDescription.config.rootId) || {};
-                    dojo.mixin(objectDescription.config.values, this.getValues("Shared"));
+                    dojo.mixin(objectDescription.config, this.getValues(objectDescription.config.rootId) || {});
+                    dojo.mixin(objectDescription.config, this.getValues("Shared"));
                 }
 
                 // Create the object
