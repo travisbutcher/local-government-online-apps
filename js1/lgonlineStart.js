@@ -57,7 +57,7 @@ require(["dojo/ready", "esri/arcgis/utils", "esri/map", "dojo/i18n"], function (
                         });
 
                         // Read the UI spec
-                        (new js.LGUIBuilder(window.location.search, null, "apps/ParcelViewer")).ready.then(
+                        (new js.LGUIBuilder(window.location.search, null, "apps1/ParcelViewer")).ready.then(
                             function (theBuilder) {
                                 uiElementsReady.then(function () {
                                     // Build the UI
