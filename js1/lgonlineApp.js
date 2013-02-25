@@ -949,7 +949,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @override
          */
         toList: function (results, searchText) {
-            var pThis = this, resultsList = [], representativeLabel, upperSearchText = searchText.toUpperCase();
+            var pThis = this, resultsList = [], possibleLabel, representativeLabel,
+                upperSearchText = searchText.toUpperCase();
             if (results && results.features && 0 < results.features.length) {
                 // Create the results list
                 array.forEach(results.features, function (item) {
@@ -958,9 +959,11 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     // that contains the search string as our label
                     representativeLabel = "";
                     array.some(pThis.searchFields, function (searchField) {
-                        if (item.attributes[searchField]
-                                && item.attributes[searchField].toUpperCase().indexOf(upperSearchText) >= 0) {
-                            representativeLabel = item.attributes[searchField];
+                        if (item.attributes[searchField]) {
+                            possibleLabel = item.attributes[searchField].toString();
+                            if (possibleLabel.toUpperCase().indexOf(upperSearchText) >= 0) {
+                                representativeLabel = possibleLabel;
+                            }
                             return true;
                         }
                         return false;
