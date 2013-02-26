@@ -963,8 +963,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                             possibleLabel = item.attributes[searchField].toString();
                             if (possibleLabel.toUpperCase().indexOf(upperSearchText) >= 0) {
                                 representativeLabel = possibleLabel;
+                                return true;
                             }
-                            return true;
                         }
                         return false;
                     });
@@ -2204,21 +2204,16 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @memberOf js.LGMap#
          */
         getLayer: function (name) {
-            var layer, layerInternalName, pThis = this;
+            var layer;
 
-            // Use the webmap name for the layer to get the internal name
-            array.some(this.mapInfo.itemInfo.itemData.operationalLayers, function (layer) {
-                if (layer.title === name) {
-                    layerInternalName = layer.id;
+            // Find the operational layer that matches the specified search layer
+            array.some(this.mapInfo.itemInfo.itemData.operationalLayers, function (opLayer) {
+                if (opLayer.title === name) {
+                    layer = opLayer.layerObject;
                     return true;
                 }
                 return false;
             });
-
-            // Get the layer using the internal name
-            if (layerInternalName) {
-                layer = pThis.mapInfo.map.getLayer(layerInternalName);
-            }
 
             return layer;
         },
