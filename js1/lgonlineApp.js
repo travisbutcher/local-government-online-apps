@@ -52,7 +52,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         constructor: function (args) {
             var rootAttrs, parentDiv, parentDivObj, pThis = this;
 
-            if (args) {
+            if (undefined !== args) {  // Guard needed by IE7, IE8
                 dojo.safeMixin(this, args);
             }
 
