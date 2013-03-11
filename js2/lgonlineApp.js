@@ -469,7 +469,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Applies the current theme class to the object.
-         * @param {boolean} withHover Node has hover color or not
+         * @param {boolean} [withHover] Node has hover color or not; no
+         *        hover color if omitted
          * @param {string|object} [node] Node to receive style; applied
          *        to the calling object if omitted
          * @memberOf js.LGGraphic#
@@ -506,7 +507,80 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGCommand", js.LGGraphic, {
+    dojo.declare("js.LGDependency", null, {
+        /**
+         * Constructs an LGDependency.
+         *
+         * @constructor
+         * @class
+         * @name js.LGCommand
+         * @extends js.LGGraphic
+         * @classdesc
+         * Provides a mixin for handling a ready dependency on another
+         * object.
+         */
+        constructor: function () {
+            var dependsOn, pThis = this;
+
+            if (this.dependencyId) {
+                dependsOn = dojo.byId(this.dependencyId).getLGObject();
+                this.onDependencyPrep(dependsOn);
+                dependsOn.ready.then(function () {
+                    pThis.onDependencyReady();
+                });
+            }
+        },
+
+        /**
+         * Performs class-specific setup before waiting for a
+         * dependency.
+         * @memberOf js.LGCommand#
+         * @param {object} dependsOn LG object that this object depends
+         *        on
+         */
+        onDependencyPrep: function () {
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGCommand#
+         */
+        onDependencyReady: function () {
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGMapDependency", js.LGDependency, {
+        /**
+         * Constructs an LGMapDependency.
+         *
+         * @class
+         * @name js.LGMapDependency
+         * @extends js.LGDependency
+         * @classdesc
+         * Provides a mixin for handling a ready dependency on a map
+         * object.
+         */
+
+        /**
+         * Performs class-specific setup before waiting for a
+         * dependency.
+         * @memberOf js.LGMapDependency#
+         * @param {object} dependsOn LG object that this object depends
+         *        on
+         * @override
+         */
+        onDependencyPrep: function (dependsOn) {
+            this.mapObj = dependsOn;
+            this.inherited(arguments);
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGCommand", [js.LGGraphic, js.LGDependency], {
         /**
          * Constructs an LGCommand.
          *
@@ -550,12 +624,12 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @constructor
          * @class
          * @name js.LGCommand
-         * @extends js.LGGraphic
+         * @extends js.LGGraphic, js.LGDependency
          * @classdesc
          * Builds and manages a UI object that represents a command.
          */
         constructor: function () {
-            var attrs, dependsOn, pThis = this;
+            var attrs, pThis = this;
 
             this.applyTheme(true);
 
@@ -585,15 +659,30 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             if (this.publish) {
                 this.clickHandler = on(this.rootDiv, "click", this.handleClick);
             }
+        },
 
+        /**
+         * Performs class-specific setup before waiting for a
+         * dependency.
+         * @memberOf js.LGCommand#
+         * @override
+         */
+        onDependencyPrep: function () {
             // Make command invisible until dependency resolved
-            if (this.dependencyId) {
-                this.setIsVisible(false);
-                dependsOn = dojo.byId(this.dependencyId).getLGObject();
-                dependsOn.ready.then(function () {
-                    pThis.setIsVisible(true);
-                });
-            }
+            this.setIsVisible(false);
+            this.inherited(arguments);
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGCommand#
+         * @override
+         */
+        onDependencyReady: function () {
+            // Make command invisible until dependency resolved
+            this.setIsVisible(true);
+            this.inherited(arguments);
         },
 
         /**
@@ -633,7 +722,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Launches a search of the instance's search type.
-         * @param {string|geometry} searchKey Text or geometry to search
+         * @param {string|geometry} searchText Text or geometry to search
          * @param {function} callback Function to call when search
          *        results arrive
          * @param {function} errback Function to call when search
@@ -660,7 +749,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Publishes the specified data after performing any post
          * processing.
          * @param {string} subject Publishing topic name
-         * @param {object} data Object to publish under topic
+         * @param {object} [data] Object to publish under topic
          * @memberOf js.LGSearch#
          * @note Interface stub
          * @note The data are those set up by the toList function and
@@ -739,25 +828,17 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         },
 
         /**
-         * Checks that the instance has its prerequisites.
-         * @throw {string}
-         * @memberOf js.LGSearchAddress#
-         */
-        checkPrerequisites: function () {
-        },
-
-        /**
          * Launches a search of the instance's search type.
-         * @param {string|geometry} searchKey Text or geometry to search
+         * @param {string|geometry} searchText Text or geometry to search
          * @param {function} callback Function to call when search
          *        results arrive; function takes the results as its sole
          *        argument
          * @memberOf js.LGSearchAddress#
          * @override
          */
-        search: function (searchKey, callback, errback) {
+        search: function (searchText, callback, errback) {
             this.params.address = {};
-            this.params.address[this.addressParamName] = searchKey;
+            this.params.address[this.addressParamName] = searchText;
             this.searcher.addressToLocations(this.params, callback, errback);
         },
 
@@ -806,89 +887,94 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGSearchFeatureLayer", js.LGSearch, {
+    dojo.declare("js.LGSearchFeatureLayer", [js.LGSearch, js.LGMapDependency], {
         /**
          * Constructs an LGSearchFeatureLayer.
          *
          * @constructor
          * @class
          * @name js.LGSearchFeatureLayer
-         * @extends js.LGSearch
+         * @extends js.LGSearch, js.LGMapDependency
          * @classdesc
          * Provides a searcher for feature layers.
          */
         constructor: function () {
-            var mapDiv, mapObj, searchLayer, pThis = this;
             this.ready = new dojo.Deferred();
+        },
 
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGSearchFeatureLayer#
+         * @override
+         */
+        onDependencyReady: function () {
             // Get the URL of the search layer from the associated map, but we have to wait
             // until the map is ready before asking it
-            mapDiv = dojo.byId(this.mapRootId);
-            mapObj = mapDiv.getLGObject();
-            mapObj.ready.then(function () {
-                var reason, message, availableFields = ",";
-                try {
-                    searchLayer = mapObj.getLayer(pThis.searchLayerName);
-                    if (!searchLayer || !searchLayer.url) {
-                        reason = pThis.checkForI18n("@messages.searchLayerMissing");
-                    } else {
-                        pThis.searchURL = searchLayer.url;
+            var searchLayer, reason, message, availableFields = ",";
+            try {
+                searchLayer = this.mapObj.getLayer(this.searchLayerName);
+                if (!searchLayer || !searchLayer.url) {
+                    reason = this.checkForI18n("@messages.searchLayerMissing");
+                } else {
+                    this.searchURL = searchLayer.url;
 
-                        // Check for existence of fields
-                        array.forEach(searchLayer.fields, function (layerField) {
-                            availableFields += layerField.name + ",";
-                        });
-                        if (!array.every(pThis.searchFields, function (searchField) {
-                                reason = searchField;
-                                return availableFields.indexOf("," + searchField + ",") >= 0;
-                            })) {
+                    // Check for existence of fields
+                    array.forEach(searchLayer.fields, function (layerField) {
+                        availableFields += layerField.name + ",";
+                    });
+                    if (!array.every(this.searchFields, function (searchField) {
+                            reason = searchField;
+                            return availableFields.indexOf("," + searchField + ",") >= 0;
+                        })) {
 
-                            // Failed to find the field in the search layer; provide some feedback
-                            message = "\"" + reason + "\"<br>";
-                            message += pThis.checkForI18n("@messages.searchFieldMissing") + "<br><hr><br>";
-                            message += pThis.checkForI18n("@prompts.layerFields") + "<br>";
-                            if (availableFields.length > 1) {
-                                message += availableFields.substring(1, availableFields.length - 1);
-                            }
-                            pThis.log(message, true);
+                        // Failed to find the field in the search layer; provide some feedback
+                        message = "\"" + reason + "\"<br>";
+                        message += this.checkForI18n("@messages.searchFieldMissing") + "<br><hr><br>";
+                        message += this.checkForI18n("@prompts.layerFields") + "<br>";
+                        if (availableFields.length > 1) {
+                            message += availableFields.substring(1, availableFields.length - 1);
                         }
-
-                        // Set up our query task now that we have the URL to the layer
-                        pThis.objectIdField = searchLayer.objectIdField;
-                        pThis.publishPointsOnly = (typeof pThis.publishPointsOnly === "boolean") ? pThis.publishPointsOnly : true;
-
-                        pThis.searcher = new esri.tasks.QueryTask(pThis.searchURL);
-                        pThis.searcher.outSpatialReference = new esri.SpatialReference({"wkid": pThis.outWkid});
-
-                        // Set up the general layer query task: pattern match
-                        pThis.generalSearchParams = new esri.tasks.Query();
-                        pThis.generalSearchParams.returnGeometry = false;
-                        pThis.generalSearchParams.outFields = [searchLayer.objectIdField].concat(pThis.searchFields);
-
-                        // Set up the specific layer query task: object id
-                        pThis.objectSearchParams = new esri.tasks.Query();
-                        pThis.objectSearchParams.returnGeometry = true;
-
-                        pThis.log("Search layer " + pThis.searchLayerName + " set up for queries");
-                        pThis.ready.resolve(pThis);
-                        return;
+                        this.log(message, true);
                     }
-                } catch (error) {
-                    reason = error.toString();
+
+                    // Set up our query task now that we have the URL to the layer
+                    this.objectIdField = searchLayer.objectIdField;
+                    this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
+
+                    this.searcher = new esri.tasks.QueryTask(this.searchURL);
+                    this.searcher.outSpatialReference = new esri.SpatialReference({"wkid": this.outWkid});
+
+                    // Set up the general layer query task: pattern match
+                    this.generalSearchParams = new esri.tasks.Query();
+                    this.generalSearchParams.returnGeometry = false;
+                    this.generalSearchParams.outFields = [searchLayer.objectIdField].concat(this.searchFields);
+
+                    // Set up the specific layer query task: object id
+                    this.objectSearchParams = new esri.tasks.Query();
+                    this.objectSearchParams.returnGeometry = true;
+
+                    this.log("Search layer " + this.searchLayerName + " set up for queries");
+                    this.ready.resolve(this);
+                    this.inherited(arguments);
+                    return;
                 }
+            } catch (error) {
+                reason = error.toString();
+            }
 
-                // Failed to find the search layer; provide some feedback
-                message = "\"" + pThis.searchLayerName + "\"<br>";
-                message += reason + "<br><hr><br>";
-                message += pThis.checkForI18n("@prompts.mapLayers") + "<br><ul>";
-                array.forEach(mapObj.getLayerNameList(), function (layerName) {
-                    message += "<li>\"" + layerName + "\"</li>";
-                });
-                message += "</ul>";
-                pThis.log(message, true);
-
-                pThis.ready.reject(pThis);
+            // Failed to find the search layer; provide some feedback
+            message = "\"" + this.searchLayerName + "\"<br>";
+            message += reason + "<br><hr><br>";
+            message += this.checkForI18n("@prompts.mapLayers") + "<br><ul>";
+            array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
+                message += "<li>\"" + layerName + "\"</li>";
             });
+            message += "</ul>";
+            this.log(message, true);
+
+            this.ready.reject(pThis);
+            this.inherited(arguments);
         },
 
         /**
@@ -915,22 +1001,22 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Launches a search.
-         * @param {string|geometry} searchKey Text or geometry to search
+         * @param {string|geometry} searchText Text or geometry to search
          * @param {function} callback Function to call when search
          *        results arrive; function takes the results as its sole
          *        argumentsss
          * @memberOf js.LGSearchFeatureLayer#
          * @override
          */
-        search: function (searchKey, callback, errback) {
-            var upperSearchKey = searchKey.toUpperCase(),
+        search: function (searchText, callback, errback) {
+            var upperSearchText = searchText.toUpperCase(),
                 searchParam = "",
                 attributePattern = "UPPER(${0}) LIKE '%${1}%'",
                 attributeSeparator = "",
                 attributeSeparatorReset = " OR ";
             array.forEach(this.searchFields, function (searchField) {
                 searchParam = searchParam + attributeSeparator
-                    + dojo.string.substitute(attributePattern, [searchField, upperSearchKey]);
+                    + dojo.string.substitute(attributePattern, [searchField, upperSearchText]);
                 attributeSeparator = attributeSeparatorReset;
             });
             if (0 < searchParam.length) {
@@ -1089,6 +1175,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
     dojo.declare("js.LGMessageBox", js.LGDropdownBox, {
         /**
          * Constructs an LGMessageBox.
+         *
+         * @param {string} content HTML to insert into box
          *
          * @constructor
          * @class
@@ -1280,38 +1368,31 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGMapBasedMenuBox", js.LGDropdownBox, {
+    dojo.declare("js.LGMapBasedMenuBox", [js.LGDropdownBox, js.LGMapDependency], {
         /**
          * Constructs an LGMapBasedMenuBox.
          *
          * @constructor
          * @class
          * @name js.LGMapBasedMenuBox
-         * @extends js.LGDropdownBox
+         * @extends js.LGDropdownBox, js.LGMapDependency
          * @classdesc
          * Provides a UI display of a menu that is not available until
          * the specified map is available.
          */
         constructor: function () {
-            var pThis = this,
-                mapDiv;
-
             this.ready = new dojo.Deferred();
-
-            mapDiv = dojo.byId(this.mapRootId);
-            this.mapObj = mapDiv.getLGObject();
-            this.mapObj.ready.then(function () {
-                pThis.onMapReady();
-                pThis.ready.resolve(pThis);
-            });
         },
 
         /**
-         * Performs class-specific setup when the map dependency is
+         * Performs class-specific setup when the dependency is
          * satisfied.
          * @memberOf js.LGMapBasedMenuBox#
+         * @override
          */
-        onMapReady: function () {
+        onDependencyReady: function () {
+            this.ready.resolve(this);
+            this.inherited(arguments);
         }
     });
 
@@ -1330,12 +1411,12 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          */
 
         /**
-         * Performs class-specific setup when the map dependency is
+         * Performs class-specific setup when the dependency is
          * satisfied.
          * @memberOf js.LGBasemapBox#
          * @override
          */
-        onMapReady: function () {
+        onDependencyReady: function () {
             var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup();
 
             galleryId = this.rootId + "_gallery";
@@ -1355,6 +1436,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             galleryHolder.set('content', basemapGallery.domNode);
 
             basemapGallery.startup();
+
+            this.inherited(arguments);
         },
 
         getBasemapGroup: function () {
@@ -1555,13 +1638,13 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGShareAppExtents", js.LGShare, {
+    dojo.declare("js.LGShareAppExtents", [js.LGShare, js.LGMapDependency], {
         /**
          * LGShareAppExtents
          *
          * @class
          * @name js.LGShareAppExtents
-         * @extends js.LGShare
+         * @extends js.LGShare, js.LGMapDependency
          * @classdesc
          * Extends  simple sharing to include the app's map's current
          * extents.
@@ -1585,11 +1668,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @memberOf js.LGShare
          */
         getMapExtentsArg: function () {
-            var mapDiv, mapObj;
-
-            mapDiv = dojo.byId(this.mapRootId);
-            mapObj = mapDiv.getLGObject();
-            return "ex=" + mapObj.getExtentsString();
+            return "ex=" + this.mapObj.getExtentsString();
         }
     });
 
@@ -2092,7 +2171,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     pThis.tempGraphicsLayer = pThis.createGraphicsLayer("tempGraphicsLayer");
 
                     // Start listening for position updates
-                    this.positionHandle = topic.subscribe("position", function (newCenterPoint) {
+                    pThis.positionHandle = topic.subscribe("position", function (newCenterPoint) {
                         pThis.tempGraphicsLayer.clear();
 
                         // Accept geographic coords as well as Web Mercator Aux
@@ -2105,7 +2184,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     });
 
                     // Start listening for feature highlights
-                    this.showFeatureHandle = topic.subscribe("showFeature", function (feature) {
+                    pThis.showFeatureHandle = topic.subscribe("showFeature", function (feature) {
                         pThis.tempGraphicsLayer.clear();
 
                         // Do the highlight
