@@ -153,10 +153,6 @@
         "styles": ".mapContainer{margin:0px;padding:0px;overflow:hidden;position:absolute}",
         "config": {
             "geometryServiceURL": "http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
-            "xmin": -9275490,
-            "ymin": 5243772,
-            "xmax": -9266404,
-            "ymax": 5251788,
             "rootId": "map",
             "rootClass": "mapContainer",
             "parentDiv": "contentFrame",
@@ -207,7 +203,7 @@
             "rootId": "featureSearcher",
             "parentDiv": "contentFrame",
             "outWkid": 102100,
-            "mapRootId": "map",
+            "dependencyId": "map",
             "busyIndicator": "busyIndicator",
             "publishPointsOnly": false
         }
@@ -257,7 +253,7 @@
             "horizOffset": -2,
             "vertOffset": [2, -2],
             "trigger": "basemap",
-            "mapRootId": "map"
+            "dependencyId": "map"
         }
     }, {
         "classname": "js.LGMapBasedMenuBox",
@@ -269,7 +265,7 @@
             "horizOffset": -2,
             "vertOffset": 2,
             "trigger": "share",
-            "mapRootId": "map"
+            "dependencyId": "map"
         }
     }, {
         "classname": "js.LGSearchBoxByText",
@@ -397,7 +393,7 @@
             "tinyURLResponseAttribute": "data.url",
             "shareUrl": "mailto:%20?subject=Tax%20Viewer%20Map&body=${url}",
             "busyIndicator": "busyIndicator",
-            "mapRootId": "map"
+            "dependencyId": "map"
         }
     }, {
         "classname": "js.LGShareAppExtents",
@@ -408,7 +404,7 @@
             "tinyURLResponseAttribute": "data.url",
             "shareUrl": "http://www.facebook.com/sharer.php?u=${url}&t=Tax%20Viewer%20Map",
             "busyIndicator": "busyIndicator",
-            "mapRootId": "map"
+            "dependencyId": "map"
         }
     }, {
         "classname": "js.LGShareAppExtents",
@@ -419,7 +415,7 @@
             "tinyURLResponseAttribute": "data.url",
             "shareUrl": "http://twitter.com/home/?status=Tax%20Viewer%20Map ${url}",
             "busyIndicator": "busyIndicator",
-            "mapRootId": "map"
+            "dependencyId": "map"
         }
     }]
 }
