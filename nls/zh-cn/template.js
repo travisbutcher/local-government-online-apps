@@ -19,15 +19,15 @@
         prompts: {
             search: "搜索:",
             markup: "绘图",
-            mapLayers: "试_Map layers:_验",
-            layerFields: "试_Search layer fields:_验"
+            mapLayers: "地图图层:",
+            layerFields: "搜索图层字段:"
         },
         messages: {
             geolocationDenied: "该网站无权获取当前位置",
             geolocationUnavailable: "浏览器无法获取当前位置",
             geolocationTimeout: "浏览器无法及时获取当前位置",
-            searchLayerMissing: "试_This search layer was not found in the map_验",
-            searchFieldMissing: "试_This field was not found in the map search layer_验"
+            searchLayerMissing: "在地图中未找到此搜索图层",
+            searchFieldMissing: "在地图搜索图层中未找到此字段"
         }
     })
 );

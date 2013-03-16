@@ -19,15 +19,15 @@
         prompts: {
             search: "검색:",
             markup: "그리기",
-            mapLayers: "한_Map layers:_빠",
-            layerFields: "한_Search layer fields:_빠"
+            mapLayers: "맵 레이어:",
+            layerFields: "검색 레이어 필드:"
         },
         messages: {
             geolocationDenied: "이 사이트에는 현재 위치를 확인할 권한이 없습니다.",
             geolocationUnavailable: "브라우저에서 현재 위치를 확인할 수 없습니다.",
             geolocationTimeout: "브라우저에서 적절한 시간 내에 현재 위치를 확인할 수 없습니다.",
-            searchLayerMissing: "한_This search layer was not found in the map_빠",
-            searchFieldMissing: "한_This field was not found in the map search layer_빠"
+            searchLayerMissing: "맵에서 이 검색 레이어를 찾을 수 없습니다.",
+            searchFieldMissing: "맵 검색 레이어에서 이 필드를 찾을 수 없습니다."
         }
     })
 );

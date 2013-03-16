@@ -19,15 +19,15 @@
         prompts: {
             search: "Zoeken:",
             markup: "Tekenen",
-            mapLayers: "Ĳ_Map layers:_ä",
-            layerFields: "Ĳ_Search layer fields:_ä"
+            mapLayers: "Kaartlagen:",
+            layerFields: "Zoeklaagvelden:"
         },
         messages: {
             geolocationDenied: "Deze site heeft geen toestemming om de huidige locatie op te halen",
             geolocationUnavailable: "De browser kon de huidige locatie niet ophalen",
             geolocationTimeout: "De browser kon de huidige locatie niet tijdig ophalen",
-            searchLayerMissing: "Ĳ_This search layer was not found in the map_ä",
-            searchFieldMissing: "Ĳ_This field was not found in the map search layer_ä"
+            searchLayerMissing: "Deze zoeklaag is niet gevonden op de kaart",
+            searchFieldMissing: "Dit veld is niet gevonden in de zoeklaag van de kaart"
         }
     })
 );

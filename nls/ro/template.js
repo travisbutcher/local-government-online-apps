@@ -19,15 +19,15 @@
         prompts: {
             search: "Căutare:",
             markup: "Trasare",
-            mapLayers: "Ă_Map layers:_ș",
-            layerFields: "Ă_Search layer fields:_ș"
+            mapLayers: "Straturi tematice hartă:",
+            layerFields: "Câmpuri strat tematic de căutare:"
         },
         messages: {
             geolocationDenied: "Acest site nu are permisiunea de a obţine locaţia curentă",
             geolocationUnavailable: "Browserul nu a putut obţine locaţia curentă",
             geolocationTimeout: "Browserul nu a putut obţine locaţia curentă la timp",
-            searchLayerMissing: "Ă_This search layer was not found in the map_ș",
-            searchFieldMissing: "Ă_This field was not found in the map search layer_ș"
+            searchLayerMissing: "Acest strat tematic de căutare nu a fost găsit în hartă",
+            searchFieldMissing: "Acest câmp nu a fost găsit în stratul tematic de căutare al hărţii"
         }
     })
 );
