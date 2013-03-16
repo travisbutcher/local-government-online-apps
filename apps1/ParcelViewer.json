@@ -261,7 +261,7 @@
         }
     }, {
         "classname": "js.LGMapBasedMenuBox",
-        "styles": ".shareBox{display:none;width:130px;height:124px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .shareBox{border-radius:8px}",
+        "styles": ".shareBox{display:none;height:124px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .shareBox{border-radius:8px}",
         "config": {
             "rootId": "shareBox",
             "parentDiv": "contentFrame",
