@@ -19,15 +19,15 @@
         prompts: {
             search: "Sök:",
             markup: "Rita",
-            mapLayers: "Å_Map layers:_ö",
-            layerFields: "Å_Search layer fields:_ö"
+            mapLayers: "Kartlager:",
+            layerFields: "Sök i lagerfälten:"
         },
         messages: {
             geolocationDenied: "Den här webbplatsen har inte behörighet att hämta den aktuella platsen",
             geolocationUnavailable: "Webbläsaren kunde inte hämta den aktuella platsen",
             geolocationTimeout: "Webbläsaren kunde inte hämta den aktuella platsen inom rimlig tid",
-            searchLayerMissing: "Å_This search layer was not found in the map_ö",
-            searchFieldMissing: "Å_This field was not found in the map search layer_ö"
+            searchLayerMissing: "Det här söklagret finns inte i kartan",
+            searchFieldMissing: "Det här fältet finns inte i kartans söklager"
         }
     })
 );

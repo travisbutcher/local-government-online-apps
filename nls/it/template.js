@@ -19,15 +19,15 @@
         prompts: {
             search: "Cerca:",
             markup: "Disegna",
-            mapLayers: "é_Map layers:_È",
-            layerFields: "é_Search layer fields:_È"
+            mapLayers: "Layer mappa:",
+            layerFields: "Campi dei layer di ricerca:"
         },
         messages: {
             geolocationDenied: "Il sito non è autorizzato a ottenere la posizione corrente",
             geolocationUnavailable: "Il browser non è in grado di ottenere la posizione corrente",
             geolocationTimeout: "Il browser non è in grado di ottenere la posizione corrente in modo puntuale",
-            searchLayerMissing: "é_This search layer was not found in the map_È",
-            searchFieldMissing: "é_This field was not found in the map search layer_È"
+            searchLayerMissing: "Layer di ricerca non trovato nella mappa",
+            searchFieldMissing: "Campo non trovato nel layer di ricerca della mappa"
         }
     })
 );

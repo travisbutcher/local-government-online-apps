@@ -19,15 +19,15 @@
         prompts: {
             search: "Søg:",
             markup: "Tegn",
-            mapLayers: "ø_Map layers:_å",
-            layerFields: "ø_Search layer fields:_å"
+            mapLayers: "Kortlag:",
+            layerFields: "Søg i lag-felter:"
         },
         messages: {
             geolocationDenied: "Dette sted har ikke rettigheder til at hente den aktuelle position",
             geolocationUnavailable: "Browseren kunne ikke hente den aktuelle position",
             geolocationTimeout: "Browseren kunne ikke hente den aktuelle position i tide",
-            searchLayerMissing: "ø_This search layer was not found in the map_å",
-            searchFieldMissing: "ø_This field was not found in the map search layer_å"
+            searchLayerMissing: "Dette søgelag blev ikke fundet på kortet",
+            searchFieldMissing: "Dette felt blev ikke fundet i kortets søgelag"
         }
     })
 );

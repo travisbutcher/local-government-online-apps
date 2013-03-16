@@ -19,15 +19,15 @@
         prompts: {
             search: "Søk:",
             markup: "Tegn",
-            mapLayers: "å_Map layers:_ø",
-            layerFields: "å_Search layer fields:_ø"
+            mapLayers: "Kartlag:",
+            layerFields: "Søk i lagfelt:"
         },
         messages: {
             geolocationDenied: "Dette området har ikke tillatelse til å hente gjeldende plassering",
             geolocationUnavailable: "Nettleseren kunne ikke hente gjeldende plassering",
             geolocationTimeout: "Nettleseren kunne ikke hente gjeldende plassering innen rimelig tid",
-            searchLayerMissing: "å_This search layer was not found in the map_ø",
-            searchFieldMissing: "å_This field was not found in the map search layer_ø"
+            searchLayerMissing: "Fant ikke dette søkelaget i kartet",
+            searchFieldMissing: "Fant ikke dette feltet i kartsøkelaget"
         }
     })
 );
