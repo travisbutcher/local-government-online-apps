@@ -399,7 +399,7 @@
         "config": {
             "trigger": "share/email",
             "publish": "launch/parent",
-            "tinyURLServiceURL": "http://api.bit.ly/v3/shorten?login=esri&apiKey=R_65fd9891cd882e2a96b99d4bda1be00e&format=json&uri=${url}",
+            "tinyURLServiceURL": "",
             "tinyURLResponseAttribute": "data.url",
             "shareUrl": "mailto:%20?subject=Tax%20Viewer%20Map&body=${url}",
             "busyIndicator": "busyIndicator",
