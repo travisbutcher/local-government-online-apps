@@ -12,8 +12,8 @@ to share on the Internet.
 (<a href="http://help.arcgis.com/en/webapi/javascript/arcgis/jshelp/#supported_browsers">supported versions</a>)
 on browser screens from phone through tablet to desktop.
 * Permits multiple levels of customization:
-    1. fine-tuning of titles and icons by configuring the web application using the standard ArcGIS online configuration program
-    2. adjustment of application styles and content by configuring the web application's template
+    1. basic configuration: titles and icons by configuring the web application using the standard ArcGIS online configuration program
+    2. advanced configuration: adjustment of application styles and content
     3. unlimited modifications to the open source
 
 Currently, one application configuration is provided:
@@ -36,6 +36,10 @@ Currently, one application configuration is provided:
 * Local Government Information Model - [About](http://www.arcgis.com/home/item.html?id=5f799e6d23d94e25b5aaaf2a58e63fb1)
 
 ## Resources
+
+Additional documentation about the online apps:
+
+* [Getting started with configuring the online apps](https://github.com/Esri/local-government-online-apps/blob/master/doc/GettingStarted.md)
 
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
 
