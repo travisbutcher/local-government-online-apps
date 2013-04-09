@@ -157,7 +157,7 @@ the map window gets shorter than 229 pixels.
 
 So two changes are made for this customization:
 
-* change `horizoOffset`'s value to 2
+* change `horizOffset`'s value to 2
 * remove the `max-height:224px;` text from the item's styles.
 
 The new search box definition becomes
