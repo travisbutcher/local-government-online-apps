@@ -19,15 +19,15 @@
         prompts: {
             search: "Ieškoti:",
             markup: "Piešti",
-            mapLayers: "Į_Map layers:_š",
-            layerFields: "Į_Search layer fields:_š"
+            mapLayers: "Žemėlapio sluoksniai:",
+            layerFields: "Paieškos sluoksnio laukai:"
         },
         messages: {
             geolocationDenied: "Ši svetainė neturi teisės nustatyti esamą vietą",
             geolocationUnavailable: "Naršyklei nepavyko nustatyti esamos vietos",
             geolocationTimeout: "Naršyklei per priimtiną laiką nepavyko nustatyti esamos vietos",
-            searchLayerMissing: "Į_This search layer was not found in the map_š",
-            searchFieldMissing: "Į_This field was not found in the map search layer_š"
+            searchLayerMissing: "Paieškos sluoksnis žemėlapyje nerastas",
+            searchFieldMissing: "Žemėlapio paieškos sluoksnyje šis laukas nerastas"
         }
     })
 );

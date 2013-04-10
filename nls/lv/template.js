@@ -19,15 +19,15 @@
         prompts: {
             search: "Meklēt:",
             markup: "Zīmēt",
-            mapLayers: "Į_Map layers:_š",
-            layerFields: "Į_Search layer fields:_š"
+            mapLayers: "Kartes slāņi:",
+            layerFields: "Meklēt slāņa laukus:"
         },
         messages: {
-            geolocationDenied: "Šai vietnei nav atļaujas, lai iegūtu pašreizējo izvietojumu",
+            geolocationDenied: "Šai vietnei nav atļaujas, lai darbotos pašreizējā izvietojumā",
             geolocationUnavailable: "Pārlūks nevarēja iegūt pašreizējo izvietojumu",
             geolocationTimeout: "Pārlūks nevarēja savlaicīgi iegūt pašreizējo izvietojumu",
-            searchLayerMissing: "Į_This search layer was not found in the map_š",
-            searchFieldMissing: "Į_This field was not found in the map search layer_š"
+            searchLayerMissing: "Meklētais slānis kartē netika atrasts",
+            searchFieldMissing: "Lauks netika atrasts meklētajā kartes slānī"
         }
     })
 );

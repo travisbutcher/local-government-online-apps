@@ -19,15 +19,15 @@
         prompts: {
             search: "Szukaj:",
             markup: "Narysuj",
-            mapLayers: "ł_Map layers:_ą",
-            layerFields: "ł_Search layer fields:_ą"
+            mapLayers: "Warstwy mapy:",
+            layerFields: "Pola warstwy wyszukiwania"
         },
         messages: {
             geolocationDenied: "Ta strona nie ma uprawnień do pobierania bieżącej lokalizacji",
             geolocationUnavailable: "Przeglądarka nie mogła pobrać bieżącej lokalizacji",
             geolocationTimeout: "Przeglądarka nie mogła pobrać bieżącej lokalizacji w odpowiednim czasie",
-            searchLayerMissing: "ł_This search layer was not found in the map_ą",
-            searchFieldMissing: "ł_This field was not found in the map search layer_ą"
+            searchLayerMissing: "Nie znaleziono tej warstwy wyszukiwania na mapie",
+            searchFieldMissing: "Nie znaleziono tego pola na warstwie wyszukiwania mapy"
         }
     })
 );

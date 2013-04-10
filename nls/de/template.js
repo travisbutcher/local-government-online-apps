@@ -19,15 +19,15 @@
         prompts: {
             search: "Suche:",
             markup: "Zeichnen",
-            mapLayers: "ä_Map layers:_Ü",
-            layerFields: "ä_Search layer fields:_Ü"
+            mapLayers: "Karten-Layer:",
+            layerFields: "Such-Layer-Felder:"
         },
         messages: {
             geolocationDenied: "Diese Site verfügt nicht über die Berechtigung, die aktuelle Position zu ermitteln",
             geolocationUnavailable: "Der Browser konnte die aktuelle Position nicht ermitteln",
             geolocationTimeout: "Der Browser konnte die aktuelle Position nicht rechtzeitig ermitteln",
-            searchLayerMissing: "ä_This search layer was not found in the map_Ü",
-            searchFieldMissing: "ä_This field was not found in the map search layer_Ü"
+            searchLayerMissing: "Der Such-Layer wurde nicht auf der Karte gefunden",
+            searchFieldMissing: "Dieses Feld wurde nicht im Such-Layer für die Karte gefunden"
         }
     })
 );

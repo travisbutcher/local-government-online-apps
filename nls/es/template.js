@@ -19,15 +19,15 @@
         prompts: {
             search: "Buscar:",
             markup: "Dibujar",
-            mapLayers: "á_Map layers:_Ó",
-            layerFields: "á_Search layer fields:_Ó"
+            mapLayers: "Capas de mapa:",
+            layerFields: "Campos de capa de búsqueda:"
         },
         messages: {
             geolocationDenied: "Este sitio no tiene permiso para obtener la ubicación actual",
             geolocationUnavailable: "El navegador no ha podido obtener la ubicación actual",
             geolocationTimeout: "El navegador no ha podido obtener la ubicación actual a su debido tiempo",
-            searchLayerMissing: "á_This search layer was not found in the map_Ó",
-            searchFieldMissing: "á_This field was not found in the map search layer_Ó"
+            searchLayerMissing: "Esta capa de búsqueda no se ha encontrado en el mapa",
+            searchFieldMissing: "Este campo no se ha encontrado en la capa de búsqueda del mapa"
         }
     })
 );

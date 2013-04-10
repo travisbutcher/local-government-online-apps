@@ -19,15 +19,15 @@
         prompts: {
             search: "Otsing:",
             markup: "Joonista",
-            mapLayers: "Į_Map layers:_š",
-            layerFields: "Į_Search layer fields:_š"
+            mapLayers: "Kaardikihid:",
+            layerFields: "Otsi kihi väljadelt:"
         },
         messages: {
             geolocationDenied: "See lehekülg ei oma luba praeguse asukoha saamiseks",
             geolocationUnavailable: "Veebibrauser ei saanud praegust asukohta",
             geolocationTimeout: "Veebibrauser ei saanud praegust asukohta õigeaegselt",
-            searchLayerMissing: "Į_This search layer was not found in the map_š",
-            searchFieldMissing: "Į_This field was not found in the map search layer_š"
+            searchLayerMissing: "Seda otsitud kihti ei leitud kaardilt",
+            searchFieldMissing: "Seda välja ei leitud otsitud kaardikihilt"
         }
     })
 );

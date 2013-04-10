@@ -19,15 +19,15 @@
         prompts: {
             search: "Rechercher :",
             markup: "Dessiner",
-            mapLayers: "æ_Map layers:_Â",
-            layerFields: "æ_Search layer fields:_Â"
+            mapLayers: "Couches de carte :",
+            layerFields: "Champs de la couche de recherche :"
         },
         messages: {
             geolocationDenied: "Ce site ne détient pas d\'autorisation pour obtenir l\'emplacement actuel",
             geolocationUnavailable: "Le navigateur n\'a pas pu obtenir l\'emplacement actuel",
             geolocationTimeout: "Le navigateur n\'a pas pu obtenir l\'emplacement actuel à temps",
-            searchLayerMissing: "æ_This search layer was not found in the map_Â",
-            searchFieldMissing: "æ_This field was not found in the map search layer_Â"
+            searchLayerMissing: "Cette couche de recherche n\'a pas été trouvée sur la carte",
+            searchFieldMissing: "Ce champ n\'a pas été trouvé dans la couche de recherche de la carte"
         }
     })
 );

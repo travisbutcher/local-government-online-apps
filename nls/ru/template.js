@@ -19,15 +19,15 @@
         prompts: {
             search: "Поиск:",
             markup: "Рисование",
-            mapLayers: "Ж_Map layers:_Я",
-            layerFields: "Ж_Search layer fields:_Я"
+            mapLayers: "Слои карты:",
+            layerFields: "Поля слоя поиска:"
         },
         messages: {
             geolocationDenied: "Этот сайт не имеет разрешения для получения текущего местоположения",
             geolocationUnavailable: "Браузер не смог получить текущее местоположение",
             geolocationTimeout: "Браузер не смог вовремя получить текущее местоположение",
-            searchLayerMissing: "Ж_This search layer was not found in the map_Я",
-            searchFieldMissing: "Ж_This field was not found in the map search layer_Я"
+            searchLayerMissing: "Этот слой поиска не был найден на карте",
+            searchFieldMissing: "Это поле не было найдено в слое поиска карты"
         }
     })
 );

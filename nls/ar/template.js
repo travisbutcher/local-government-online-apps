@@ -19,15 +19,15 @@
         prompts: {
             search: "بحث:",
             markup: "رسم",
-            mapLayers: "بيت_Map layers:_لاحقة",
-            layerFields: "بيت_Search layer fields:_لاحقة"
+            mapLayers: "طبقات الخريطة:",
+            layerFields: "حقول طبقة البحث:"
         },
         messages: {
             geolocationDenied: "لا يحتوي الموقع على أذن للحصول على الموقع الحالي",
             geolocationUnavailable: "لم يتمكن المتصفح للحصول على الموقع الحالي",
             geolocationTimeout: "لم يتمكن المتصفح من الحصول على الموقع الحالي داخل الحالة في وقتها",
-            searchLayerMissing: "بيت_This search layer was not found in the map_لاحقة",
-            searchFieldMissing: "بيت_This field was not found in the map search layer_لاحقة"
+            searchLayerMissing: "لم يتم العثور على طبقة البحث في الخريطة",
+            searchFieldMissing: "لم يتم العثور على هذا الحقل في طبقة بحث الخريطة"
         }
     })
 );
