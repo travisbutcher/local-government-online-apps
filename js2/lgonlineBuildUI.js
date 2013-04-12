@@ -1,4 +1,4 @@
-/*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape */
+/*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,commonConfig,console */
 /*jslint sloppy:true,evil:true,regexp:true,unparam:true */
 /** @license
  | ArcGIS for Local Government
@@ -18,7 +18,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/require!esri/utils"], function (DeferredList, utils, script) {
+define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "dojo/require!esri/utils"], function (Deferred, DeferredList, utils, script, lang) {
     dojo.require('esri.arcgis.Portal');
     dojo.require("esri.IdentityManager");
 
@@ -50,14 +50,15 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
              * @member {Deferred} ready
              * @memberOf js.LGArcGISAccess#
              */
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
 
             if (undefined !== args) {  // Guard needed by IE7, IE8
                 dojo.safeMixin(this, args);
             }
 
             this.timeout = this.timeout || 5000;
-            this.portalUrl = this.portalUrl || location.protocol + '//' + "www.arcgis.com";
+            this.portalUrl = this.baseUrl  // from the commonConfig passed in as an arg
+                || location.protocol + '//' + "www.arcgis.com";  // fallback
 
             // Launch the portal
             this.portal = new esri.arcgis.Portal(this.portalUrl);
@@ -81,7 +82,7 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
          * @memberOf js.LGArcGISAccess#
          */
         getItem: function (itemId) {
-            var done = new dojo.Deferred(),
+            var done = new Deferred(),
                 params = {
                     q: "id: " + itemId
                 };
@@ -122,7 +123,7 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
          * @memberOf js.LGArcGISAccess#
          */
         getGroup: function (groupId) {
-            var done = new dojo.Deferred(),
+            var done = new Deferred(),
                 params = {
                     q: "id: " + groupId
                 };
@@ -151,7 +152,7 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
          * @memberOf js.LGArcGISAccess#
          */
         getGroupItems: function (groupId) {
-            var done = new dojo.Deferred(),
+            var done = new Deferred(),
                 params = {
                     q: "id: " + groupId
                 };
@@ -219,15 +220,16 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
         constructor: function (queryString, uiSpec, defaultUiSpecFile) {
             var pThis = this,
                 queryParams = {},
-                readArcGIS = new dojo.Deferred(),
-                readFile = new dojo.Deferred(),
+                readArcGIS = new Deferred(),
+                readFile = new Deferred(),
                 filename = null,
                 directUI = null,
                 fileUI = null,
                 fileValues = null,
                 arcgisUI = null,
                 arcgisOverrides = null,
-                arcgisDefaults = null;
+                arcgisDefaults = null,
+                commonConfigReady;
 
             /**
              * Provides a way to test the success or failure of loading the
@@ -235,12 +237,18 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
              * @member {Deferred} ready
              * @memberOf js.LGUIBuilder#
              */
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
 
             // Save the query string
             if (typeof queryString === "string") {
                 queryParams = this.parseQueryString(queryString, true);
             }
+
+            // Get the AGOL configuration
+            // The online apps use proxy.ashx if locally hosted; setDefaults() will override
+            // this if the online app is hosted by AGOL.
+            commonConfig.proxy = "proxy.ashx";
+            commonConfigReady = this.setDefaults(commonConfig);
 
             // Pull in any localizations; they'll be available as this.i18n[.<var>]+
             /**
@@ -281,116 +289,123 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
              */
             this.values = {};
 
-            // Fetch the sources of specification and values
-            // ArcGIS.com
-            if (queryParams.appid) {
-                // Get the application item. It contains a "source" element with the
-                // ArcGIS online id of the application's template
-                (new js.LGArcGISAccess()).ready.then(
-                    function (pArcGISAccess) {
-                        pArcGISAccess.getItemWithData(queryParams.appid).then(
-                            function (item) {
-                                if (item && item.itemData.source && item.itemData.values) {
-                                    arcgisOverrides = item.itemData.values;
+            // Once we have the common config defined, we can get the app's specification and configuration
+            commonConfigReady.then(function () {
+                // Fetch the sources of specification and values
+                // ArcGIS.com
+                if (queryParams.appid) {
+                    // Get the application item. It contains a "source" element with the
+                    // ArcGIS online id of the application's template
+                    (new js.LGArcGISAccess(commonConfig)).ready.then(
+                        function (pArcGISAccess) {
+                            pArcGISAccess.getItemWithData(queryParams.appid).then(
+                                function (item) {
+                                    if (item && item.itemData.source && item.itemData.values) {
+                                        arcgisOverrides = item.itemData.values;
 
-                                    // Get the application template. It contains a "configurationSettings"
-                                    // element with the ArcGIS online configuration UI, a "values" element
-                                    // with all of the default values of configurationSettings, and a "ui"
-                                    // element with the application's UI
-                                    pArcGISAccess.getItemWithData(item.itemData.source).then(
-                                        function (item) {
-                                            arcgisUI = item.itemData.ui;
-                                            arcgisDefaults = item.itemData.values;
-                                            readArcGIS.resolve(pThis);
-                                        },
-                                        function () {
-                                            readArcGIS.reject(null);
-                                        }
-                                    );
-                                } else {
+                                        // Get the application template. It contains a "configurationSettings"
+                                        // element with the ArcGIS online configuration UI, a "values" element
+                                        // with all of the default values of configurationSettings, and a "ui"
+                                        // element with the application's UI
+                                        pArcGISAccess.getItemWithData(item.itemData.source).then(
+                                            function (item) {
+                                                arcgisUI = item.itemData.ui;
+                                                arcgisDefaults = item.itemData.values;
+                                                readArcGIS.resolve(pThis);
+                                            },
+                                            function () {
+                                                readArcGIS.reject(null);
+                                            }
+                                        );
+                                    } else {
+                                        readArcGIS.reject(null);
+                                    }
+                                },
+                                function () {
                                     readArcGIS.reject(null);
                                 }
-                            },
-                            function () {
-                                readArcGIS.reject(null);
-                            }
-                        );
-                    },
-                    function (error) {
-                        readArcGIS.reject(error);
-                    }
-                );
-            } else {
-                readArcGIS.resolve(null);
-            }
-
-            // File
-            if (uiSpec && typeof uiSpec === "object") {
-                // We have a UI specification directly specified via the override
-                directUI = uiSpec;
-                readFile.resolve(uiSpec);
-
-            } else if ((uiSpec && typeof uiSpec === "string") || queryParams.app || defaultUiSpecFile) {
-                if (uiSpec && typeof uiSpec === "string") {
-                    filename = uiSpec;
-                } else if (queryParams.app) {
-                    filename = queryParams.app;
+                            );
+                        },
+                        function (error) {
+                            readArcGIS.reject(error);
+                        }
+                    );
                 } else {
-                    filename = defaultUiSpecFile;
+                    readArcGIS.resolve(null);
                 }
-                this.loadFromFile(filename).then(
-                    function (fileConfig) {
-                        fileUI = fileConfig.ui || null;
-                        fileValues = fileConfig.values || null;
-                        readFile.resolve(pThis);
-                    },
-                    function (error) {
-                        readFile.reject(error);
+
+                // File
+                if (uiSpec && typeof uiSpec === "object") {
+                    // We have a UI specification directly specified via the override
+                    directUI = uiSpec;
+                    readFile.resolve(uiSpec);
+
+                } else if ((uiSpec && typeof uiSpec === "string") || queryParams.app || defaultUiSpecFile) {
+                    if (uiSpec && typeof uiSpec === "string") {
+                        filename = uiSpec;
+                    } else if (queryParams.app) {
+                        filename = queryParams.app;
+                    } else {
+                        filename = defaultUiSpecFile;
+                    }
+                    pThis.loadFromFile(filename).then(
+                        function (fileConfig) {
+                            fileUI = fileConfig.ui || null;
+                            fileValues = fileConfig.values || null;
+                            readFile.resolve(pThis);
+                        },
+                        function (error) {
+                            readFile.reject(error);
+                        }
+                    );
+                } else {
+                    readFile.resolve(null);
+                }
+
+                // Once both fetches are done (or not needed), pick our UI and values from the results
+                (new DeferredList([readArcGIS, readFile])).then(
+                    function (results) {
+                        // Did both succeed?
+                        if (!results[0] || !results[1]) {
+                            pThis.ready.reject(pThis);
+                            return;
+                        }
+
+                        // Pick the first acceptable UI spec
+                        if (directUI) {                                     // provided as object in 2nd constructor arg
+                            pThis.uiSpecification = directUI;
+                            console.log("Using override object for UI");
+                        } else if (fileUI && typeof uiSpec === "string") {  // provided as filename in 2nd constructor arg
+                            pThis.uiSpecification = fileUI;
+                            console.log("Using override file " + uiSpec + ".json for UI");
+                        } else if (arcgisUI) {                              // provided via appId query param (arcgis.com id)
+                            pThis.uiSpecification = arcgisUI;
+                            console.log("Using appId " + queryParams.appid + " for UI");
+                        } else if (fileUI && queryParams.app) {             // provided via app query param (filename)
+                            pThis.uiSpecification = fileUI;
+                            console.log("Using app file " + queryParams.app + ".json for UI");
+                        } else if (fileUI && defaultUiSpecFile) {           // provided as filename in 3rd constructor arg
+                            pThis.uiSpecification = fileUI;
+                            console.log("Using default file " + defaultUiSpecFile + ".json for UI");
+                        } else {
+                            console.warn("No UI found");
+                        }
+
+                        // Merge the values in inverse precedence order
+                        pThis.values = fileValues || {};  // defaults
+                        dojo.mixin(pThis.values, arcgisDefaults);  // app template config values
+                        dojo.mixin(pThis.values, arcgisOverrides);  // app config values
+                        dojo.mixin(pThis.values, queryParams);  // query params
+                        pThis.values = pThis.organizeConfigValues(pThis.values);
+
+                        // Include the common config
+                        pThis.values.Shared = pThis.values.Shared || {};
+                        pThis.values.Shared.commonConfig = commonConfig;
+
+                        pThis.ready.resolve(pThis);
                     }
                 );
-            } else {
-                readFile.resolve(null);
-            }
-
-            // Once both fetches are done (or not needed), pick our UI and values from the results
-            (new DeferredList([readArcGIS, readFile])).then(
-                function (results) {
-                    // Did both succeed?
-                    if (!results[0] || !results[1]) {
-                        pThis.ready.reject(pThis);
-                        return;
-                    }
-
-                    // Pick the first acceptable UI spec
-                    if (directUI) {                                     // provided as object in 2nd constructor arg
-                        pThis.uiSpecification = directUI;
-                        console.log("Using override object for UI");
-                    } else if (fileUI && typeof uiSpec === "string") {  // provided as filename in 2nd constructor arg
-                        pThis.uiSpecification = fileUI;
-                        console.log("Using override file " + uiSpec + ".json for UI");
-                    } else if (arcgisUI) {                              // provided via appId query param (arcgis.com id)
-                        pThis.uiSpecification = arcgisUI;
-                        console.log("Using appId " + queryParams.appid + " for UI");
-                    } else if (fileUI && queryParams.app) {             // provided via app query param (filename)
-                        pThis.uiSpecification = fileUI;
-                        console.log("Using app file " + queryParams.app + ".json for UI");
-                    } else if (fileUI && defaultUiSpecFile) {           // provided as filename in 3rd constructor arg
-                        pThis.uiSpecification = fileUI;
-                        console.log("Using default file " + defaultUiSpecFile + ".json for UI");
-                    } else {
-                        console.warn("No UI found");
-                    }
-
-                    // Merge the values in inverse precedence order
-                    pThis.values = fileValues || {};  // defaults
-                    dojo.mixin(pThis.values, arcgisDefaults);  // app template config values
-                    dojo.mixin(pThis.values, arcgisOverrides);  // app config values
-                    dojo.mixin(pThis.values, queryParams);  // query params
-                    pThis.values = pThis.organizeConfigValues(pThis.values);
-
-                    pThis.ready.resolve(pThis);
-                }
-            );
+            });
         },
 
         /**
@@ -474,7 +489,7 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
          */
         launch: function () {
             var pThis = this,
-                done = new dojo.Deferred();
+                done = new Deferred();
 
             // Asynchronously instantiate each class found in the spec
             setTimeout(function () {
@@ -621,7 +636,7 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
          * @memberOf js.LGUIBuilder#
          */
         loadJSFile: function (url) {
-            var done = new dojo.Deferred();
+            var done = new Deferred();
 
             // By James Burke
             // http://mail.dojotoolkit.org/pipermail/dojo-interest/2010-January/042005.html
@@ -647,7 +662,7 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
          * @memberOf js.LGUIBuilder#
          */
         loadJSONFile: function (url) {
-            var done = new dojo.Deferred();
+            var done = new Deferred();
 
             dojo.xhrGet({
                 url: url + ".json",
@@ -661,6 +676,78 @@ define("js/lgonlineBuildUI", ["dojo/DeferredList", "esri/arcgis/utils", "dojo/io
             });
 
             return done;
+        },
+
+        /**
+         * Sets up the AGOL defaults
+         * @param {object} config AGOL configuration structure; supply
+         *        empty structure or seed with commonConfig
+         * @return {Deferred} Provides a way to know when the portal
+         *         definition information has been retrieved and the
+         *         geometry service is available
+         * @note Input parameter config is filled with AGOL
+         *       configuration information
+         * @memberOf js.LGUIBuilder#
+         */
+        setDefaults: function (config) {
+            var appLocation, instance, req, deferred = new Deferred();
+
+            // Check to see if the app is hosted or a portal. In those cases set the sharing url and the proxy. Otherwise use
+            // the sharing url set to arcgis.com. We know app is hosted (or portal) if it has /apps/ in the url
+            // templates can be at /apps or /home/webmap/templates
+            appLocation = location.pathname.indexOf("/apps/");
+            if (appLocation === -1) {
+                appLocation = location.pathname.indexOf("/home/");
+            }
+
+            // Set the base path for the API
+            if (appLocation !== -1) { //hosted or portal
+                instance = location.pathname.substr(0, appLocation);
+                config.baseUrl = location.protocol + "//" + location.host + instance;
+
+                // If the app is hosted, we override any supplied proxy
+                config.proxy = location.protocol + '//' + location.host + instance + "/sharing/proxy";
+
+            } else { //default to arcgis.com
+                config.baseUrl = location.protocol + "//" + "www.arcgis.com";
+            }
+
+            // Query for portal definition
+            req = esri.request({
+                url: config.baseUrl + "/sharing/rest/portals/self",
+                content: {
+                    "f": "json"
+                },
+                callbackParamName: "callback"
+            });
+            req.then(function (response) {
+                config.self = response;
+
+                // Replace the sharing URL for single-tenant portals
+                if (response.isPortal && response.portalMode === "single tenant") {
+                    config.baseUrl = response.portalHostname;
+                }
+
+                // Save the portal's services
+                lang.mixin(config.helperServices, response.helperServices);
+
+                esri.arcgis.utils.arcgisUrl = config.baseUrl + "/sharing/rest/content/items";
+
+                // Setup any helper services (geometry, print, routing, geocoding)
+                if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {
+                    esri.config.defaults.geometryService = new esri.tasks.GeometryService(config.helperServices.geometry.url);
+                }
+
+                deferred.resolve(true);
+            });
+
+            // Set the proxy
+            if (config.proxy) {
+                esri.config.defaults.io.proxyUrl = config.proxy;
+                esri.config.defaults.io.alwaysUseProxy = false;
+            }
+
+            return deferred;
         }
 
     });

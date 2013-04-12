@@ -152,14 +152,17 @@
         "classname": "js.LGMap",
         "styles": ".mapContainer{margin:0px;padding:0px;overflow:hidden;position:absolute}",
         "config": {
-            "geometryServiceURL": "http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
+            "xmin": -9275490,
+            "ymin": 5243772,
+            "xmax": -9266404,
+            "ymax": 5251788,
+            "wkid": 102100,
             "rootId": "map",
             "rootClass": "mapContainer",
             "parentDiv": "contentFrame",
             "fill": true,
             "lineHiliteColor": "#0000ff",
-            "fillHiliteColor": [0, 0, 255, 0.1],
-            "bingMapsKey": ""
+            "fillHiliteColor": [0, 0, 255, 0.1]
         }
     }, {
         "classname": "js.LGTitleBar",
@@ -202,7 +205,6 @@
         "config": {
             "rootId": "featureSearcher",
             "parentDiv": "contentFrame",
-            "outWkid": 102100,
             "dependencyId": "map",
             "busyIndicator": "busyIndicator",
             "publishPointsOnly": false

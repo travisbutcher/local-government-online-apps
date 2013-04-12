@@ -85,12 +85,6 @@
             parseOnLoad: false
         };
         document.ontouchmove = function(e) {e.preventDefault()};  // prevent mobile bounce
-        var agolOptions = {
-            // Specify a proxy URL if needed; default is (location.protocol + '//' + location.host + "/sharing/proxy")
-            proxyUrl: "proxy.ashx",
-            // Specify a sharing service URL if needed; default is (location.protocol + '//' + location.host + "/sharing/content/items")
-            sharingUrl: location.protocol + "//www.arcgis.com/sharing/content/items"
-        };
     </script>
     <!--[if IE]>
     <script>
@@ -99,6 +93,7 @@
     </script>
     <!--<![endif]-->
     <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.5/"></script>
+    <script src="commonConfig.js"></script>
     <script src="js2/libs.js"></script>
     <script src="js2/lgonlineStart.js"></script>
 </body>
