@@ -156,6 +156,7 @@
             "ymin": 5243772,
             "xmax": -9266404,
             "ymax": 5251788,
+            "wkid": 102100,
             "rootId": "map",
             "rootClass": "mapContainer",
             "parentDiv": "contentFrame",
@@ -258,7 +259,7 @@
         }
     }, {
         "classname": "js.LGMapBasedMenuBox",
-        "styles": ".shareBox{display:none;width:130px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .shareBox{border-radius:8px}",
+        "styles": ".shareBox{display:none;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .shareBox{border-radius:8px}",
         "config": {
             "rootId": "shareBox",
             "parentDiv": "contentFrame",
