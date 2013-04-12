@@ -1996,13 +1996,15 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {string} args.values.webmap ArcGIS.com id of web map
          *        to display
          * @param {string|number} [args.values.xmin] Westernmost map
-         *        extent in Web Mercator Auxiliary Sphere coordinates
+         *        extent
          * @param {string|number} [args.values.ymin] Southernmost map
-         *        extent in Web Mercator Auxiliary Sphere coordinates
+         *        extent
          * @param {string|number} [args.values.xmax] Easternmost map
-         *        extent in Web Mercator Auxiliary Sphere coordinates
+         *        extent
          * @param {string|number} [args.values.ymax] Northernmost map
-         *        extent in Web Mercator Auxiliary Sphere coordinates
+         *        extent
+         * @param {string|number} [args.values.wkid] wkid for extents
+         *        coordinates
          *
          * @param {object} [args.i18n] Key-value pairs for text
          *        strings for non-configurable elements (LGGraphic)
@@ -2015,7 +2017,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Provides a UI web map display.
          */
         constructor: function () {
-            var options, minmax, extents, pThis = this;
+            var options, minmax, extents = null, pThis = this;
 
             /**
              * Provides a way to test the success or failure of the map
@@ -2028,6 +2030,28 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             options = {ignorePopups: false};
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
+
+            // Set up configured extents
+            if (this.xmin && this.ymin && this.xmax && this.ymax) {
+                try {
+                    extents = {
+                        xmin: this.xmin,
+                        ymin: this.ymin,
+                        xmax: this.xmax,
+                        ymax: this.ymax
+                    };
+
+                    extents.spatialReference = {};
+                    if (this.wkid) {
+                        extents.spatialReference.wkid = Number(this.wkid);
+                    } else {
+                        extents.spatialReference.wkid = 102100;
+                    }
+                    extents = new esri.geometry.Extent(extents);
+                } catch (err1) {
+                    extents = null;
+                }
+            }
 
             // Override the initial extent from the configuration with URL extent values; need to have a complete set of the latter
             if (this.ex) {
@@ -2047,7 +2071,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                         extents.spatialReference.wkid = 102100;
                     }
                     extents = new esri.geometry.Extent(extents);
-                } catch (err1) {
+                } catch (err2) {
                     extents = null;
                 }
             }
