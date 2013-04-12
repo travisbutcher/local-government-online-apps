@@ -19,20 +19,16 @@
  */
 //============================================================================================================================//
 // Get the basic Dojo & Esri setup
-require(["dojo/ready", "esri/arcgis/utils", "esri/map", "dojo/i18n"], function (ready, utils) {
+require(["dojo/ready", "dojo/_base/Deferred", "esri/map", "dojo/i18n"], function (ready) {
     ready(function () {
 
-        // AGOL compliance
-        this.agolOptions.proxyUrl = this.agolOptions.proxyUrl || location.protocol + '//' + location.host + "/sharing/proxy";
-        esri.config.defaults.io.proxyUrl = this.agolOptions.proxyUrl;
-
-        this.agolOptions.sharingUrl = this.agolOptions.sharingUrl || location.protocol + '//' + location.host + "/sharing/content/items";
-        utils.arcgisUrl = this.agolOptions.sharingUrl;
-
+        // Define the String.trim() method if missing
         // By Pradeep Kumar Mishra
         // http://stackoverflow.com/a/498995
         if (!String.prototype.trim) {
-            String.prototype.trim=function(){return this.replace(/^\s+|\s+$/g, '');};
+            String.prototype.trim = function() {
+                return this.replace(/^\s+|\s+$/g, '');
+            };
         }
 
         // Bring in language files
