@@ -22,7 +22,6 @@
      | See the License for the specific language governing permissions and
      | limitations under the License.
     -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9,IE=10" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -79,13 +78,17 @@
         </div>
     </noscript>
     <script>
+        var path_location = location.pathname.replace(/\/[^/]+$/, '');
         var dojoConfig = {
             packages: [{
                 name: "js",
-                location: location.pathname.replace(/\/[^/]+$/, '') + '/js2'
+                location: path_location + '/js2'
             },{
                 name: "esriTemplate",
-                location: location.pathname.replace(/\/[^/]+$/, '')
+                location: path_location
+            },{
+                name: "config",
+                location: path_location // common config
             }],
             async: false,
             parseOnLoad: false
@@ -99,7 +102,6 @@
     </script>
     <!--<![endif]-->
     <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.5/"></script>
-    <script src="commonConfig.js"></script>
     <script src="js2/libs.js"></script>
     <script src="js2/lgonlineStart.js"></script>
 </body>

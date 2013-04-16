@@ -22,7 +22,6 @@
      | See the License for the specific language governing permissions and
      | limitations under the License.
     -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9,IE=10" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -62,6 +61,12 @@
         .transparent {
             opacity:0.0;filter:Alpha(opacity=0);
         }
+        @media screen and (max-height: 550px){.contentPane{height:300px}}
+        @media screen and (max-height: 500px){.contentPane{height:250px}}
+        @media screen and (max-height: 450px){.contentPane{height:200px}}
+        @media screen and (max-height: 400px){.contentPane{height:150px}}
+        @media screen and (max-height: 350px){.contentPane{height:100px}}
+        @media screen and (max-height: 300px){.contentPane{height:50px}}
     </style>
 
 </head>
@@ -73,13 +78,17 @@
         </div>
     </noscript>
     <script>
+        var path_location = location.pathname.replace(/\/[^/]+$/, '');
         var dojoConfig = {
             packages: [{
                 name: "js",
-                location: location.pathname.replace(/\/[^/]+$/, '') + '/js1'
+                location: path_location + '/js1'
             },{
                 name: "esriTemplate",
-                location: location.pathname.replace(/\/[^/]+$/, '')
+                location: path_location
+            },{
+                name: "config",
+                location: path_location // common config
             }],
             async: false,
             parseOnLoad: false
@@ -93,7 +102,6 @@
     </script>
     <!--<![endif]-->
     <script src="http://servicesbeta.esri.com/jsapi/arcgis/3.5/"></script>
-    <script src="commonConfig.js"></script>
     <script src="js1/libs.js"></script>
     <script src="js1/lgonlineStart.js"></script>
 </body>

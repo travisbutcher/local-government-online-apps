@@ -1,4 +1,4 @@
-/*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,commonConfig,console */
+/*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,console */
 /*jslint sloppy:true,evil:true,regexp:true,unparam:true */
 /** @license
  | ArcGIS for Local Government
@@ -18,7 +18,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "dojo/require!esri/utils"], function (Deferred, DeferredList, utils, script, lang) {
+define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "dojo/require!esri/utils"], function (Deferred, DeferredList, utils, script, lang, commonConfig) {
     dojo.require('esri.arcgis.Portal');
     dojo.require("esri.IdentityManager");
 
