@@ -4,7 +4,10 @@
 
 It is ready to run using sample data, so you can set it up on your server to test that it will
 work in that environment.  A good starting URL after the appropriate server and site name substitutions
-would simply be `http://<yourServer>/<yourSite>/s1.html`.  Zoom in a bit and click on a parcel to get its details popup (defined in the sample data's webmap).  Try a search for a parcel (e.g., "1916301027") or an address (e.g., "42757 Woodward Ave").  Change the basemap.  Send the current extents to someone via email.
+would simply be `http://<yourServer>/<yourSite>/s1.html`.  Zoom in a bit and click on a parcel to get
+its details popup (defined in the sample data's webmap).  Try a search for a parcel (e.g., "1916301027")
+or an address (e.g., "42757 Woodward Ave").  Change the basemap.  Send the current extents to someone via
+email.
 
 With familiarity about what the app does, you can see where you want to customize it.  To begin, we need
 to understand how to configure the app.
@@ -16,15 +19,53 @@ There are two tiers of configuration that can be done without changing the JavaS
 1. Basic configuration:  title, color theme, search layer, etc.
 2. Advanced configuration:  icons, menu options, UI-element placing & sizing, etc.
 
-Basic configuration is done as part of publishing a web map into a web application, and one uses the
+Basic configuration is done as part of publishing a webmap into a web application, and one uses the
 ArcGIS Online configuration user interface to perform it.  Normally, just a few items are presented at
 this level.
 
-Advanced configuration is an optional part of setting up a web application template for your web map
+Advanced configuration is an optional part of setting up a web application template for your webmap
 publishers, and one uses a text editor to perform it.  It specifies which UI elements are to appear,
 the order in which they are to appear, and the CSS to display them.  There is no need to modify this
 part of a web application template in order to use the app--it is only there to make it easier to modify
 the app without touching the JavaScript or to customize the app without having to host it.
+
+### Elements of the basic configuration
+
+The basic configuration is divided into two sections: Title and Map.
+
+The Title section has a type-in box for the banner title and for the URL to the icon to use for the app
+in the banner; the URL can be local (e.g., the default "images/onlineapp.png" points to an image in the
+hosting site's "images" folder) or the full URL to an image on another site.
+
+The image is scaled to 48 pixels high to fit in the banner; its width is scaled by the same ratio as the
+height is scaled, but is not constrained to a fixed width: it is possible to have a rectangular image.
+Images may be PNG, GIF, or JPEG.
+
+The Map section has type-in boxes for the hint--the text that appears as a hint when one starts a
+search--and for the search layer and basemap group settings.
+
+#### Search layer
+
+One configures the search layer using two type-in boxes: layer name and layer field(s). If the
+specified name (e.g., the default "Parcel Details") is not found in the webmap, a box pops up
+reporting this problem and listing the available layers in the webmap. *Important note: At this
+time, the app is not able to get access to layers within other layers. The search layer needs
+to be a top-level layer.*
+
+Once you've supplied the name of a layer, you'll supply the names of one or more of that layer's fields
+that will be searched whenever your user enters text into the app's search box. Field names should
+match the ones in the layer exactly, including their case. Multiple field names are separated by commas.
+
+If a specified field is not found in the search layer, a box pops up
+reporting this problem and listing the available fields in the search layer. (Note that you'll
+need to save any changes to the search layer name before this field name check will be useful.)
+
+#### Basemap group
+
+One configures the basemap group using two type-in boxes: group name and group owner. The group name
+is the name of an arcgis.com group that contains the set of basemaps that you want to offer with this
+app; the group owner is the arcgis.com login name of the owner of that group. If these fields are left
+blank, then a default set of basemaps is supplied by Esri.
 
 ### How an app's configuration is stored
 
