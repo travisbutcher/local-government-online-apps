@@ -18,7 +18,7 @@
  */
 define([], function () {
     var config = {
-        bingMapsKey: "Akt3ZoeZ089qyG3zWQZSWpwV3r864AHStal7Aon21-Fyxwq_KdydAH32LTwhieA8",
+        bingMapsKey: "",
         helperServices: {
             geometry: {
                 url: location.protocol + "//utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer"
