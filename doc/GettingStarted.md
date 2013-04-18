@@ -144,6 +144,19 @@ the web application.  For example, try
 again after making this change.
 
 
+## Another advanced configuration:  change the custom utility services
+
+The application is configured to use four services:
+
+1. Bing maps key
+2. Geometry server URL
+3. Printing task URL
+4. Geocoding server URL
+
+These service parameters are all stored in the file commonConfig.js. Each URL parameter is preceded by
+"location.protocol +" so that it will work whether your site uses http or https.
+
+
 ## Another advanced configuration:  show the help text upon launch
 
 For this, we'll add to our configuration an instance of class `js.LGCallMethods`; this class calls
