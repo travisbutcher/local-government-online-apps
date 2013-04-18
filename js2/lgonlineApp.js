@@ -629,7 +629,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Builds and manages a UI object that represents a command.
          */
         constructor: function () {
-            var attrs, pThis = this;
+            var attrs;
 
             this.applyTheme(true);
 
@@ -910,7 +910,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          */
         onDependencyReady: function () {
             // Now that the map (our dependency) is ready, get the URL of the search layer from it
-            var mapDiv, mapObj, searchLayer, reason, message, availableFields = ",";
+            var mapDiv, mapObj, searchLayer, reason, message, availableFields = ",", opLayers,
+                popupTemplate = null, pThis = this;
 
             mapDiv = dojo.byId(this.dependencyId);
             mapObj = mapDiv.getLGObject();
@@ -957,6 +958,18 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     this.objectSearchParams = new esri.tasks.Query();
                     this.objectSearchParams.returnGeometry = true;
                     this.objectSearchParams.outSpatialReference = mapObj.mapInfo.map.spatialReference;
+                    this.objectSearchParams.outFields = ["*"];
+
+                    // Get the popup for this layer & send it to the map
+                    opLayers = mapObj.mapInfo.itemInfo.itemData.operationalLayers;
+                    array.some(opLayers, function (layer) {
+                        if (layer.title === pThis.searchLayerName) {
+                            popupTemplate = new esri.dijit.PopupTemplate(layer.popupInfo);
+                            return true;
+                        }
+                        return false;
+                    });
+                    mapObj.setPopup(popupTemplate);
 
                     this.log("Search layer " + this.searchLayerName + " set up for queries");
                     this.ready.resolve(this);
@@ -977,7 +990,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             message += "</ul>";
             this.log(message, true);
 
-            this.ready.reject(pThis);
+            this.ready.reject(this);
             this.inherited(arguments);
         },
 
@@ -2112,6 +2125,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             options = {ignorePopups: false};
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
+            options.mapOptions.infoWindow = new esri.dijit.Popup(null, dojo.create("div"));
 
             // Set up configured extents
             if (this.xmin && this.ymin && this.xmax && this.ymax) {
@@ -2282,6 +2296,17 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         },
 
         /**
+         * Sets the popup template to be used by graphics that the map
+         * creates.
+         * @param {object} popupTemplate esri.dijit.PopupTemplate for
+         *        map's infoWindow
+         * @memberOf js.LGMap#
+         */
+        setPopup: function (popupTemplate) {
+            this.popupTemplate = popupTemplate;
+        },
+
+        /**
          * Highlights a point by drawing a marker over it and centers
          * the map on the point.
          * @param {object} newCenterPoint Point to highlight
@@ -2307,32 +2332,60 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @memberOf js.LGMap#
          */
         highlightFeature: function (feature) {
-            var extent, symbol;
+            var extent, symbol, highlightGraphic, newMapCenter, focusFinished, pThis = this;
             extent = feature.geometry.getExtent();
+
+            // Polyline or polygon symbol whose extents are used to reposition & rezoom the map
             if (extent) {
                 // Shift the map
-                this.mapInfo.map.setExtent(extent.expand(4));
+                focusFinished = this.mapInfo.map.setExtent(extent.expand(4));
+                newMapCenter = extent.getCenter();
 
-                // Draw the feature highlight
+                // Create the feature highlight
                 if (feature.geometry.type === "polyline") {
                     symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, this.lineHiliteColor, 3);
                 } else {
                     symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
                         new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, this.lineHiliteColor, 3), this.fillHiliteColor);
                 }
-                this.tempGraphicsLayer.add(
-                    new esri.Graphic(feature.geometry,
-                        symbol, feature.attributes, null)
-                );
+                highlightGraphic = new esri.Graphic(feature.geometry,
+                    symbol, feature.attributes, null);
+
+            // Point symbol used to reposition the map
             } else {
-                this.highlightPoint(feature.geometry);
+                newMapCenter = feature.geometry;
+
+                // Shift the map
+                focusFinished = this.mapInfo.map.centerAt(newMapCenter);
+
+                // Create the feature highlight
+                highlightGraphic = new esri.Graphic(newMapCenter,
+                    new esri.symbol.PictureMarkerSymbol("images/youAreHere.png", 30, 30), //???
+                    null, null);
             }
+
+            // Assign the popup template to the highlight & populate the infoWindow;
+            // we need to clear the infoWindow's feature list because the infoWindow
+            // doesn't work well with a mix of direct-click feature selection and this
+            // routine's feature
+            highlightGraphic.setInfoTemplate(this.popupTemplate);
+
+            this.mapInfo.map.infoWindow.clearFeatures();
+            this.mapInfo.map.infoWindow.setContent(highlightGraphic.getContent());
+
+            // Display the highlight
+            this.tempGraphicsLayer.add(highlightGraphic);
+
+            // When the map is done with recentering, show the infoWindow
+            focusFinished.then(function () {
+                pThis.mapInfo.map.infoWindow.show(pThis.mapInfo.map.toScreen(newMapCenter));
+            });
         },
 
         /**
          * Creates a string from the map's current extents.
          * @return {string} Comma-separated extents in the order xmin,
-         *         ymin, xmax, ymax
+         *         ymin, xmax, ymax, spatial reference's wkid
          * @memberOf js.LGMap#
          */
         getExtentsString: function () {
