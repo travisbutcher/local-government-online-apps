@@ -57,7 +57,7 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
             }
 
             this.timeout = this.timeout || 5000;
-            this.portalUrl = this.baseUrl  // from the commonConfig passed in as an arg
+            this.portalUrl = this.sharingUrl  // from the commonConfig passed in as an arg
                 || location.protocol + '//' + "www.arcgis.com";  // fallback
 
             // Launch the portal
@@ -245,9 +245,6 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
             }
 
             // Get the AGOL configuration
-            // The online apps use proxy.ashx if locally hosted; setDefaults() will override
-            // this if the online app is hosted by AGOL.
-            commonConfig.proxy = "proxy.ashx";
             commonConfigReady = this.setDefaults(commonConfig);
 
             // Pull in any localizations; they'll be available as this.i18n[.<var>]+
@@ -699,22 +696,32 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
             if (appLocation === -1) {
                 appLocation = location.pathname.indexOf("/home/");
             }
+            if (appLocation !== -1) {
+                instance = location.pathname.substr(0, appLocation);
+            }
 
             // Set the base path for the API
-            if (appLocation !== -1) { //hosted or portal
-                instance = location.pathname.substr(0, appLocation);
-                config.baseUrl = location.protocol + "//" + location.host + instance;
+            if (config.sharingUrl) {
 
-                // If the app is hosted, we override any supplied proxy
-                config.proxy = location.protocol + '//' + location.host + instance + "/sharing/proxy";
+            } else if (appLocation !== -1) { //hosted or portal
+                config.sharingUrl = location.protocol + "//" + location.host + instance;
 
             } else { //default to arcgis.com
-                config.baseUrl = location.protocol + "//" + "www.arcgis.com";
+                config.sharingUrl = location.protocol + "//" + "www.arcgis.com";
             }
+            console.log("sharingUrl: " + config.sharingUrl);
+
+            // Set the proxy for the API
+            if (config.proxy) {
+
+            } else if (appLocation !== -1) { //hosted or portal
+                config.proxy = location.protocol + '//' + location.host + instance + "/sharing/proxy";
+            }
+            console.log("proxy: " + config.proxy);
 
             // Query for portal definition
             req = esri.request({
-                url: config.baseUrl + "/sharing/rest/portals/self",
+                url: config.sharingUrl + "/sharing/rest/portals/self",
                 content: {
                     "f": "json"
                 },
@@ -725,13 +732,13 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
 
                 // Replace the sharing URL for single-tenant portals
                 if (response.isPortal && response.portalMode === "single tenant") {
-                    config.baseUrl = response.portalHostname;
+                    config.sharingUrl = response.portalHostname;
                 }
 
                 // Save the portal's services
                 lang.mixin(config.helperServices, response.helperServices);
 
-                esri.arcgis.utils.arcgisUrl = config.baseUrl + "/sharing/rest/content/items";
+                esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
 
                 // Setup any helper services (geometry, print, routing, geocoding)
                 if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {

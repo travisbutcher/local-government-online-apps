@@ -18,6 +18,8 @@
  */
 define([], function () {
     var config = {
+        // sharingUrl: "http://www.arcgis.com",  // URL to sharing service; default is arcgis.com with app's HTTP protocol
+        // proxy: null,  // URL to proxy (if desired); default is no proxy
         bingMapsKey: "",
         helperServices: {
             geometry: {
