@@ -712,12 +712,12 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
             console.log("sharingUrl: " + config.sharingUrl);
 
             // Set the proxy for the API
-            if (config.proxy) {
+            if (config.proxyUrl) {
 
             } else if (appLocation !== -1) { //hosted or portal
-                config.proxy = location.protocol + '//' + location.host + instance + "/sharing/proxy";
+                config.proxyUrl = location.protocol + '//' + location.host + instance + "/sharing/proxy";
             }
-            console.log("proxy: " + config.proxy);
+            console.log("proxyUrl: " + config.proxyUrl);
 
             // Query for portal definition
             req = esri.request({
@@ -749,8 +749,8 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
             });
 
             // Set the proxy
-            if (config.proxy) {
-                esri.config.defaults.io.proxyUrl = config.proxy;
+            if (config.proxyUrl) {
+                esri.config.defaults.io.proxyUrl = config.proxyUrl;
                 esri.config.defaults.io.alwaysUseProxy = false;
             }
 
