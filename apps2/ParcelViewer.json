@@ -202,7 +202,8 @@
             "parentDiv": "contentFrame",
             "dependencyId": "map",
             "busyIndicator": "busyIndicator",
-            "publishPointsOnly": false
+            "publishPointsOnly": false,
+            "searchPattern": "%${1}%"
         }
     }, {
         "classname": "js.LGLaunchUrl",

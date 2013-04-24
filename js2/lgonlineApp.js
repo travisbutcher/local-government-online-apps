@@ -900,6 +900,9 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          */
         constructor: function () {
             this.ready = new dojo.Deferred();
+            if (!this.searchPattern || this.searchPattern.indexOf("${1}") < 0) {
+                this.searchPattern = "%${1}%";
+            }
         },
 
         /**
@@ -1028,7 +1031,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         search: function (searchText, callback, errback) {
             var upperSearchText = searchText.toUpperCase(),
                 searchParam = "",
-                attributePattern = "UPPER(${0}) LIKE '%${1}%'",
+                attributePattern = "UPPER(${0}) LIKE '" + this.searchPattern + "'",
                 attributeSeparator = "",
                 attributeSeparatorReset = " OR ";
             array.forEach(this.searchFields, function (searchField) {
