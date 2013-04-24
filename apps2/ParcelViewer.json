@@ -152,11 +152,6 @@
         "classname": "js.LGMap",
         "styles": ".mapContainer{margin:0px;padding:0px;overflow:hidden;position:absolute}",
         "config": {
-            "xmin": -9275490,
-            "ymin": 5243772,
-            "xmax": -9266404,
-            "ymax": 5251788,
-            "wkid": 102100,
             "rootId": "map",
             "rootClass": "mapContainer",
             "parentDiv": "contentFrame",

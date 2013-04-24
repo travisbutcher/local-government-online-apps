@@ -701,21 +701,20 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
             }
 
             // Set the base path for the API
-            if (config.sharingUrl) {
-
-            } else if (appLocation !== -1) { //hosted or portal
-                config.sharingUrl = location.protocol + "//" + location.host + instance;
-
-            } else { //default to arcgis.com
-                config.sharingUrl = location.protocol + "//" + "www.arcgis.com";
+            if (!config.sharingUrl) {
+                if (appLocation !== -1) { //hosted or portal
+                    config.sharingUrl = location.protocol + "//" + location.host + instance;
+                } else { //default to arcgis.com
+                    config.sharingUrl = location.protocol + "//" + "www.arcgis.com";
+                }
             }
             console.log("sharingUrl: " + config.sharingUrl);
 
             // Set the proxy for the API
-            if (config.proxyUrl) {
-
-            } else if (appLocation !== -1) { //hosted or portal
-                config.proxyUrl = location.protocol + '//' + location.host + instance + "/sharing/proxy";
+            if (!config.proxyUrl) {
+                if (appLocation !== -1) { //hosted or portal
+                    config.proxyUrl = location.protocol + '//' + location.host + instance + "/sharing/proxy";
+                }
             }
             console.log("proxyUrl: " + config.proxyUrl);
 
