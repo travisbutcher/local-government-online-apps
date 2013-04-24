@@ -1012,6 +1012,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
             // Search for the supplied object id
             this.objectSearchParams.objectIds = [data];
+            this.objectSearchParams.where = this.objectIdField + "=" + data;
             this.searcher.execute(this.objectSearchParams, function (results) {
                 if (results && results.features && 0 < results.features.length) {
                     item = results.features[0];
@@ -2137,7 +2138,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     pThis.tempGraphicsLayer = pThis.createGraphicsLayer("tempGraphicsLayer");
 
                     // Start listening for position updates
-                    this.positionHandle = topic.subscribe("position", function (newCenterPoint) {
+                    pThis.positionHandle = topic.subscribe("position", function (newCenterPoint) {
                         pThis.tempGraphicsLayer.clear();
 
                         // Highlight the point's position if it's in the same coord system as the map
@@ -2174,7 +2175,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     });
 
                     // Start listening for feature highlights
-                    this.showFeatureHandle = topic.subscribe("showFeature", function (feature) {
+                    pThis.showFeatureHandle = topic.subscribe("showFeature", function (feature) {
                         pThis.tempGraphicsLayer.clear();
 
                         // Do the highlight
