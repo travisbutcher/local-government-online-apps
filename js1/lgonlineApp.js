@@ -819,6 +819,9 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          */
         constructor: function () {
             var mapDiv, mapObj, searchLayer, pThis = this;
+            if (!this.searchPattern || this.searchPattern.indexOf("${1}") < 0) {
+                this.searchPattern = "%${1}%";
+            }
             this.ready = new dojo.Deferred();
 
             // Get the URL of the search layer from the associated map, but we have to wait
@@ -926,7 +929,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         search: function (searchKey, callback, errback) {
             var upperSearchKey = searchKey.toUpperCase(),
                 searchParam = "",
-                attributePattern = "UPPER(${0}) LIKE '%${1}%'",
+                attributePattern = "UPPER(${0}) LIKE '" + this.searchPattern + "'",
                 attributeSeparator = "",
                 attributeSeparatorReset = " OR ";
             array.forEach(this.searchFields, function (searchField) {
