@@ -1133,7 +1133,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             }
 
             // Search for the supplied object id
-            this.objectSearchParams.objectIds = [data];
             this.objectSearchParams.where = this.objectIdField + "=" + data;
             this.searcher.execute(this.objectSearchParams, function (results) {
                 if (results && results.features && 0 < results.features.length) {
@@ -2146,7 +2145,9 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             options = {ignorePopups: false};
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
-            options.mapOptions.infoWindow = new esri.dijit.Popup(null, dojo.create("div"));
+
+            this.popup = new esri.dijit.Popup(null, dojo.create("div"));
+            options.mapOptions.infoWindow = this.popup;
 
             // Set up configured extents
             if (this.xmin && this.ymin && this.xmax && this.ymax) {
@@ -2391,8 +2392,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             // routine's feature
             highlightGraphic.setInfoTemplate(this.popupTemplate);
 
-            this.mapInfo.map.infoWindow.clearFeatures();
-            this.mapInfo.map.infoWindow.setContent(highlightGraphic.getContent());
+            this.popup.clearFeatures();
+            this.popup.setContent(highlightGraphic.getContent());
 
             // Display the highlight
             this.tempGraphicsLayer.add(highlightGraphic);

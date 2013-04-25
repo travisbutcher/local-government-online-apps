@@ -1030,7 +1030,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             }
 
             // Search for the supplied object id
-            this.objectSearchParams.objectIds = [data];
             this.objectSearchParams.where = this.objectIdField + "=" + data;
             this.searcher.execute(this.objectSearchParams, function (results) {
                 if (results && results.features && 0 < results.features.length) {
