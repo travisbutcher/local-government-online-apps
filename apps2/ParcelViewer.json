@@ -203,7 +203,8 @@
             "dependencyId": "map",
             "busyIndicator": "busyIndicator",
             "publishPointsOnly": false,
-            "searchPattern": "%${1}%"
+            "searchPattern": "%${1}%",
+            "caseInsensitiveSearch": true
         }
     }, {
         "classname": "js.LGLaunchUrl",

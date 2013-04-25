@@ -899,10 +899,17 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Provides a searcher for feature layers.
          */
         constructor: function () {
-            this.ready = new dojo.Deferred();
             if (!this.searchPattern || this.searchPattern.indexOf("${1}") < 0) {
                 this.searchPattern = "%${1}%";
             }
+            if (this.caseInsensitiveSearch === undefined || this.caseInsensitiveSearch === "true"
+                    || this.caseInsensitiveSearch === true) {
+                this.caseInsensitiveSearch = true;
+            } else {
+                this.caseInsensitiveSearch = false;
+            }
+            this.ready = new dojo.Deferred();
+
         },
 
         /**
@@ -1021,7 +1028,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Launches a search.
-         * @param {string|geometry} searchText Text or geometry to search
+         * @param {string|geometry} searchText Text to search
          * @param {function} callback Function to call when search
          *        results arrive; function takes the results as its sole
          *        argumentsss
@@ -1029,14 +1036,23 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @override
          */
         search: function (searchText, callback, errback) {
-            var upperSearchText = searchText.toUpperCase(),
+            var processedSearchText,
                 searchParam = "",
-                attributePattern = "UPPER(${0}) LIKE '" + this.searchPattern + "'",
+                attributePattern,
                 attributeSeparator = "",
                 attributeSeparatorReset = " OR ";
+
+            if (this.caseInsensitiveSearch === true) {
+                processedSearchText = searchText.toUpperCase();
+                attributePattern = "UPPER(${0}) LIKE '" + this.searchPattern + "'";
+            } else {
+                processedSearchText = searchText;
+                attributePattern = "${0} LIKE '" + this.searchPattern + "'";
+            }
+
             array.forEach(this.searchFields, function (searchField) {
                 searchParam = searchParam + attributeSeparator
-                    + dojo.string.substitute(attributePattern, [searchField, upperSearchText]);
+                    + dojo.string.substitute(attributePattern, [searchField, processedSearchText]);
                 attributeSeparator = attributeSeparatorReset;
             });
             if (0 < searchParam.length) {
@@ -1056,7 +1072,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          */
         toList: function (results, searchText) {
             var pThis = this, resultsList = [], possibleLabel, representativeLabel,
-                upperSearchText = searchText.toUpperCase();
+                processedSearchText = searchText.toUpperCase();
+
             if (results && results.features && 0 < results.features.length) {
                 // Create the results list
                 array.forEach(results.features, function (item) {
@@ -1067,7 +1084,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     array.some(pThis.searchFields, function (searchField) {
                         if (item.attributes[searchField]) {
                             possibleLabel = item.attributes[searchField].toString();
-                            if (possibleLabel.toUpperCase().indexOf(upperSearchText) >= 0) {
+                            if (possibleLabel.toUpperCase().indexOf(processedSearchText) >= 0) {
                                 representativeLabel = possibleLabel;
                                 return true;
                             }
