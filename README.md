@@ -39,6 +39,7 @@ Currently, one application configuration is provided:
 
 Additional documentation about the online apps:
 
+* [Background information about web application templates](http://resources.arcgis.com/en/help/arcgisonline/index.html#/About_web_application_templates/010q000000nt000000/)
 * [Getting started with configuring the online apps](https://github.com/Esri/local-government-online-apps/blob/master/doc/GettingStarted.md)
 
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
