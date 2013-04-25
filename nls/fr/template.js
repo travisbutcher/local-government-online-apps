@@ -12,7 +12,7 @@
             help: "Aide"
         },
         labels: {
-            email: "courrier électronique",
+            email: "Email",
             Facebook: "Facebook",
             Twitter: "Twitter"
         },

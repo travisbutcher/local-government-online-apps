@@ -20,7 +20,7 @@
             search: "Suche:",
             markup: "Zeichnen",
             mapLayers: "Karten-Layer:",
-            layerFields: "Such-Layer-Felder:"
+            layerFields: "Felder des Such-Layers:"
         },
         messages: {
             geolocationDenied: "Diese Site verfügt nicht über die Berechtigung, die aktuelle Position zu ermitteln",
