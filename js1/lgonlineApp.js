@@ -469,7 +469,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Applies the current theme class to the object.
-         * @param {boolean} withHover Node has hover color or not
+         * @param {boolean} [withHover] Node has hover color or not; no
+         *        hover color if omitted
          * @param {string|object} [node] Node to receive style; applied
          *        to the calling object if omitted
          * @memberOf js.LGGraphic#
@@ -660,7 +661,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * Publishes the specified data after performing any post
          * processing.
          * @param {string} subject Publishing topic name
-         * @param {object} data Object to publish under topic
+         * @param {object} [data] Object to publish under topic
          * @memberOf js.LGSearch#
          * @note Interface stub
          * @note The data are those set up by the toList function and
@@ -736,14 +737,6 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             this.searcher.outSpatialReference = new esri.SpatialReference({"wkid": this.outWkid});
             this.params = {};
             this.params.outFields = this.outFields;
-        },
-
-        /**
-         * Checks that the instance has its prerequisites.
-         * @throw {string}
-         * @memberOf js.LGSearchAddress#
-         */
-        checkPrerequisites: function () {
         },
 
         /**
@@ -1109,6 +1102,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
     dojo.declare("js.LGMessageBox", js.LGDropdownBox, {
         /**
          * Constructs an LGMessageBox.
+         *
+         * @param {string} content HTML to insert into box
          *
          * @constructor
          * @class
@@ -2269,7 +2264,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         /**
          * Creates a string from the map's current extents.
          * @return {string} Comma-separated extents in the order xmin,
-         *         ymin, xmax, ymax
+         *         ymin, xmax, ymax, spatial reference's wkid
          * @memberOf js.LGMap#
          */
         getExtentsString: function () {
