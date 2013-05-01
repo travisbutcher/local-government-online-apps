@@ -920,11 +920,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          */
         onDependencyReady: function () {
             // Now that the map (our dependency) is ready, get the URL of the search layer from it
-            var mapDiv, mapObj, searchLayer, reason, message, availableFields = ",", opLayers,
+            var searchLayer, reason, message, availableFields = ",", opLayers,
                 popupTemplate = null, pThis = this;
-
-            mapDiv = dojo.byId(this.dependencyId);
-            mapObj = mapDiv.getLGObject();
 
             try {
                 searchLayer = this.mapObj.getLayer(this.searchLayerName);
@@ -961,17 +958,17 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     // Set up the general layer query task: pattern match
                     this.generalSearchParams = new esri.tasks.Query();
                     this.generalSearchParams.returnGeometry = false;
-                    this.generalSearchParams.outSpatialReference = mapObj.mapInfo.map.spatialReference;
+                    this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
                     this.generalSearchParams.outFields = [searchLayer.objectIdField].concat(this.searchFields);
 
                     // Set up the specific layer query task: object id
                     this.objectSearchParams = new esri.tasks.Query();
                     this.objectSearchParams.returnGeometry = true;
-                    this.objectSearchParams.outSpatialReference = mapObj.mapInfo.map.spatialReference;
+                    this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
                     this.objectSearchParams.outFields = ["*"];
 
                     // Get the popup for this layer & send it to the map
-                    opLayers = mapObj.mapInfo.itemInfo.itemData.operationalLayers;
+                    opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
                     array.some(opLayers, function (layer) {
                         if (layer.title === pThis.searchLayerName) {
                             popupTemplate = new esri.dijit.PopupTemplate(layer.popupInfo);
@@ -979,7 +976,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                         }
                         return false;
                     });
-                    mapObj.setPopup(popupTemplate);
+                    this.mapObj.setPopup(popupTemplate);
 
                     this.log("Search layer " + this.searchLayerName + " set up for queries");
                     this.ready.resolve(this);
@@ -1040,7 +1037,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 searchParam = "",
                 attributePattern,
                 attributeSeparator = "",
-                attributeSeparatorReset = " OR ";
+                attributeSeparatorReset = "  OR  ";  // thanks to Tim H.: single spaces don't work with some DBs
 
             if (this.caseInsensitiveSearch === true) {
                 processedSearchText = searchText.toUpperCase();
