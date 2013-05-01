@@ -937,7 +937,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 searchParam = "",
                 attributePattern,
                 attributeSeparator = "",
-                attributeSeparatorReset = " OR ";
+                attributeSeparatorReset = "  OR  ";  // thanks to Tim H.: single spaces don't work with some DBs
 
             if (this.caseInsensitiveSearch === true) {
                 processedSearchText = searchText.toUpperCase();
