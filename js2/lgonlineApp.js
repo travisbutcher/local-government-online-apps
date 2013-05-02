@@ -17,7 +17,6 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
-var gLogMessageBox;
 //============================================================================================================================//
 define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo/on", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color"], function (dijit, registry, domConstruct, on, domStyle, domClass, array, utils, topic, Color) {
     dojo.require("esri.tasks.find");
@@ -212,7 +211,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Displays a message to the console, and, optionally, also
-         * publishes it. If gLogMessageBox is defined, message is also
+         * publishes it. If window.gLogMessageBox is defined, message is also
          * appended to it.
          * @param {string} message Message to write
          * @param {boolean} publishError If true, message is also
@@ -226,8 +225,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
             if (publishError) {
                 topic.publish("error", message);
             }
-            if (gLogMessageBox) {
-                gLogMessageBox.append(message);
+            if (window.gLogMessageBox) {
+                window.gLogMessageBox.append(message);
             }
         }
 
@@ -1257,7 +1256,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         /**
          * Constructs an LGLogBox.
          *
-         * @note Sets the global variable gLogMessageBox to point to
+         * @see Sets the global variable window.gLogMessageBox to point to
          *       this object.
          *
          * @constructor
@@ -1269,7 +1268,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * console.
          */
         constructor: function () {
-            gLogMessageBox = this;
+            window.gLogMessageBox = this;
             touchScroll(this.rootDiv);
         },
 
