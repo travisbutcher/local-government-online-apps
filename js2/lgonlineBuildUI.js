@@ -682,7 +682,7 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
          * @return {Deferred} Provides a way to know when the portal
          *         definition information has been retrieved and the
          *         geometry service is available
-         * @note Input parameter config is filled with AGOL
+         * @see Input parameter config is filled with AGOL
          *       configuration information
          * @memberOf js.LGUIBuilder#
          */

@@ -640,7 +640,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {function} errback Function to call when search
          *        fails
          * @memberOf js.LGSearch#
-         * @note Interface stub
+         * @see Interface stub
          */
         search: function () {
         },
@@ -652,7 +652,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {string} [searchText] Search text
          * @return {array} List of structures
          * @memberOf js.LGSearch#
-         * @note Interface stub
+         * @see Interface stub
          */
         toList: function () {
         },
@@ -663,12 +663,11 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {string} subject Publishing topic name
          * @param {object} [data] Object to publish under topic
          * @memberOf js.LGSearch#
-         * @note Interface stub
-         * @note The data are those set up by the toList function and
-         *       could be final or intermediate results. For
-         *       intermediate results, the publish function is the place
-         *       for the searcher to complete the data-retrieval process
-         *       before publishing.
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
          */
         publish: function (subject, data) {
             topic.publish(subject, data);
@@ -896,7 +895,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Checks that the instance has its prerequisites.
-         * @throw {string} "missing search fields" if the search fields
+         * @throws {string} "missing search fields" if the search fields
          *        parameter is omitted
          * @memberOf js.LGSearchFeatureLayer#
          * @override
@@ -1006,12 +1005,11 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {string} subject Publishing topic name
          * @param {object} data Object to publish under topic
          * @memberOf js.LGSearch#
-         * @note Interface stub
-         * @note The data are those set up by the toList function and
-         *       could be final or intermediate results. For
-         *       intermediate results, the publish function is the place
-         *       for the searcher to complete the data-retrieval process
-         *       before publishing.
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
          * @memberOf js.LGSearchFeatureLayer#
          * @override
          */
@@ -1152,7 +1150,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
         /**
          * Constructs an LGLogBox.
          *
-         * @note Sets the global variable gLogMessageBox to point to
+         * @see Sets the global variable gLogMessageBox to point to
          *       this object.
          *
          * @constructor
