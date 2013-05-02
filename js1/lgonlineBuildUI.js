@@ -443,7 +443,7 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
         parseJSON: function (jsonString) {
             try {
                 return window.JSON.parse(jsonString);
-            } catch (err) {
+            } catch (ignore) {
             }
         },
 
@@ -534,7 +534,7 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
 
                 // Create the object
                 obj = new (eval(className))(objectDescription.config);
-            } catch (err) {
+            } catch (ignore) {
             }
 
             return obj;

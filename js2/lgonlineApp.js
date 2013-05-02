@@ -538,6 +538,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          *        on
          */
         onDependencyPrep: function () {
+            return null;
         },
 
         /**
@@ -546,6 +547,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @memberOf js.LGCommand#
          */
         onDependencyReady: function () {
+            return null;
         }
     });
 
@@ -730,6 +732,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @see Interface stub
          */
         search: function () {
+            return null;
         },
 
         /**
@@ -742,6 +745,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @see Interface stub
          */
         toList: function () {
+            return [];
         },
 
         /**
@@ -2031,25 +2035,29 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @memberOf js.LGGallery#
          */
         drawGallery: function () {
-            var i, jsLintDummyVar, firstI = this.iFirstItem, lastI = this.iFirstItem + this.numItemsToDisplay,
+            var i, firstI = this.iFirstItem, lastI = this.iFirstItem + this.numItemsToDisplay,
                 item = this.firstItem;
 
             // Hide items to left of visible range
-            for (i = 0; i < firstI; i += 1) {
+            i = 0;
+            while (i < firstI) {
                 item.style.display = "none";
                 item = item.nextSibling;
+                i += 1;
             }
 
             // Draw items in visible range
-            for (jsLintDummyVar = 0; i < lastI; i += 1) {
+            while (i < lastI) {
                 item.style.display = "";
                 item = item.nextSibling;
+                i += 1;
             }
 
             // Hide items to right of visible range
-            for (jsLintDummyVar = 0; i < this.numItems; i += 1) {
+            while (i < this.numItems) {
                 item.style.display = "none";
                 item = item.nextSibling;
+                i += 1;
             }
 
             // Readjust the placement now that we've adjusted item visibility
