@@ -728,7 +728,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {function} errback Function to call when search
          *        fails
          * @memberOf js.LGSearch#
-         * @note Interface stub
+         * @see Interface stub
          */
         search: function () {
         },
@@ -740,7 +740,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {string} [searchText] Search text
          * @return {array} List of structures
          * @memberOf js.LGSearch#
-         * @note Interface stub
+         * @see Interface stub
          */
         toList: function () {
         },
@@ -751,12 +751,11 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {string} subject Publishing topic name
          * @param {object} [data] Object to publish under topic
          * @memberOf js.LGSearch#
-         * @note Interface stub
-         * @note The data are those set up by the toList function and
-         *       could be final or intermediate results. For
-         *       intermediate results, the publish function is the place
-         *       for the searcher to complete the data-retrieval process
-         *       before publishing.
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
          */
         publish: function (subject, data) {
             topic.publish(subject, data);
@@ -1003,7 +1002,7 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
         /**
          * Checks that the instance has its prerequisites.
-         * @throw {string} "missing search fields" if the search fields
+         * @throws {string} "missing search fields" if the search fields
          *        parameter is omitted
          * @memberOf js.LGSearchFeatureLayer#
          * @override
@@ -1113,12 +1112,11 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
          * @param {string} subject Publishing topic name
          * @param {object} data Object to publish under topic
          * @memberOf js.LGSearch#
-         * @note Interface stub
-         * @note The data are those set up by the toList function and
-         *       could be final or intermediate results. For
-         *       intermediate results, the publish function is the place
-         *       for the searcher to complete the data-retrieval process
-         *       before publishing.
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
          * @memberOf js.LGSearchFeatureLayer#
          * @override
          */
@@ -1370,7 +1368,8 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                                 resultsList = searcher.toList(results, searchText);
 
                                 now = (new Date()).getTime();
-                                pThis.log("retd " + resultsList.length + " items in " + (now - thisSearchTime) / 1000 + " secs");
+                                pThis.log("retd " + resultsList.length + " items in "
+                                    + (now - thisSearchTime) / 1000 + " secs");
 
                                 if (resultsList.length > 0) {
                                     array.forEach(resultsList, function (item) {
@@ -2383,22 +2382,24 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                     null, null);
             }
 
-            // Assign the popup template to the highlight & populate the infoWindow;
-            // we need to clear the infoWindow's feature list because the infoWindow
-            // doesn't work well with a mix of direct-click feature selection and this
-            // routine's feature
-            highlightGraphic.setInfoTemplate(this.popupTemplate);
-
-            this.popup.clearFeatures();
-            this.popup.setContent(highlightGraphic.getContent());
-
             // Display the highlight
             this.tempGraphicsLayer.add(highlightGraphic);
 
-            // When the map is done with recentering, show the infoWindow
-            focusFinished.then(function () {
-                pThis.mapInfo.map.infoWindow.show(pThis.mapInfo.map.toScreen(newMapCenter));
-            });
+            // If we have a popup, prep & display it
+            if (this.popupTemplate) {
+                // Assign the popup template to the highlight & populate the infoWindow;
+                // we need to clear the infoWindow's feature list because the infoWindow
+                // doesn't work well with a mix of direct-click feature selection and this
+                // routine's feature
+                highlightGraphic.setInfoTemplate(this.popupTemplate);
+                this.popup.clearFeatures();
+                this.popup.setContent(highlightGraphic.getContent());
+
+                // When the map is done with recentering, show the infoWindow
+                focusFinished.then(function () {
+                    pThis.mapInfo.map.infoWindow.show(pThis.mapInfo.map.toScreen(newMapCenter));
+                });
+            }
         },
 
         /**
