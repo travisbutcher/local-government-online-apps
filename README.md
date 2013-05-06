@@ -80,5 +80,5 @@ limitations under the License.
 A copy of the license is available in the repository's
 [license.txt](https://raw.github.com/Esri/local-government-online-apps/master/license.txt) file.
 
-[](Esri Tags: Local Government Online Apps Parcel Viewer)
+[](Esri Tags: Local-Government Local Government Online Apps Parcel Viewer)
 [](Esri Language: JavaScript)
