@@ -84,6 +84,11 @@ file.
 When you use the app out of the box, it uses a default configuration completely defined in a file found
 in the `apps1` folder, the `ParcelViewer.json` file.
 
+#### Where's the webmap ID stored?
+
+The "values" section of the basic configuration begins with a "webmap" element, which labels the ID of
+the webmap to be used by the app.
+
 ## A sample advanced configuration
 
 We can override the default configuration by specifying a configuration file on your server using a URL
