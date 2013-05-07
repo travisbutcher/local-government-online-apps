@@ -529,9 +529,11 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
                 }
 
                 // Apply the value override parameters into the object configuration
-                if (objectDescription.config && objectDescription.config.rootId) {
+                if (objectDescription.config) {
                     objectDescription.config.i18n = this.i18n;
-                    dojo.mixin(objectDescription.config, this.getValues(objectDescription.config.rootId) || {});
+                    if (objectDescription.config.rootId) {
+                        dojo.mixin(objectDescription.config, this.getValues(objectDescription.config.rootId) || {});
+                    }
                     dojo.mixin(objectDescription.config, this.getValues("Shared"));
                 }
 
