@@ -420,14 +420,17 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
          */
         parseQueryString: function (winLocSearch, overwrite) {
             // modified to take query string in as an argument to facilitate testing
-            // and with "replace" option
+            // and added "overwrite" option
             var query = (winLocSearch || "?").substr(1),
                 map   = {};
             query.replace(/([^&=]+)=?([^&]*)(?:&+|$)/g, function (match, key, value) {
                 if (overwrite) {
                     map[key] = value;
                 } else {
-                    (map[key] = map[key] || []).push(value);
+                    // Modified original assignment for new JSLint rule
+                    //(map[key] = map[key] || []).push(value);
+                    map[key] = map[key] || [];
+                    map[key].push(value);
                 }
             });
             return map;
