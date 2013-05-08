@@ -184,18 +184,6 @@
             "arrowClass": "commandPanelArrow"
         }
     }, {
-        "classname": "js.LGSearchAddress",
-        "config": {
-            "rootId": "addressSearcher",
-            "parentDiv": "contentFrame",
-            "searchUrl": "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer",
-            "addressParamName": "SingleLine",
-            "minimumScore": 80,
-            "validLocators": ["US_RoofTop", "US_Streets", "US_StreetName"],
-            "outWkid": 102100,
-            "outFields": ["Loc_name", "Match_addr"]
-        }
-    }, {
         "classname": "js.LGSearchFeatureLayer",
         "config": {
             "rootId": "featureSearcher",
