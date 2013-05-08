@@ -430,7 +430,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
         /**
          * Formats results into a list of structures; each structure
-         * contains a label and an optional datum structure.
+         * contains a label and an optional data structure.
          * @param {object} results Search-specific results
          * @param {string} [searchText] Search text
          * @return {array} List of structures
@@ -520,6 +520,8 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             this.searcher.outSpatialReference = new esri.SpatialReference({"wkid": this.outWkid});
             this.params = {};
             this.params.outFields = this.outFields;
+            this.ready = new dojo.Deferred();
+            this.ready.resolve(this);
         },
 
         /**
@@ -539,14 +541,15 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
         /**
          * Formats results into a list of structures; each structure
-         * contains a label and an optional datum structure.
+         * contains a label and an optional data structure.
          * @param {object} results Search-specific results
          * @param {string} [searchText] Search text
-         * @return {array} List of structures
+         * @return {array} List of structures; label is tagged with
+         *         "label" and data is tagged with "data"
          * @memberOf js.LGSearchAddress#
          * @override
          */
-        toList: function (results) {
+        toList: function (results, searchText) {
             var ok, pThis = this, resultsList = [];
             if (results) {
                 // Filter results by desired score and locator
@@ -577,6 +580,23 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 });
             }
             return resultsList;
+        },
+
+        /**
+         * Publishes the specified data after performing any post
+         * processing.
+         * @param {string} subject Publishing topic name
+         * @param {object} data Object to publish under topic
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
+         * @memberOf js.LGSearchAddress#
+         * @override
+         */
+        publish: function (subject, data) {
+            topic.publish(subject, data);
         }
     });
 
@@ -713,7 +733,6 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 this.caseInsensitiveSearch = false;
             }
             this.ready = new dojo.Deferred();
-
         },
 
         /**
@@ -864,10 +883,11 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
         /**
          * Formats results into a list of structures; each structure
-         * contains a label and an optional datum structure.
+         * contains a label and an optional data structure.
          * @param {object} results Search-specific results
          * @param {string} searchText Search text
-         * @return {array} List of structures
+         * @return {array} List of structures; label is tagged with
+         *         "label" and data is tagged with "data"
          * @memberOf js.LGSearchFeatureLayer#
          * @override
          */
@@ -916,7 +936,6 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * processing.
          * @param {string} subject Publishing topic name
          * @param {object} data Object to publish under topic
-         * @memberOf js.LGSearch#
          * @see Interface stub. The data are those set up by the toList
          *       function and could be final or intermediate results.
          *       For intermediate results, the publish function is the

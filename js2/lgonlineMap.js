@@ -86,9 +86,8 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
          * @param {object} [args.mapOptions] Options to be sent to
          *        created map; see
          *        <a
-         *        href="http://help.arcgis.com/en/webapi/javascript/arcgis/help/jsapi/map.htm#MapConst">API
-         *        for JavaScript map
-         *        constructor</a>
+         *        href="http://help.arcgis.com/en/webapi/javascript/arcgis/jsapi/map.html#MapConst">API
+         *        for JavaScript map constructor</a>
          *
          * @param {object} args.values Key-value pairs for configurable
          *        elements (LGGraphic)
@@ -155,7 +154,8 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
                 }
             }
 
-            // Override the initial extent from the configuration with URL extent values; need to have a complete set of the latter
+            // Override the initial extent from the configuration with URL extent values;
+            // need to have a complete set of the latter
             if (this.ex) {
                 minmax = this.ex.split(",");
                 try {
@@ -197,7 +197,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
                     pThis.mapInfo = response;
                     //pThis.listeners.push(
                     //    dojo.connect(pThis.mapInfo.map, "onUnload", function () {  // release event listeners upon unload
-                    //        // http://help.arcgis.com/en/webapi/javascript/arcgis/help/jshelp/inside_events.htm
+                    //        // http://help.arcgis.com/en/webapi/javascript/arcgis/jshelp/inside_events.html
                     //        dojo.forEach(var fred in pThis.listeners) {
                     //            dojo.disconnect(fred);
                     //        }
@@ -339,7 +339,10 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
          */
         highlightFeature: function (feature) {
             var extent, symbol, highlightGraphic, newMapCenter, focusFinished, pThis = this;
-            extent = feature.geometry.getExtent();
+
+            if (feature.geometry && feature.geometry.getExtent) {
+                extent = feature.geometry.getExtent();
+            }
 
             // Polyline or polygon symbol whose extents are used to reposition & rezoom the map
             if (extent) {
@@ -349,17 +352,23 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
 
                 // Create the feature highlight
                 if (feature.geometry.type === "polyline") {
-                    symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, this.lineHiliteColor, 3);
+                    symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                        this.lineHiliteColor, 3);
                 } else {
                     symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                        new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, this.lineHiliteColor, 3), this.fillHiliteColor);
+                        new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                            this.lineHiliteColor, 3), this.fillHiliteColor);
                 }
                 highlightGraphic = new esri.Graphic(feature.geometry,
                     symbol, feature.attributes, null);
 
             // Point symbol used to reposition the map
             } else {
-                newMapCenter = feature.geometry;
+                if (feature.geometry) {
+                    newMapCenter = feature.geometry;
+                } else {
+                    newMapCenter = feature;
+                }
 
                 // Shift the map
                 focusFinished = this.mapInfo.map.centerAt(newMapCenter);
