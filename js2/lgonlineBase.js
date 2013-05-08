@@ -157,21 +157,27 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
 
         /**
          * Converts a string into a value retrieved from the object's
-         * i18n structure if the string begins with "@".
+         * i18n structure if the string begins with "@" or from an
+         * object by its id if the string begins with ".".
          * @param {string} aString A string or "@" followed by a path
-         *        into the object's i18n structure
+         *        into the object's i18n structure or "." followed by an
+         *        object id and an optional path into the object
          * @return {string} Original string if it doesn't begin with
-         *        "@" or the i18n structure string found at the end of
-         *        the original string interpreted as a path
+         *        "@" or "." or the item found at the end of the
+         *        original string interpreted as a path
          * @memberOf js.LGObject#
          */
-        checkForI18n: function (aString) {
+        checkForSubstitution: function (aString) {
             var leadChar, resolvedString = aString;
 
-            if (this.i18n && aString && 1 < aString.length) {
+            if (aString && aString.length > 1) {
                 leadChar = aString.substring(0, 1);  // IE7/8 cannot use aString[0]
                 if ("@" === leadChar) {
-                    resolvedString = this.followAttributePath(this.i18n, aString.substring(1));
+                    if (this.i18n) {
+                        resolvedString = this.followAttributePath(this.i18n, aString.substring(1));
+                    }
+                } else if ("." === leadChar) {
+                    resolvedString = this.followAttributePath(null, aString.substring(1));
                 }
             }
 
@@ -189,13 +195,20 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * @memberOf js.LGObject#
          */
         followAttributePath: function (rootObj, attributePath) {
-            var x, objAtEnd = rootObj,
-                attributeChain = attributePath.split(".");
+            var x, objAtEnd = rootObj, attributeChain;
 
             // Step thru the chain of nested attributes to get to the object at the end
-            attributeChain = attributePath.split(".");
-            for (x = 0; x < attributeChain.length; x = x + 1) {
-                objAtEnd = objAtEnd[attributeChain[x]];
+            try {
+                attributeChain = attributePath.split(".");
+                for (x = 0; x < attributeChain.length; x = x + 1) {
+                    if (null === objAtEnd) {
+                        objAtEnd = dojo.byId(attributeChain[x]).getLGObject();
+                    } else {
+                        objAtEnd = objAtEnd[attributeChain[x]];
+                    }
+                }
+            } catch (ex) {
+                objAtEnd = null;
             }
 
             return objAtEnd;

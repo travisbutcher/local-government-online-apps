@@ -388,9 +388,10 @@
         "config": {
             "trigger": "share/email",
             "publish": "launch/parent",
+            "subject": ".titleBar.title",
             "tinyURLServiceURL": "",
             "tinyURLResponseAttribute": "data.url",
-            "shareUrl": "mailto:%20?subject=Tax%20Viewer%20Map&body=${url}",
+            "shareUrl": "mailto:%20?subject=${subject}&body=${url}",
             "busyIndicator": "busyIndicator",
             "dependencyId": "map"
         }
@@ -399,9 +400,10 @@
         "config": {
             "trigger": "share/facebook",
             "publish": "launch/blank",
+            "subject": ".titleBar.title",
             "tinyURLServiceURL": "",
             "tinyURLResponseAttribute": "data.url",
-            "shareUrl": "http://www.facebook.com/sharer.php?u=${url}&t=Tax%20Viewer%20Map",
+            "shareUrl": "http://www.facebook.com/sharer.php?u=${url}&t=${subject}",
             "busyIndicator": "busyIndicator",
             "dependencyId": "map"
         }
@@ -410,9 +412,10 @@
         "config": {
             "trigger": "share/twitter",
             "publish": "launch/blank",
+            "subject": ".titleBar.title",
             "tinyURLServiceURL": "",
             "tinyURLResponseAttribute": "data.url",
-            "shareUrl": "http://twitter.com/home/?status=Tax%20Viewer%20Map ${url}",
+            "shareUrl": "http://twitter.com/home/?status=${subject} ${url}",
             "busyIndicator": "busyIndicator",
             "dependencyId": "map"
         }

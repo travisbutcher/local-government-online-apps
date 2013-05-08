@@ -252,7 +252,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             }
             // If we have text, add it to the face of the button
             if (this.displayText) {
-                attrs = {innerHTML: this.checkForI18n(this.displayText)};
+                attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
                 if (this.displayTextClass) {
                     attrs.className = this.displayTextClass;
                 }
@@ -260,7 +260,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             }
 
             if (this.tooltip) {
-                this.rootDiv.title = this.checkForI18n(this.tooltip);
+                this.rootDiv.title = this.checkForSubstitution(this.tooltip);
             }
 
             // Hook up a click on the root div to the click handler; we use the root div so that
@@ -376,13 +376,13 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                         var message;
                         switch (error.code) {
                         case error.PERMISSION_DENIED:
-                            message = pThis.checkForI18n("@messages.geolocationDenied");
+                            message = pThis.checkForSubstitution("@messages.geolocationDenied");
                             break;
                         case error.TIMEOUT:
-                            message = pThis.checkForI18n("@messages.geolocationTimeout");
+                            message = pThis.checkForSubstitution("@messages.geolocationTimeout");
                             break;
                         default:
-                            message = pThis.checkForI18n("@messages.geolocationUnavailable");
+                            message = pThis.checkForSubstitution("@messages.geolocationUnavailable");
                             break;
                         }
                         alert(message);
@@ -601,7 +601,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             textBoxId = this.rootId + "_entry";
 
             domConstruct.create("label",
-                {"for": textBoxId, innerHTML: this.checkForI18n(this.showPrompt)}, this.rootId);
+                {"for": textBoxId, innerHTML: this.checkForSubstitution(this.showPrompt)}, this.rootId);
             searchEntryTextBox = new dijit.form.TextBox({
                 id: textBoxId,
                 value: "",
@@ -730,7 +730,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             try {
                 searchLayer = this.mapObj.getLayer(this.searchLayerName);
                 if (!searchLayer || !searchLayer.url) {
-                    reason = this.checkForI18n("@messages.searchLayerMissing");
+                    reason = this.checkForSubstitution("@messages.searchLayerMissing");
                 } else {
                     this.searchURL = searchLayer.url;
 
@@ -745,8 +745,8 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
                         // Failed to find the field in the search layer; provide some feedback
                         message = "\"" + reason + "\"<br>";
-                        message += this.checkForI18n("@messages.searchFieldMissing") + "<br><hr><br>";
-                        message += this.checkForI18n("@prompts.layerFields") + "<br>";
+                        message += this.checkForSubstitution("@messages.searchFieldMissing") + "<br><hr><br>";
+                        message += this.checkForSubstitution("@prompts.layerFields") + "<br>";
                         if (availableFields.length > 1) {
                             message += availableFields.substring(1, availableFields.length - 1);
                         }
@@ -794,7 +794,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             // Failed to find the search layer; provide some feedback
             message = "\"" + this.searchLayerName + "\"<br>";
             message += reason + "<br><hr><br>";
-            message += this.checkForI18n("@prompts.mapLayers") + "<br><ul>";
+            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
                 message += "<li>\"" + layerName + "\"</li>";
             });
@@ -994,7 +994,8 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * @memberOf js.LGShare
          */
         share: function () {
-            var pThis = this, urlToShare, compressionUrl;
+            var pThis = this, subjectLine, urlToShare, compressionUrl;
+            subjectLine = encodeURIComponent(this.getSubject());
             urlToShare = encodeURIComponent(this.getUrlToShare());
 
             if (this.tinyURLServiceURL && this.tinyURLServiceURL.length > 0) {
@@ -1017,7 +1018,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                         tinyUrl = pThis.followAttributePath(response, pThis.tinyURLResponseAttribute);
                         if (tinyUrl) {
                             // Put the tiny URL into the sharing method's URL & launch the sharing method
-                            shareUrl = esri.substitute({url: tinyUrl}, pThis.shareUrl);
+                            shareUrl = esri.substitute({subject: subjectLine, url: tinyUrl}, pThis.shareUrl);
                             topic.publish(pThis.publish, shareUrl);
                         }
                     } catch (error) {
@@ -1037,9 +1038,18 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 });
             } else {
                 // Share the uncompressed URL
-                urlToShare = esri.substitute({url: urlToShare}, this.shareUrl);
+                urlToShare = esri.substitute({subject: subjectLine, url: urlToShare}, this.shareUrl);
                 topic.publish(this.publish, urlToShare);
             }
+        },
+
+        /**
+         * Returns the subject message to use in the sharing.
+         * @return {string} subject
+         * @memberOf js.LGShare
+         */
+        getSubject: function () {
+            return "";
         },
 
         /**
@@ -1076,9 +1086,23 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          */
 
         /**
+         * Returns the subject message to use in the sharing.
+         * @return {string} subject
+         * @memberOf js.LGShareAppExtents
+         * @override
+         */
+        getSubject: function () {
+            var subjectText = "";
+            if (this.subject) {
+                subjectText = this.checkForSubstitution(this.subject);
+            }
+            return subjectText;
+        },
+
+        /**
          * Returns the app's URL and its extents as the item to share.
          * @return {string} URL
-         * @memberOf js.LGShare
+         * @memberOf js.LGShareAppExtents
          * @override
          */
         getUrlToShare: function () {
@@ -1090,7 +1114,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * Gets the app's map's extents.
          * @return {string} Extents as supplied by LGMap's
          *         getExtentsString()
-         * @memberOf js.LGShare
+         * @memberOf js.LGShareAppExtents
          */
         getMapExtentsArg: function () {
             return "ex=" + this.mapObj.getExtentsString();
