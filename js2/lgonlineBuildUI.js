@@ -18,9 +18,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "dojo/require!esri/utils"], function (Deferred, DeferredList, utils, script, lang, commonConfig) {
-    dojo.require('esri.arcgis.Portal');
-    dojo.require("esri.IdentityManager");
+define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "esri/arcgis/Portal", "esri/IdentityManager", "dojo/require!esri/utils"], function (Deferred, DeferredList, utils, script, lang, commonConfig, Portal) {
 
     //========================================================================================================================//
 
@@ -61,7 +59,7 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
                 || location.protocol + '//' + "www.arcgis.com";  // fallback
 
             // Launch the portal
-            this.portal = new esri.arcgis.Portal(this.portalUrl);
+            this.portal = new Portal(this.portalUrl);
             timerId = setTimeout(
                 function () {
                     pThis.ready.reject(pThis);
@@ -575,13 +573,15 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
          * Injects a string of CSS into the document.
          * @example
          * <pre>
-         * dojo.require("js.LGUIBuilder");
-         * dojo.addOnLoad(function () {
-         *     var loader = new js.LGUIBuilder();
-         *     loader.injectCSS(
-         *         ".commandGallery{height:52px;margin:0px;padding:2px;font-size:36px;background-color:#d3d3d3;overflow:hidden;position:absolute;}"+
-         *         ".command{width:48px;height:48px;min-width:48px;margin:4px;padding:0px;background-color:#add8e6;text-align:center;vertical-align:middle;}"
-         *     );
+         * // For <div class="titleBox"><div class="title">Title</div></div>
+         * require(["dojo/ready", "js/lgonlineBuildUI"], function (ready) {
+         *     ready(function () {
+         *         var loader = new js.LGUIBuilder();
+         *         loader.injectCSS(
+         *             ".titleBox{width:100%;height:52px;margin:0px;padding:4px;color:white;background-color:#1e90ff;text-align:center;overflow:hidden;}"+
+         *             ".title{font-size:24px;position:relative;top:25%}"
+         *         );
+         *     });
          * });
          * </pre>
          * @param {string} cssStr A string of CSS text

@@ -121,13 +121,15 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * Injects a string of CSS into the document.
          * @example
          * <pre>
-         * dojo.require("js.LGObject");
-         * dojo.addOnLoad(function () {
-         *     var loader = new js.LGObject();
-         *     loader.injectCSS(
-         *         ".commandGallery{height:52px;margin:0px;padding:2px;font-size:36px;background-color:#d3d3d3;overflow:hidden;position:absolute;}"+
-         *         ".command{width:48px;height:48px;min-width:48px;margin:4px;padding:0px;background-color:#add8e6;text-align:center;vertical-align:middle;}"
-         *     );
+         * // For <div class="titleBox"><div class="title">Title</div></div>
+         * require(["dojo/ready", "js/lgonlineBase"], function (ready) {
+         *     ready(function () {
+         *         var loader = new js.LGObject();
+         *         loader.injectCSS(
+         *             ".titleBox{width:100%;height:52px;margin:0px;padding:4px;color:white;background-color:#1e90ff;text-align:center;overflow:hidden;}"+
+         *             ".title{font-size:24px;position:relative;top:25%}"
+         *         );
+         *     });
          * });
          * </pre>
          * @param {string} cssStr A string of CSS text
