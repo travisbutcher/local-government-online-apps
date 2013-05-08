@@ -44,7 +44,7 @@ Additional documentation about the online apps:
 
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
 
-Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local%2DGovernment).
+Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local-Government).
 
 This application uses the 3.5 version of
 [Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/);
