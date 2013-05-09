@@ -196,11 +196,11 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
                 function (response) {
                     pThis.mapInfo = response;
 
-					//for some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
-					//this is a bit of a hack to set it manually
-					if (!response.map.spatialReference) {
-					    pThis.mapInfo.map.spatialReference = new esri.SpatialReference({wkid:102100});
-					}
+                    //for some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
+                    //this is a bit of a hack to set it manually
+                    if (!response.map.spatialReference) {
+                        pThis.mapInfo.map.spatialReference = new esri.SpatialReference({wkid: 102100});
+                    }
 
                     //pThis.listeners.push(
                     //    dojo.connect(pThis.mapInfo.map, "onUnload", function () {  // release event listeners upon unload
