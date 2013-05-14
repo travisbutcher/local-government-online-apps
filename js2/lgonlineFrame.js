@@ -173,7 +173,6 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
                 dojo.style(this.contentDiv, styleAttrs);
             }
         }
-
     });
 
     //========================================================================================================================//
@@ -296,6 +295,8 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
          */
         addItem: function (galleryItem) {
             var item, attrs = {};
+
+            // A string can be added as an attribute to the td creation
             if (typeof galleryItem === "string") {
                 attrs.innerHTML = galleryItem;
             }
@@ -304,10 +305,12 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
             }
             item = domConstruct.create("td", attrs);
 
-            if (galleryItem) {
+            // A non-string is added as a child of the td
+            if (typeof galleryItem !== "string") {
                 item.appendChild(galleryItem);
             }
 
+            // Add the td to the gallery
             this.galleryRow.insertBefore(item, this.rightArrow);
             this.numItems += 1;
             if (!this.firstItem) {
@@ -485,7 +488,6 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
             // Readjust the placement now that we've added items
             this.handleWindowResize();
         }
-
     });
 
     //========================================================================================================================//
