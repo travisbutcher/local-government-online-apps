@@ -463,6 +463,15 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
         },
 
         /**
+         * Returns the operational layers in the map.
+         * @return {array} List of layers
+         * @memberOf js.LGMap#
+         */
+        getOperationalLayers: function () {
+            return this.mapInfo.itemInfo.itemData.operationalLayers;
+        },
+
+        /**
          * Creates a graphics layer for the object's map.
          * @param {string} layerId Name for layer
          * @return {GraphicsLayer} Created graphics layer
