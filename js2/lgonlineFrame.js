@@ -160,17 +160,20 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
          * @memberOf js.LGFrame#
          */
         resizeContentDiv: function () {
-            var rootDivBox, headerDivBox, styleAttrs;
+            var rootDivBox, headerDivBox, contentHeight, styleAttrs;
 
             // Resize the content frame to fill the rootDiv not occupied by the header frame
             if (this.headerDiv && this.contentDiv) {
                 rootDivBox = dojo.marginBox(this.rootDiv);
                 headerDivBox = dojo.marginBox(this.headerDiv);
 
-                styleAttrs = {};
-                styleAttrs.top = headerDivBox.h + "px";
-                styleAttrs.height = (rootDivBox.h - headerDivBox.h) + "px";
-                dojo.style(this.contentDiv, styleAttrs);
+                contentHeight = rootDivBox.h - headerDivBox.h;
+                if(contentHeight > 0) {
+                    styleAttrs = {};
+                    styleAttrs.top = headerDivBox.h + "px";
+                    styleAttrs.height = (rootDivBox.h - headerDivBox.h) + "px";
+                    dojo.style(this.contentDiv, styleAttrs);
+                }
             }
         }
     });
@@ -276,11 +279,13 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
             this.applyTheme(true, this.rightArrow);
             dojo.connect(this.rightArrow, "onclick", this, this.shiftRight);
 
+            // zeroItemWidth only works if gallery is visible
             this.zeroItemWidth = dojo.marginBox(this.rootDiv).w;
             this.itemWidth = 0;
             this.numItems = 0;
             this.iFirstItem = 0;
             this.numItemsToDisplay = 0;
+            this.firstItem = null;
 
             // Readjust the placement now that we've added items
             this.handleParentResize();
@@ -317,12 +322,29 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
                 this.firstItem = item;
                 this.itemWidth = dojo.marginBox(item).w;
             }
-            this.rootDiv.style.maxWidth = (this.zeroItemWidth + (this.numItems * this.itemWidth)) + "px";
 
             // Readjust the placement now that we've added an item
             this.handleParentResize();
 
             return item;
+        },
+
+        /**
+         * Removes all but the shift arrows from the gallery.
+         * @memberOf js.LGGallery#
+         */
+        clearItems: function () {
+            // Remove all but the endcap arrows
+            while (this.galleryRow.childNodes.length > 2) {
+                this.galleryRow.removeChild(this.galleryRow.childNodes[1]);
+            }
+            this.numItems = 0;
+            this.iFirstItem = 0;
+            this.numItemsToDisplay = 0;
+            this.firstItem = null;
+
+            // Readjust the placement now that we've altered the number of items
+            this.handleParentResize();
         },
 
         /**
@@ -333,6 +355,12 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
          */
         handleParentResize: function () {
             var parentWidth, desiredGalleryWidth;
+
+            // Patch zeroItemWidth in case the gallery was created initially invisible
+            if (this.zeroItemWidth === 0) {
+                this.zeroItemWidth = dojo.marginBox(this.rootDiv).w;
+            }
+
             parentWidth = dojo.marginBox(this.rootDiv.parentNode).w;
             desiredGalleryWidth = this.zeroItemWidth + (this.numItems * this.itemWidth);
 
@@ -385,9 +413,14 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
             var i, firstI = this.iFirstItem, lastI = this.iFirstItem + this.numItemsToDisplay,
                 item = this.firstItem;
 
+            // Remove arrows, then add them in below as appropriate for hidden items
+            this.leftArrow.style.visibility = "hidden";
+            this.rightArrow.style.visibility = "hidden";
+
             // Hide items to left of visible range
             i = 0;
             while (i < firstI) {
+                this.rightArrow.style.visibility = "visible";
                 item.style.display = "none";
                 item = item.nextSibling;
                 i += 1;
@@ -402,6 +435,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
 
             // Hide items to right of visible range
             while (i < this.numItems) {
+                this.leftArrow.style.visibility = "visible";
                 item.style.display = "none";
                 item = item.nextSibling;
                 i += 1;
