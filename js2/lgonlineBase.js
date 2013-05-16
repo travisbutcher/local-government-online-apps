@@ -236,7 +236,6 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
                 window.gLogMessageBox.append(message);
             }
         }
-
     });
 
     //========================================================================================================================//
@@ -294,12 +293,20 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
         },
 
         /**
+         * Reports the graphic's visibility
+         * @return {boolean} True if graphic is visible
+         * @memberOf js.LGGraphic#
+         */
+        getIsVisible: function () {
+            return domStyle.get(this.getRootDiv(), "display") !== "none";
+        },
+
+        /**
          * Toggles the graphic's visibility
          * @memberOf js.LGGraphic#
          */
         toggleVisibility: function () {
-            var isVisibleNow = domStyle.get(this.getRootDiv(), "display") !== "none";
-            domStyle.set(this.getRootDiv(), "display", isVisibleNow ? "none" : "block");
+            domStyle.set(this.getRootDiv(), "display", this.getIsVisible() ? "none" : "block");
         },
 
         /**
@@ -453,7 +460,6 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
                 domClass.add(node || this.rootDiv, "appThemeHover");
             }
         }
-
     });
 
     //========================================================================================================================//
