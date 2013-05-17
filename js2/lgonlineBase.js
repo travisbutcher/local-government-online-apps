@@ -286,10 +286,25 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * Shows or hides the graphic.
          * @param {boolean} isVisible Indicates if graphic should be
          *        shown (true) or hidden
+         * @param {boolean} [hasSubstance] Indicates if graphic should
+         *        have DOM substance even when it is not visible. If
+         *        hasSubstance is omitted or is false, then the
+         *        "visibility" style is set to "visible" and the
+         *        isVisible parameter toggles the "display" style
+         *        between "block" and "none". If hasSubstance is true,
+         *        then the "display" style is set to "block" and the
+         *        isVisible parameter toggles the "visiblity" style
+         *        between "visible" and "hidden".
          * @memberOf js.LGGraphic#
          */
-        setIsVisible: function (isVisible) {
-            domStyle.set(this.getRootDiv(), "display", isVisible ? "block" : "none");
+        setIsVisible: function (isVisible, hasSubstance) {
+            if (!hasSubstance) {  // null or false
+                domStyle.set(this.getRootDiv(), "display", isVisible ? "block" : "none");
+                domStyle.set(this.getRootDiv(), "visibility", "visible");
+            } else {
+                domStyle.set(this.getRootDiv(), "display", "block");
+                domStyle.set(this.getRootDiv(), "visibility", isVisible ? "visible" : "hidden");
+            }
         },
 
         /**
