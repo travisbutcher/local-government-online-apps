@@ -352,7 +352,13 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * the browser's location.
          */
         constructor: function () {
-            var pThis = this;
+            var pThis = this, backupTimeoutTimer,
+                // Make backup timeout that's later than the geolocation timeout
+                // so that we don't get overlapping timeouts. Also, the backup
+                // timeout occurs if the user takes too long to decide to accept
+                // or to deny the location request (no harm in this--just an alert
+                // appears).
+                cTimeout = 8000 /* ms */, cBackupTimeout = 16000 /* ms */;
 
             // Object is ready only if geolocation is supported
             this.ready = new dojo.Deferred();
@@ -363,8 +369,16 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 // Start listening for a position request
                 topic.subscribe(this.trigger, function () {
 
+                    // Set a backup timeout because if one chooses "not now" for providing
+                    // the position, the geolocation call does not return or time out
+                    backupTimeoutTimer = setTimeout(function () {
+                        alert(pThis.checkForSubstitution("@messages.geolocationTimeout"));
+                    }, cBackupTimeout);
+
                     // Try to get the current position
                     navigator.geolocation.getCurrentPosition(function (position) {
+                        clearTimeout(backupTimeoutTimer);
+
                         pThis.log("go to " + position.coords.latitude + " " + position.coords.longitude);
                         topic.publish(pThis.publish, new esri.geometry.Point(
                             position.coords.longitude,
@@ -372,8 +386,10 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                             new esri.SpatialReference({ wkid: 4326 })
                         ));
                     }, function (error) {
-                        // Report the location failure
                         var message;
+                        clearTimeout(backupTimeoutTimer);
+
+                        // Report the location failure
                         switch (error.code) {
                         case error.PERMISSION_DENIED:
                             message = pThis.checkForSubstitution("@messages.geolocationDenied");
@@ -387,7 +403,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                         }
                         alert(message);
                     }, {
-                        timeout: 30000
+                        timeout: cTimeout
                     });
                 });
                 this.ready.resolve(pThis);
