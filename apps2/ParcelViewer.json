@@ -157,7 +157,8 @@
             "parentDiv": "contentFrame",
             "fill": true,
             "lineHiliteColor": "#0000ff",
-            "fillHiliteColor": [0, 0, 255, 0.1]
+            "fillHiliteColor": [0, 0, 255, 0.1],
+            "featureZoomFactor": 2
         }
     }, {
         "classname": "js.LGTitleBar",

@@ -307,7 +307,6 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             topic.publish("command", obj.publish);
             topic.publish(obj.publish, obj.publishArg);
         }
-
     });
 
     //========================================================================================================================//
@@ -1116,7 +1115,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * @name js.LGShareAppExtents
          * @extends js.LGShare, js.LGMapDependency
          * @classdesc
-         * Extends  simple sharing to include the app's map's current
+         * Extends simple sharing to include the app's map's current
          * extents.
          */
 

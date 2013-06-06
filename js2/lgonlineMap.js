@@ -186,6 +186,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
             // Set defaults for missing params
             this.lineHiliteColor = new Color(this.lineHiliteColor || "#00ffff");
             this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 255, 255, 0.1]);
+            this.featureZoomFactor = this.featureZoomFactor || 2;
 
             // Create the map
             if (this.webmap) {
@@ -354,7 +355,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
             // Polyline or polygon symbol whose extents are used to reposition & rezoom the map
             if (extent) {
                 // Shift the map
-                focusFinished = this.mapInfo.map.setExtent(extent.expand(4));
+                focusFinished = this.mapInfo.map.setExtent(extent.expand(this.featureZoomFactor));
                 newMapCenter = extent.getCenter();
 
                 // Create the feature highlight
