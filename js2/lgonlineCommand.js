@@ -741,12 +741,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             if (!this.searchPattern || this.searchPattern.indexOf("${1}") < 0) {
                 this.searchPattern = "%${1}%";
             }
-            if (this.caseInsensitiveSearch === undefined || this.caseInsensitiveSearch === "true"
-                    || this.caseInsensitiveSearch === true) {
-                this.caseInsensitiveSearch = true;
-            } else {
-                this.caseInsensitiveSearch = false;
-            }
+            this.caseInsensitiveSearch = this.toBoolean(this.caseInsensitiveSearch, true);
             this.ready = new dojo.Deferred();
         },
 

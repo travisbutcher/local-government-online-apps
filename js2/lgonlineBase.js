@@ -216,6 +216,46 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
             return objAtEnd;
         },
 
+        /** Normalizes a boolean value to true or false.
+         * @param {boolean|string} boolValue A true or false
+         *        value that is returned directly or a string
+         *        "true" or "false" (case-insensitive) that
+         *        is checked and returned; if neither a
+         *        a boolean or a usable string, falls back to
+         *        defaultValue
+         * @param {boolean} [defaultValue] A true or false
+         *        that is returned if boolValue can't be
+         *        used; if not defined, true is returned
+         * @memberOf js.LGObject#
+         */
+        toBoolean: function (boolValue, defaultValue) {
+            var lowercaseValue;
+
+            // Shortcut true|false
+            if (boolValue === true) {
+                return true;
+            }
+            if (boolValue === false) {
+                return false;
+            }
+
+            // Handle a true|false string
+            if (typeof boolValue === "string") {
+                lowercaseValue = boolValue.toLowerCase();
+                if (lowercaseValue === "true") {
+                    return true;
+                }
+                if (lowercaseValue === "false") {
+                    return false;
+                }
+            }
+            // Fall back to default
+            if (defaultValue === undefined) {
+                return true;
+            }
+            return defaultValue;
+        },
+
         /**
          * Displays a message to the console, and, optionally, also
          * publishes it. If window.gLogMessageBox is defined, message is also

@@ -7,6 +7,7 @@
         "searchBox.hint": "42757 Woodward Ave",
         "featureSearcher.searchLayerName": "Parcel Details",
         "featureSearcher.searchFields": "SITEADDRESS,CNVYNAME,PARCELID",
+        "map.showFeaturePopup": true,
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
         "helpMessageBox.content": "Parcel Viewer<hr><br>The Parcel Viewer provides the general public and other interested parties local government property tax and assessment information and supplements that information with lifestyle and internet broadband information for a given neighborhood.<br><br>To locate a parcel, simply click on the map or enter an address or parcel number in the search box and select a parcel from the list."
@@ -72,6 +73,11 @@
             "fieldName": "featureSearcher.searchFields",
             "type": "string",
             "tooltip": "Comma-separated list of the field(s) to look at during a search"
+        }, {
+            "label": "Show popup for selected feature",
+            "fieldName": "map.showFeaturePopup",
+            "type": "boolean",
+            "tooltip": "Determines if the popup will automaticallly appear for a feature selected from a search results list"
         }, {
             "label": "Name of basemap group",
             "fieldName": "basemapBox.basemapgroupTitle",

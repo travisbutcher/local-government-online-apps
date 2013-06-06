@@ -187,6 +187,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
             this.lineHiliteColor = new Color(this.lineHiliteColor || "#00ffff");
             this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 255, 255, 0.1]);
             this.featureZoomFactor = this.featureZoomFactor || 2;
+            this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
 
             // Create the map
             if (this.webmap) {
@@ -391,7 +392,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
             this.tempGraphicsLayer.add(highlightGraphic);
 
             // If we have a popup, prep & display it
-            if (this.popupTemplate) {
+            if (this.showFeaturePopup && this.popupTemplate) {
                 // Assign the popup template to the highlight & populate the infoWindow;
                 // we need to clear the infoWindow's feature list because the infoWindow
                 // doesn't work well with a mix of direct-click feature selection and this
