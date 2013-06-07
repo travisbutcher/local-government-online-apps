@@ -424,6 +424,7 @@
         "config": {
             "tooltip": "@tooltips.fetchPrint",
             "iconUrl": "images/mapDoc.png",
+            "iconDisabledUrl": "images/mapDocDisabled.png",
             "rootId": "fetchPrint",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
@@ -431,6 +432,8 @@
             "publish": "fetchPrint",
             "triggerVisible": "printAvailable",
             "triggerInvisible": "printNotAvailable",
+            "triggerEnable": "printingReady",
+            "triggerDisable": "printing",
             "isVisible": false
         }
     }, {
