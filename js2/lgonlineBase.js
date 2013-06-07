@@ -256,6 +256,36 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
             return defaultValue;
         },
 
+        /** Normalizes a number value.
+         * @param {number|string} numValue A number that is
+         *        returned directly or a string that is
+         *        attempted as a number; if neither a
+         *        a number or a usable string, falls back to
+         *        defaultValue
+         * @param {boolean} [defaultValue] A number
+         *        that is returned if numValue can't be
+         *        used; if not defined, 0 is returned
+         * @memberOf js.LGObject#
+         */
+        toNumber: function (numValue, defaultValue) {
+            // Shortcut number
+            if (typeof numValue === "number") {
+                return numValue;
+            }
+
+            // Handle a non-number
+            numValue = new Number(numValue);
+            if (!isNaN(numValue)) {
+                return numValue;
+            }
+
+            // Fall back to default
+            if (defaultValue === undefined) {
+                return 0;
+            }
+            return defaultValue;
+        },
+
         /**
          * Displays a message to the console, and, optionally, also
          * publishes it. If window.gLogMessageBox is defined, message is also

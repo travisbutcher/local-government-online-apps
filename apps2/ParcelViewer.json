@@ -218,7 +218,6 @@
     }, {
         "classname": "js.LGPrintMap",
         "config": {
-            "trigger": "print",
             "rootId": "printMap",
             "parentDiv": "contentFrame",
             "mapId": "map",
@@ -231,16 +230,25 @@
                 "title": null,
                 "author": null,
                 "copyrightText": null
-            }
+            },
+            "dependencyId": "map",
+            "trigger": "print",
+            "publishReady": "printingReady",
+            "publishWorking": "printing",
+            "publishPrintUrl": "printUrl"
         }
     }, {
         "classname": "js.LGFetchPrintedMap",
         "config": {
-            "trigger": "fetchPrint",
             "publish": "launch/blank",
             "rootId": "fetchPrintedMap",
             "parentDiv": "contentFrame",
-            "dependencyId": "printMap"
+            "dependencyId": "map",
+            "trigger": "fetchPrint",
+            "triggerPrintUrl": "printUrl",
+            "publishPrintAvailable": "printAvailable",
+            "publishPrintNotAvailable": "printNotAvailable",
+            "printAvailabilityTimeoutMinutes": 15
         }
     }, {
         "classname": "js.LGMessageBox",
@@ -395,19 +403,24 @@
             "publish": "share/twitter"
         }
     }, {
-        "classname": "js.LGCommand",
+        "classname": "js.LGCommandToggle",
         "config": {
             "tooltip": "@tooltips.print",
             "iconUrl": "images/print.png",
+            "iconDisabledUrl": "images/printDisabled.png",
             "rootId": "print",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
-            "dependencyId": "map",
-            "publish": "print"
+            "publish": "print",
+            "triggerVisible": "printingReady",
+            "triggerEnable": "printingReady",
+            "triggerDisable": "printing",
+            "isVisible": false,
+            "isEnabled": false
         }
     }, {
-        "classname": "js.LGCommand",
+        "classname": "js.LGCommandToggle",
         "config": {
             "tooltip": "@tooltips.fetchPrint",
             "iconUrl": "images/mapDoc.png",
@@ -415,8 +428,10 @@
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
-            "dependencyId": "printMap",
-            "publish": "fetchPrint"
+            "publish": "fetchPrint",
+            "triggerVisible": "printAvailable",
+            "triggerInvisible": "printNotAvailable",
+            "isVisible": false
         }
     }, {
         "classname": "js.LGCommand",

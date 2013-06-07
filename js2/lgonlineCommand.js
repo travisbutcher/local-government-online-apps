@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/_base/array", "dojo/topic", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, registry, domConstruct, dom, on, Deferred, domStyle, array, topic, BasemapGallery, PrintTask, PrintParameters, PrintTemplate) {
+define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, registry, domConstruct, dom, on, Deferred, domStyle, domClass, array, topic, BasemapGallery, PrintTask, PrintParameters, PrintTemplate) {
 
     //========================================================================================================================//
 
@@ -311,6 +311,95 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
     //========================================================================================================================//
 
+    dojo.declare("js.LGCommandToggle", js.LGCommand, {
+        /**
+         * Constructs an LGCommandToggle.
+         *
+         * @constructor
+         * @class
+         * @name js.LGCommandToggle
+         * @extends js.LGCommand
+         * @classdesc
+         * Builds and manages a UI object that represents a command that
+         * can toggle its enabled and/or visibility states.
+         */
+        constructor: function () {
+            var pThis = this;
+
+            // Set initial state
+            this.iconDisabledUrl = this.iconDisabledUrl || this.iconUrl;
+            this.isEnabled = this.toBoolean(this.isEnabled, true);
+            pThis.setIsEnabled(this.isEnabled);
+
+            this.isVisible = this.toBoolean(this.isVisible, true);
+            pThis.setIsVisible(this.isVisible);
+
+            // Handle enable/disable triggers
+            if (this.triggerEnable) {
+                topic.subscribe(this.triggerEnable, function () {
+                    pThis.isEnabled = true;
+                    pThis.setIsEnabled(pThis.isEnabled);
+                });
+            }
+            if (this.triggerDisable) {
+                topic.subscribe(this.triggerDisable, function () {
+                    pThis.isEnabled = false;
+                    pThis.setIsEnabled(pThis.isEnabled);
+                });
+            }
+
+            // Handle visible/invisible triggers
+            if (this.triggerVisible) {
+                topic.subscribe(this.triggerVisible, function () {
+                    pThis.isVisible = true;
+                    pThis.setIsVisible(pThis.isVisible);
+                });
+            }
+            if (this.triggerInvisible) {
+                topic.subscribe(this.triggerInvisible, function () {
+                    pThis.isVisible = false;
+                    pThis.setIsVisible(pThis.isVisible);
+                });
+            }
+        },
+
+        /**
+         * Enables or disables the command.
+         * @param {boolean} isEnabled Indicates if graphic should be
+         *        enabled (true) or disabled
+         * @memberOf js.LGCommandToggle#
+         */
+        setIsEnabled: function (isEnabled) {
+            this.isEnabled = isEnabled;
+            if (this.isEnabled) {
+                this.iconImg.src = this.iconUrl;
+                domClass.add(this.rootDiv, "appThemeHover");
+            } else {
+                this.iconImg.src = this.iconDisabledUrl;
+                domClass.remove(this.rootDiv, "appThemeHover");
+            }
+        },
+
+        /**
+         * Handles a click event.
+         * @param {object} evt Click event
+         * @this {js.LGCommand}
+         * @private
+         * @memberOf js.LGCommandToggle#
+         * @override
+         */
+        handleClick: function (evt) {
+            var obj = evt.currentTarget.getLGObject();
+            if (obj.isEnabled) {
+                //var func = lang.hitch("handleClick", obj, "inherited");
+                //func();
+                obj.inherited("handleClick", arguments);
+            }
+        }
+    });
+
+    //========================================================================================================================//
+
     dojo.declare("js.LGLaunchUrl", js.LGObject, {
         /**
          * Constructs an LGLaunchUrl.
@@ -338,22 +427,18 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGPrintMap", js.LGObject, {
+    dojo.declare("js.LGPrintMap", [js.LGObject, js.LGMapDependency], {
         /**
          * Constructs an LGPrintMap.
          *
          * @constructor
          * @class
          * @name js.LGPrintMap
-         * @extends js.LGObject
+         * @extends js.LGObject, js.LGMapDependency
          * @classdesc
          * Prints the configured map.
          */
         constructor: function () {
-            var pThis = this;
-
-            this.ready = new Deferred();
-            this.fetchPrintUrl = null;
             if (this.commonConfig.helperServices &&
                     this.commonConfig.helperServices.printTask &&
                     this.commonConfig.helperServices.printTask.url) {
@@ -373,11 +458,28 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             if (!this.printSpecification) {
                 this.printSpecification = {};
             }
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGPrintMap#
+         * @override
+         */
+        onDependencyReady: function () {
+            var pThis = this;
+            // Now that the map (our dependency) is ready, finish setup
+
+            // Broadcast that we're open for business
+            topic.publish(this.publishReady);
 
             // Do the print when triggered
             topic.subscribe(this.trigger, function () {
                 var printParams,
                     mapInstance = dom.byId(pThis.mapId).getLGObject();
+
+                // Broadcast status
+                topic.publish(pThis.publishWorking);
                 if (pThis.busyIndicator) {
                     pThis.busyIndicator.setIsVisible(true);
                 }
@@ -401,58 +503,77 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 pThis.printTask.execute(printParams,
                     function (result) {
                         /* success */
-                        pThis.fetchPrintUrl = result.url;
-                        if (!pThis.ready.isResolved()) {
-                            pThis.ready.resolve(pThis);
-                        }
+                        // Broadcast status
+                        topic.publish(pThis.publishReady);
+                        topic.publish(pThis.publishPrintUrl, result.url);
+
                         if (pThis.busyIndicator) {
                             pThis.busyIndicator.setIsVisible(false);
                         }
                     }, function (error) {
                         /* failure */
+                        // Broadcast status
+                        topic.publish(pThis.publishReady);
                         if (pThis.busyIndicator) {
                             pThis.busyIndicator.setIsVisible(false);
                         }
                         pThis.log("Print failed: " + error.message, true);
-                    }
-                    );
+                    });
             });
         }
     });
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGFetchPrintedMap", [js.LGObject, js.LGDependency], {
+    dojo.declare("js.LGFetchPrintedMap", [js.LGObject, js.LGMapDependency], {
         /**
          * Constructs an LGFetchPrintedMap.
          *
          * @constructor
          * @class
          * @name js.LGFetchPrintedMap
-         * @extends js.LGObject, js.LGDependency
+         * @extends js.LGObject, js.LGMapDependency
          * @classdesc
          * In response to a message, responds with another message with
          * the URL of the printed map.
          */
         constructor: function () {
-            var pThis = this;
-
-            topic.subscribe(this.trigger, function () {
-                topic.publish(pThis.publish, pThis.dependsOn.fetchPrintUrl);
-            });
+            this.fetchPrintUrl = null;
+            this.printAvailabilityTimeoutMinutes = this.toNumber(this.printAvailabilityTimeoutMinutes, 10);  // minutes
+            this.printTimeouter = null;
         },
 
         /**
-         * Performs class-specific setup before waiting for a
-         * dependency; saves a copy of the dependency instance.
+         * Performs class-specific setup when the dependency is
+         * satisfied.
          * @memberOf js.LGFetchPrintedMap#
-         * @param {object} dependsOn LG object that this object depends
-         *        on
          * @override
          */
-        onDependencyPrep: function (dependsOn) {
-            this.dependsOn = dependsOn;
-            this.inherited(arguments);
+        onDependencyReady: function () {
+            var pThis = this;
+            // Now that the map (our dependency) is ready, finish setup
+
+            // Cache the URL to the print when triggered
+            topic.subscribe(this.triggerPrintUrl, function (url) {
+                // Cancel any timeout we've got going
+                clearTimeout(pThis.printTimeouter);
+
+                // Make the URL available
+                pThis.fetchPrintUrl = url;
+                topic.publish(pThis.publishPrintAvailable);
+
+                // Set up an expiration for this URL
+                pThis.printTimeouter = setTimeout(function () {
+                    topic.publish(pThis.publishPrintNotAvailable);
+                }, pThis.printAvailabilityTimeoutMinutes * 60000);
+            });
+
+            // Fetch the print when triggered
+            topic.subscribe(this.trigger, function () {
+                if (pThis.fetchPrintUrl !== null) {
+                    topic.publish(pThis.publish, pThis.fetchPrintUrl);
+                }
+            });
         }
     });
 
