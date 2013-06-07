@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic"], function (domConstruct, domStyle, domClass, array, topic) {
+define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "dojo/_base/lang"], function (domConstruct, dom, on, domStyle, domClass, array, topic, lang) {
 
     //========================================================================================================================//
 
@@ -67,7 +67,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
             // If a parent div is supplied, make sure that it exists
             if (this.parentDiv !== undefined) {
                 parentDiv = this.parentDiv;
-                parentDivObj = dojo.byId(parentDiv);
+                parentDivObj = dom.byId(parentDiv);
                 if (!parentDivObj) {
                     parentDiv = null;
                 }
@@ -204,7 +204,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
                 attributeChain = attributePath.split(".");
                 for (x = 0; x < attributeChain.length; x = x + 1) {
                     if (null === objAtEnd) {
-                        objAtEnd = dojo.byId(attributeChain[x]).getLGObject();
+                        objAtEnd = dom.byId(attributeChain[x]).getLGObject();
                     } else {
                         objAtEnd = objAtEnd[attributeChain[x]];
                     }
@@ -318,7 +318,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          */
         constructor: function () {
             // Do class-specific adjustments whenever the window is resized
-            dojo.connect(window, "resize", this, this.handleWindowResize, true);
+            on(window, "resize", lang.hitch(this, this.handleWindowResize));
             this.handleWindowResize();
         },
 
@@ -526,7 +526,6 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * @constructor
          * @class
          * @name js.LGDependency
-         * @extends js.LGGraphic
          * @classdesc
          * Provides a mixin for handling a ready dependency on another
          * object.
@@ -535,7 +534,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
             var dependsOn, pThis = this;
 
             if (this.dependencyId) {
-                dependsOn = dojo.byId(this.dependencyId).getLGObject();
+                dependsOn = dom.byId(this.dependencyId).getLGObject();
                 this.onDependencyPrep(dependsOn);
                 dependsOn.ready.then(function () {
                     pThis.onDependencyReady();

@@ -18,7 +18,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "esri/arcgis/Portal", "esri/IdentityManager", "dojo/require!esri/utils"], function (Deferred, DeferredList, utils, script, lang, commonConfig, Portal) {
+define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "esri/arcgis/Portal", "esri/IdentityManager", "dojo/require!esri/utils"], function (on, Deferred, DeferredList, utils, script, lang, commonConfig, Portal) {
 
     //========================================================================================================================//
 
@@ -66,7 +66,7 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
                 },
                 this.timeout
             );
-            dojo.connect(this.portal, "onLoad", function () {
+            on(this.portal, "load", function () {
                 clearTimeout(timerId);
                 pThis.ready.resolve(pThis);
             });

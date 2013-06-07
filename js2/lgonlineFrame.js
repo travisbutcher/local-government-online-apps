@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonlineBase"], function (domConstruct, array) {
+define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "dojo/_base/array", "dojo/_base/lang", "js/lgonlineBase"], function (domConstruct, on, domStyle, array, lang) {
 
     //========================================================================================================================//
 
@@ -172,7 +172,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
                     styleAttrs = {};
                     styleAttrs.top = headerDivBox.h + "px";
                     styleAttrs.height = (rootDivBox.h - headerDivBox.h) + "px";
-                    dojo.style(this.contentDiv, styleAttrs);
+                    domStyle.set(this.contentDiv, styleAttrs);
                 }
             }
         }
@@ -229,7 +229,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
             // Create the table to hold the titlebar
             table = domConstruct.create("table", null, this.rootDiv);
             this.applyTheme(false, table);
-            dojo.connect(window, "resize", this, this.handleParentResize, true);
+            on(window, "resize", lang.hitch(this, this.handleParentResize));
 
             /**
              * Adds an empty item to the  position of the gallery between
@@ -265,7 +265,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
              */
             this.leftArrow = domConstruct.create("td", arrowAttrs, this.galleryRow);
             this.applyTheme(true, this.leftArrow);
-            dojo.connect(this.leftArrow, "onclick", this, this.shiftLeft);
+            on(this.leftArrow, "click", lang.hitch(this, this.shiftLeft));
 
             arrowAttrs.innerHTML = "&gt;";
 
@@ -277,7 +277,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/_base/array", "js/lgonli
              */
             this.rightArrow = domConstruct.create("td", arrowAttrs, this.galleryRow);
             this.applyTheme(true, this.rightArrow);
-            dojo.connect(this.rightArrow, "onclick", this, this.shiftRight);
+            on(this.rightArrow, "click", lang.hitch(this, this.shiftRight));
 
             // zeroItemWidth only works if gallery is visible
             this.zeroItemWidth = dojo.marginBox(this.rootDiv).w;

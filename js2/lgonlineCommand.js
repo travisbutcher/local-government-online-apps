@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo/on", "dojo/dom-style", "dojo/_base/array", "dojo/topic", "esri/dijit/BasemapGallery", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, registry, domConstruct, on, domStyle, array, topic, BasemapGallery) {
+define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/_base/array", "dojo/topic", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, registry, domConstruct, dom, on, Deferred, domStyle, array, topic, BasemapGallery, PrintTask, PrintParameters, PrintTemplate) {
 
     //========================================================================================================================//
 
@@ -75,7 +75,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * the specified map is available.
          */
         constructor: function () {
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
         },
 
         /**
@@ -126,7 +126,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 basemapsGroup: basemapGroup,
                 bingMapsKey: this.mapObj.commonConfig.bingMapsKey,
                 map: this.mapObj.mapInfo.map
-            }, dojo.create('div')).placeAt(this.rootDiv);
+            }, domConstruct.create('div')).placeAt(this.rootDiv);
             galleryHolder.set('content', basemapGallery.domNode);
 
             basemapGallery.startup();
@@ -172,7 +172,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 // For each item in to-do list, get the id of the item, then call the specified method with the specified arg
                 array.forEach(this.todo, function (task) {
                     try {
-                        target = dojo.byId(task.rootId);
+                        target = dom.byId(task.rootId);
                         if (target) {
                             target = target.getLGObject();
                             if (target) {
@@ -248,7 +248,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 if (this.iconClass) {
                     attrs.className = this.iconClass;
                 }
-                this.iconImg = dojo.create("img", attrs, this.rootDiv);
+                this.iconImg = domConstruct.create("img", attrs, this.rootDiv);
             }
             // If we have text, add it to the face of the button
             if (this.displayText) {
@@ -256,7 +256,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 if (this.displayTextClass) {
                     attrs.className = this.displayTextClass;
                 }
-                dojo.create("div", attrs, this.rootDiv);
+                domConstruct.create("div", attrs, this.rootDiv);
             }
 
             if (this.tooltip) {
@@ -338,6 +338,126 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
     //========================================================================================================================//
 
+    dojo.declare("js.LGPrintMap", js.LGObject, {
+        /**
+         * Constructs an LGPrintMap.
+         *
+         * @constructor
+         * @class
+         * @name js.LGPrintMap
+         * @extends js.LGObject
+         * @classdesc
+         * Prints the configured map.
+         */
+        constructor: function () {
+            var pThis = this;
+
+            this.ready = new Deferred();
+            this.fetchPrintUrl = null;
+            if (this.commonConfig.helperServices &&
+                    this.commonConfig.helperServices.printTask &&
+                    this.commonConfig.helperServices.printTask.url) {
+                this.printTask = new PrintTask(
+                    this.commonConfig.helperServices.printTask.url,
+                    {
+                        async: false  // depends on print service
+                    }
+                );
+            } else {
+                this.log("No print task configured", true);
+                return;
+            }
+            if (this.busyIndicator) {
+                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
+            }
+            if (!this.printSpecification) {
+                this.printSpecification = {};
+            }
+
+            // Do the print when triggered
+            topic.subscribe(this.trigger, function () {
+                var printParams,
+                    mapInstance = dom.byId(pThis.mapId).getLGObject();
+                if (pThis.busyIndicator) {
+                    pThis.busyIndicator.setIsVisible(true);
+                }
+
+                // Create print parameters with full template
+                printParams = new PrintParameters();
+                printParams.map = mapInstance.mapInfo.map;
+                printParams.outSpatialReference = mapInstance.mapInfo.map.spatialReference;
+                printParams.template = new PrintTemplate();
+                printParams.template.format = pThis.printSpecification.format || "PDF";
+                printParams.template.layout = pThis.printSpecification.layout || "Letter ANSI A Landscape";
+                printParams.template.layoutOptions = {
+                    titleText: pThis.printSpecification.title,
+                    authorText: pThis.printSpecification.author,
+                    copyrightText: pThis.printSpecification.copyrightText
+                };
+                printParams.template.preserveScale = pThis.toBoolean(pThis.printSpecification.preserveScale, false);
+                printParams.template.showAttribution = true;
+
+                // Run the job
+                pThis.printTask.execute(printParams,
+                    function (result) {
+                        /* success */
+                        pThis.fetchPrintUrl = result.url;
+                        if (!pThis.ready.isResolved()) {
+                            pThis.ready.resolve(pThis);
+                        }
+                        if (pThis.busyIndicator) {
+                            pThis.busyIndicator.setIsVisible(false);
+                        }
+                    }, function (error) {
+                        /* failure */
+                        if (pThis.busyIndicator) {
+                            pThis.busyIndicator.setIsVisible(false);
+                        }
+                        pThis.log("Print failed: " + error.message, true);
+                    }
+                    );
+            });
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGFetchPrintedMap", [js.LGObject, js.LGDependency], {
+        /**
+         * Constructs an LGFetchPrintedMap.
+         *
+         * @constructor
+         * @class
+         * @name js.LGFetchPrintedMap
+         * @extends js.LGObject, js.LGDependency
+         * @classdesc
+         * In response to a message, responds with another message with
+         * the URL of the printed map.
+         */
+        constructor: function () {
+            var pThis = this;
+
+            topic.subscribe(this.trigger, function () {
+                topic.publish(pThis.publish, pThis.dependsOn.fetchPrintUrl);
+            });
+        },
+
+        /**
+         * Performs class-specific setup before waiting for a
+         * dependency; saves a copy of the dependency instance.
+         * @memberOf js.LGFetchPrintedMap#
+         * @param {object} dependsOn LG object that this object depends
+         *        on
+         * @override
+         */
+        onDependencyPrep: function (dependsOn) {
+            this.dependsOn = dependsOn;
+            this.inherited(arguments);
+        }
+    });
+
+    //========================================================================================================================//
+
     dojo.declare("js.LGLocate", js.LGObject, {
         /**
          * Constructs an LGLocate.
@@ -357,10 +477,10 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 // timeout occurs if the user takes too long to decide to accept
                 // or to deny the location request (no harm in this--just an alert
                 // appears).
-                cTimeout = 8000 /* ms */, cBackupTimeout = 16000 /* ms */;
+                cTimeout = 8000, cBackupTimeout = 16000;  // timeouts are in ms
 
             // Object is ready only if geolocation is supported
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
             if (!Modernizr.geolocation) {
                 this.ready.reject(pThis);
 
@@ -425,7 +545,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          */
         constructor: function () {
             if (this.busyIndicator) {
-                this.busyIndicator = dojo.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
             }
         },
 
@@ -535,7 +655,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             this.searcher.outSpatialReference = new esri.SpatialReference({"wkid": this.outWkid});
             this.params = {};
             this.params.outFields = this.outFields;
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
             this.ready.resolve(this);
         },
 
@@ -564,7 +684,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * @memberOf js.LGSearchAddress#
          * @override
          */
-        toList: function (results, searchText) {
+        toList: function (results) {
             var ok, pThis = this, resultsList = [];
             if (results) {
                 // Filter results by desired score and locator
@@ -654,7 +774,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 {className: this.resultsListBodyClass}, table);
             touchScroll(resultsListBox);
 
-            searcher = dojo.byId(this.searcher).getLGObject();
+            searcher = dom.byId(this.searcher).getLGObject();
             lastSearchString = "";
             lastSearchTime = 0;
             stagedSearch = null;
@@ -664,7 +784,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 var searchText = searchEntryTextBox.get("value");
                 if (lastSearchString !== searchText) {
                     lastSearchString = searchText;
-                    dojo.empty(tableBody);
+                    domConstruct.empty(tableBody);
 
                     // Clear any staged search
                     clearTimeout(stagedSearch);
@@ -689,7 +809,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                                 }
 
                                 // Show results
-                                dojo.empty(tableBody);  // to get rid of searching indicator
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
                                 resultsList = searcher.toList(results, searchText);
 
                                 now = (new Date()).getTime();
@@ -715,7 +835,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                                 pThis.log("LGSearchBoxByText_1: " + error.message);
 
                                 lastSearchString = "";  // so that we can quickly repeat this search
-                                dojo.empty(tableBody);  // to get rid of searching indicator
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
                             });
                         }, 1000);
                     }
@@ -742,7 +862,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 this.searchPattern = "%${1}%";
             }
             this.caseInsensitiveSearch = this.toBoolean(this.caseInsensitiveSearch, true);
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
         },
 
         /**
@@ -1010,7 +1130,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
         constructor: function () {
             var pThis = this;
             if (this.busyIndicator) {
-                this.busyIndicator = dojo.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
             }
             topic.subscribe(this.trigger, function () {
                 pThis.share();

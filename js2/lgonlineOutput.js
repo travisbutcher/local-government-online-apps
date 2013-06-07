@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineOutput", ["dojo/dom-construct", "js/lgonlineBase"], function (domConstruct) {
+define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "js/lgonlineBase"], function (domConstruct, domClass) {
 
     //========================================================================================================================//
 
@@ -33,8 +33,7 @@ define("js/lgonlineOutput", ["dojo/dom-construct", "js/lgonlineBase"], function 
          */
         constructor: function () {
             if (this.busyImageClass) {
-                dojo.addClass(this.rootDiv, this.busyImageClass);
-
+                domClass.add(this.rootDiv, this.busyImageClass);
             }
         }
     });

@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color", "js/lgonlineBase"], function (array, utils, topic, Color) {
+define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, utils, topic, Color) {
 
     //========================================================================================================================//
 
@@ -34,7 +34,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
 
         /**
          * Performs class-specific setup before waiting for a
-         * dependency.
+         * dependency; saves a copy of the dependency instance.
          * @memberOf js.LGMapDependency#
          * @param {object} dependsOn LG object that this object depends
          *        on
@@ -123,13 +123,13 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
              * @member {Deferred} ready
              * @memberOf js.LGMap#
              */
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
 
             options = {ignorePopups: false};
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
 
-            this.popup = new esri.dijit.Popup(null, dojo.create("div"));
+            this.popup = new esri.dijit.Popup(null, domConstruct.create("div"));
             options.mapOptions.infoWindow = this.popup;
 
             // Set up configured extents
@@ -213,10 +213,10 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
                     //    });
                     //);
                     //pThis.listeners.push(
-                    dojo.connect(window, "resize", pThis.mapInfo.map, function () {
+                    on(window, "resize", lang.hitch(pThis.mapInfo.map, function () {
                         pThis.mapInfo.map.resize();
                         pThis.mapInfo.map.reposition();
-                    });
+                    }));
                     //);
 
                     // Jump to the initial extents

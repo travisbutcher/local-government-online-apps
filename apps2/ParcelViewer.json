@@ -180,7 +180,7 @@
         }
     }, {
         "classname": "js.LGGallery",
-        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-left:2px;margin-top:6px}",
+        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-top:6px}",
         "config": {
             "rootId": "commandPanel",
             "parentDiv": "headerFrame",
@@ -214,6 +214,33 @@
             "parentDiv": "contentFrame",
             "trigger": "locate",
             "publish": "position"
+        }
+    }, {
+        "classname": "js.LGPrintMap",
+        "config": {
+            "trigger": "print",
+            "rootId": "printMap",
+            "parentDiv": "contentFrame",
+            "mapId": "map",
+            "busyIndicator": "busyIndicator",
+            "printSpecification": {
+                "asynchronous": false,
+                "format": "PDF",
+                "layout": "Letter ANSI A Landscape",
+                "preserveScale": true,
+                "title": null,
+                "author": null,
+                "copyrightText": null
+            }
+        }
+    }, {
+        "classname": "js.LGFetchPrintedMap",
+        "config": {
+            "trigger": "fetchPrint",
+            "publish": "launch/blank",
+            "rootId": "fetchPrintedMap",
+            "parentDiv": "contentFrame",
+            "dependencyId": "printMap"
         }
     }, {
         "classname": "js.LGMessageBox",
@@ -366,6 +393,30 @@
             "rootClass": "commandTextButton",
             "iconClass": "commandIcon",
             "publish": "share/twitter"
+        }
+    }, {
+        "classname": "js.LGCommand",
+        "config": {
+            "tooltip": "@tooltips.print",
+            "iconUrl": "images/print.png",
+            "rootId": "print",
+            "parentDiv": "commandPanel",
+            "rootClass": "commandButton",
+            "iconClass": "commandIcon",
+            "dependencyId": "map",
+            "publish": "print"
+        }
+    }, {
+        "classname": "js.LGCommand",
+        "config": {
+            "tooltip": "@tooltips.fetchPrint",
+            "iconUrl": "images/mapDoc.png",
+            "rootId": "fetchPrint",
+            "parentDiv": "commandPanel",
+            "rootClass": "commandButton",
+            "iconClass": "commandIcon",
+            "dependencyId": "printMap",
+            "publish": "fetchPrint"
         }
     }, {
         "classname": "js.LGCommand",

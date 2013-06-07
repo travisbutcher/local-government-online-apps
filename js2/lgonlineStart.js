@@ -19,7 +19,7 @@
  */
 //============================================================================================================================//
 // Get the basic Dojo & Esri setup
-require(["dojo/ready", "dojo/_base/Deferred", "esri/map", "dojo/i18n"], function (ready) {
+require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (ready, Deferred) {
     ready(function () {
 
         // Define the String.trim() method if missing
@@ -45,7 +45,7 @@ require(["dojo/ready", "dojo/_base/Deferred", "esri/map", "dojo/i18n"], function
                     ready(function () {
 
                         // Load the UI elements
-                        var uiElementsReady = new dojo.Deferred();
+                        var uiElementsReady = new Deferred();
                         require(["dojo/ready", "js/lgonlineApp"], function (ready) {
                             ready(function () {
                                 uiElementsReady.resolve();
