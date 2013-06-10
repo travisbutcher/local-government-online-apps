@@ -221,7 +221,6 @@
             "rootId": "printMap",
             "parentDiv": "contentFrame",
             "mapId": "map",
-            "busyIndicator": "busyIndicator",
             "printSpecification": {
                 "asynchronous": false,
                 "format": "PDF",
@@ -407,7 +406,7 @@
         "config": {
             "tooltip": "@tooltips.print",
             "iconUrl": "images/print.png",
-            "iconDisabledUrl": "images/printDisabled.png",
+            "iconDisabledUrl": "images/printing.gif",
             "rootId": "print",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",

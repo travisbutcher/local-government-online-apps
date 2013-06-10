@@ -452,9 +452,6 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 this.log("No print task configured", true);
                 return;
             }
-            if (this.busyIndicator) {
-                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
-            }
             if (!this.printSpecification) {
                 this.printSpecification = {};
             }
@@ -480,9 +477,6 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
                 // Broadcast status
                 topic.publish(pThis.publishWorking);
-                if (pThis.busyIndicator) {
-                    pThis.busyIndicator.setIsVisible(true);
-                }
 
                 // Create print parameters with full template
                 printParams = new PrintParameters();
@@ -506,17 +500,10 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                         // Broadcast status
                         topic.publish(pThis.publishReady);
                         topic.publish(pThis.publishPrintUrl, result.url);
-
-                        if (pThis.busyIndicator) {
-                            pThis.busyIndicator.setIsVisible(false);
-                        }
                     }, function (error) {
                         /* failure */
                         // Broadcast status
                         topic.publish(pThis.publishReady);
-                        if (pThis.busyIndicator) {
-                            pThis.busyIndicator.setIsVisible(false);
-                        }
                         pThis.log("Print failed: " + error.message, true);
                     });
             });
