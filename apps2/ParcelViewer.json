@@ -156,7 +156,7 @@
         }
     }, {
         "classname": "js.LGMap",
-        "styles": ".mapContainer{margin:0px;padding:0px;overflow:hidden;position:absolute}",
+        "styles": ".mapContainer{margin:0px;padding:0px;overflow:hidden;position:absolute}.simpleInfoWindow .close{width:32px!important;height:32px!important;background-size:32px 32px;left:244px!important;top:-18px!important}.simpleInfoWindow .title{min-height:14px}",
         "config": {
             "rootId": "map",
             "rootClass": "mapContainer",

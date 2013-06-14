@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, utils, topic, Color) {
+define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "dojo/query", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color", "esri/dijit/InfoWindowLite", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, query, utils, topic, Color, InfoWindowLite) {
 
     //========================================================================================================================//
 
@@ -129,9 +129,6 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
 
-            this.popup = new esri.dijit.Popup(null, domConstruct.create("div"));
-            options.mapOptions.infoWindow = this.popup;
-
             // Set up configured extents
             if (this.xmin && this.ymin && this.xmax && this.ymax) {
                 try {
@@ -196,7 +193,40 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
             utils.createMap(this.mapId, this.rootDiv, options).then(
                 function (response) {
+                    var contentDiv;
+
                     pThis.mapInfo = response;
+
+                    // Fill in the missing parts so that an InfoWindowLite can serve as a popup
+                    pThis.popup = new esri.dijit.InfoWindowLite(null, dojo.create("div", null, map.root));
+                    if (!pThis.popup.clearFeatures) {
+                        pThis.popup.clearFeatures = function () {
+                            pThis.popup.setContent("");
+                        };
+                    }
+                    if (!pThis.popup.setFeatures) {
+                        pThis.popup.setFeatures = function (features) {
+                            // features is an array of features or Deferreds to features;
+                            // the InfoWindowLite only uses the first one
+                            if (features && features.length > 0) {
+                                features[0].then(function (feature) {
+                                    // Resolution of Deferred is also an array
+                                    if (feature && feature.length > 0) {
+                                        if (pThis.popupTemplate) {
+                                            feature[0].setInfoTemplate(pThis.popupTemplate);
+                                        }
+                                        pThis.popup.setContent(feature[0].getContent());
+                                    }
+                                });
+                            }
+                        };
+                    }
+                    pThis.popup.startup();
+                    pThis.mapInfo.map.setInfoWindow(pThis.popup);
+
+                    // Fix scrolling for Android and iOS
+                    contentDiv = query(".simpleInfoWindow .content")[0];
+                    touchScroll(contentDiv);
 
                     //for some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
                     //this is a bit of a hack to set it manually
@@ -385,7 +415,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                 // Create the feature highlight
                 highlightGraphic = new esri.Graphic(newMapCenter,
                     new esri.symbol.PictureMarkerSymbol("images/youAreHere.png", 30, 30), //???
-                    null, null);
+                    feature.attributes, null);
             }
 
             // Display the highlight

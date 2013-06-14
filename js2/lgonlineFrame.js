@@ -29,7 +29,8 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "
          * @name js.LGColorizer
          * @extends js.LGObject
          * @classdesc
-         * Manages the app's color theme.
+         * Manages the app's color theme; colors are specified
+         * as foreground, background, and hover.
          */
         constructor: function () {
             var styleString = "",

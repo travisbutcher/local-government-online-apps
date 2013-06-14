@@ -26,8 +26,8 @@ define({
             shareViaEmail: "Share via email",
             shareViaFacebook: "Share via Facebook",
             shareViaTwitter: "Share via Twitter",
-            print: "Create a map print",
-            fetchPrint: "Get the map print",
+            print: "Print map",
+            fetchPrint: "View printed map",
             help: "Help"
         },
         labels: {
