@@ -86,7 +86,7 @@
             "label": "Zoom level for selected feature",
             "fieldName": "highlighter.highlightZoomLevel",
             "type": "number",
-            "constraints": {min:0,places:0},
+            "constraints": {min: 0, places: 0},
             "tooltip": "Sets the map zoom level to this level after selecting a feature"
         }, {
             "label": "Name of basemap group",
@@ -106,12 +106,12 @@
             "label": "Title",
             "fieldName": "printMap.title",
             "type": "string",
-            "tooltip": "Text to display when the help button is clicked"
+            "tooltip": "Text to display as the printed map's title"
         }, {
             "label": "Author",
             "fieldName": "printMap.author",
             "type": "string",
-            "tooltip": "Text to display when the help button is clicked"
+            "tooltip": "Text to display as the printed map's author"
         }, {
             "label": "Orientation",
             "fieldName": "printMap.layout",
@@ -141,6 +141,7 @@
                 "label": "A4 Portrait",
                 "value": "A4 Portrait"
             }],
+            "tooltip": "Orientation and size of the printed map's PDF"
         }]
     }, {
         "category": "Help",
