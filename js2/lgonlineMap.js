@@ -193,7 +193,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
             utils.createMap(this.mapId, this.rootDiv, options).then(
                 function (response) {
-                    var contentDiv;
+                    var popupContentDiv;
 
                     pThis.mapInfo = response;
 
@@ -224,9 +224,9 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                     pThis.popup.startup();
                     pThis.mapInfo.map.setInfoWindow(pThis.popup);
 
-                    // Fix scrolling for Android and iOS
-                    contentDiv = query(".simpleInfoWindow .content")[0];
-                    touchScroll(contentDiv);
+                    // Fix popup's content-area scrolling for Android and iOS
+                    popupContentDiv = query(".simpleInfoWindow .content")[0];
+                    touchScroll(popupContentDiv);
 
                     //for some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
                     //this is a bit of a hack to set it manually
@@ -279,11 +279,9 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                     // Start listening for position updates
                     pThis.positionHandle = topic.subscribe("position", function (newCenterPoint) {
-                        pThis.tempGraphicsLayer.clear();
-
                         // Highlight the point's position if it's in the same coord system as the map
                         if (newCenterPoint.spatialReference.wkid === pThis.mapInfo.map.spatialReference.wkid) {
-                            pThis.highlightPoint(newCenterPoint);
+                            topic.publish("highlightItem", newCenterPoint);
 
                         // Otherwise, convert the position into the map's spatial reference before highlighting it
                         } else {
@@ -291,7 +289,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                             if (newCenterPoint.spatialReference.wkid === 4326
                                     && pThis.mapInfo.map.spatialReference.wkid === 102100) {
                                 newCenterPoint = esri.geometry.geographicToWebMercator(newCenterPoint);
-                                pThis.highlightPoint(newCenterPoint);
+                                topic.publish("highlightItem", newCenterPoint);
 
                             // Otherwise, use the geometry service
                             } else if (esri.config.defaults.geometryService) {
@@ -301,7 +299,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                                 esri.config.defaults.geometryService.project(params).then(
                                     function (geometries) {
                                         newCenterPoint = geometries[0];
-                                        pThis.highlightPoint(newCenterPoint);
+                                        topic.publish("highlightItem", newCenterPoint);
                                     }
                                 );
 
@@ -316,10 +314,11 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                     // Start listening for feature highlights
                     pThis.showFeatureHandle = topic.subscribe("showFeature", function (feature) {
-                        pThis.tempGraphicsLayer.clear();
-
-                        // Do the highlight
-                        pThis.highlightFeature(feature);
+                        if (pThis.popupTemplate) {
+                            // Assign the popup template to the highlight item
+                            feature.infoTemplate = pThis.popupTemplate;
+                        }
+                        topic.publish("highlightItem", feature);
                     });
 
                     pThis.ready.resolve(pThis);
@@ -352,90 +351,47 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
         },
 
         /**
-         * Highlights a point by drawing a marker over it and centers
-         * the map on the point.
-         * @param {object} newCenterPoint Point to highlight
-         * @memberOf js.LGMap#
+         * Shows the map's popup using content from the supplied feature.
          */
-        highlightPoint: function (newCenterPoint) {
-            // Shift the map
-            this.mapInfo.map.centerAt(newCenterPoint);
-
-            // Draw the location indicator
-            this.tempGraphicsLayer.add(
-                new esri.Graphic(newCenterPoint,
-                    new esri.symbol.PictureMarkerSymbol("images/youAreHere.png", 30, 30), //???
-                    null, null)
-            );
+        showPopupWithFeature: function (popupLocation, feature) {
+            this.popup.setContent(feature.getContent());
+            this.mapInfo.map.infoWindow.show(this.mapInfo.map.toScreen(popupLocation));
         },
 
         /**
-         * Highlights a polyline or polygon by drawing a line symbol
-         * over its boundaries and centers the map on 4x the extents of
-         * the feature.
-         * @param {object} feature Feature to highlight
+         * Sets the map's extent.
+         * @param {extent} extent The desired map display extent
          * @memberOf js.LGMap#
          */
-        highlightFeature: function (feature) {
-            var extent, symbol, highlightGraphic, newMapCenter, focusFinished, pThis = this;
+        setExtent: function(extent) {
+            return this.mapInfo.map.setExtent(extent);
+        },
 
-            if (feature.geometry && feature.geometry.getExtent) {
-                extent = feature.geometry.getExtent();
+        /**
+         * Centers the map at the specified point.
+         * @param {point} mapPoint The desired map centerpoint
+         * @memberOf js.LGMap#
+         */
+        centerAt: function(mapPoint) {
+            return this.mapInfo.map.centerAt(mapPoint);
+        },
+
+        /**
+         * Zooms the map to the specified level, constrained
+         * to the map's minimum-maximum zoom level range if
+         * that range exists.
+         * @param {number} zoom The desired zoom level
+         * @memberOf js.LGMap#
+         */
+        setZoom: function(zoom) {
+            var minZoom = this.mapInfo.map.getMinZoom(),
+                maxZoom = this.mapInfo.map.getMaxZoom();
+
+            // Constrain the zoom to the map's zoom levels if the map has them
+            if (minZoom >= 0 && maxZoom >= 0) {
+                zoom = Math.max(minZoom, Math.min(maxZoom, zoom));
             }
-
-            // Polyline or polygon symbol whose extents are used to reposition & rezoom the map
-            if (extent) {
-                // Shift the map
-                focusFinished = this.mapInfo.map.setExtent(extent.expand(this.featureZoomFactor));
-                newMapCenter = extent.getCenter();
-
-                // Create the feature highlight
-                if (feature.geometry.type === "polyline") {
-                    symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                        this.lineHiliteColor, 3);
-                } else {
-                    symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                        new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                            this.lineHiliteColor, 3), this.fillHiliteColor);
-                }
-                highlightGraphic = new esri.Graphic(feature.geometry,
-                    symbol, feature.attributes, null);
-
-            // Point symbol used to reposition the map
-            } else {
-                if (feature.geometry) {
-                    newMapCenter = feature.geometry;
-                } else {
-                    newMapCenter = feature;
-                }
-
-                // Shift the map
-                focusFinished = this.mapInfo.map.centerAt(newMapCenter);
-
-                // Create the feature highlight
-                highlightGraphic = new esri.Graphic(newMapCenter,
-                    new esri.symbol.PictureMarkerSymbol("images/youAreHere.png", 30, 30), //???
-                    feature.attributes, null);
-            }
-
-            // Display the highlight
-            this.tempGraphicsLayer.add(highlightGraphic);
-
-            // If we have a popup, prep & display it
-            if (this.showFeaturePopup && this.popupTemplate) {
-                // Assign the popup template to the highlight & populate the infoWindow;
-                // we need to clear the infoWindow's feature list because the infoWindow
-                // doesn't work well with a mix of direct-click feature selection and this
-                // routine's feature
-                highlightGraphic.setInfoTemplate(this.popupTemplate);
-                this.popup.clearFeatures();
-                this.popup.setContent(highlightGraphic.getContent());
-
-                // When the map is done with recentering, show the infoWindow
-                focusFinished.then(function () {
-                    pThis.mapInfo.map.infoWindow.show(pThis.mapInfo.map.toScreen(newMapCenter));
-                });
-            }
+            return this.mapInfo.map.setZoom(zoom);
         },
 
         /**
