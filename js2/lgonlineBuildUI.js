@@ -2,7 +2,7 @@
 /*jslint sloppy:true,evil:true,regexp:true,unparam:true */
 /** @license
  | ArcGIS for Local Government
- | Version 10.1.2
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
