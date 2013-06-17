@@ -9,6 +9,8 @@
             shareViaEmail: "通过电子邮件共享",
             shareViaFacebook: "通过 Facebook 共享",
             shareViaTwitter: "通过 Twitter 共享",
+            print: "试_Create a map print_验",
+            fetchPrint: "试_Get the map print_验",
             help: "帮助"
         },
         labels: {

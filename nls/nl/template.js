@@ -9,6 +9,8 @@
             shareViaEmail: "Delen via e-mail",
             shareViaFacebook: "Delen via Facebook",
             shareViaTwitter: "Delen via Twitter",
+            print: "Ĳ_Create a map print_ä",
+            fetchPrint: "Ĳ_Get the map print_ä",
             help: "Help"
         },
         labels: {

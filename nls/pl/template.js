@@ -9,6 +9,8 @@
             shareViaEmail: "Udostępnij przez e-mail",
             shareViaFacebook: "Udostępnij przez Facebook",
             shareViaTwitter: "Udostępnij przez Twitter",
+            print: "ł_Create a map print_ą",
+            fetchPrint: "ł_Get the map print_ą",
             help: "Pomoc"
         },
         labels: {

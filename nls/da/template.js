@@ -9,6 +9,8 @@
             shareViaEmail: "Del via e-mail",
             shareViaFacebook: "Del via Facebook",
             shareViaTwitter: "Del via Twitter",
+            print: "ø_Create a map print_å",
+            fetchPrint: "ø_Get the map print_å",
             help: "Hjælp"
         },
         labels: {

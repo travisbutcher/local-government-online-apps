@@ -9,6 +9,8 @@
             shareViaEmail: "Partajare prin e-mail",
             shareViaFacebook: "Partajare prin Facebook",
             shareViaTwitter: "Partajare prin Twitter",
+            print: "Ă_Create a map print_ș",
+            fetchPrint: "Ă_Get the map print_ș",
             help: "Ajutor"
         },
         labels: {

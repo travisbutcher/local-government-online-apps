@@ -9,6 +9,8 @@
             shareViaEmail: "이메일을 통해 공유",
             shareViaFacebook: "Facebook을 통해 공유",
             shareViaTwitter: "Twitter를 통해 공유",
+            print: "한_Create a map print_빠",
+            fetchPrint: "한_Get the map print_빠",
             help: "도움말"
         },
         labels: {

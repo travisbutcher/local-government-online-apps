@@ -9,6 +9,8 @@
             shareViaEmail: "電子メールで共有",
             shareViaFacebook: "Facebook で共有",
             shareViaTwitter: "Twitter で共有",
+            print: "須_Create a map print_鷗",
+            fetchPrint: "須_Get the map print_鷗",
             help: "ヘルプ"
         },
         labels: {

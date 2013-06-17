@@ -9,6 +9,8 @@
             shareViaEmail: "Bendrinti naudojant el. paštą",
             shareViaFacebook: "Bendrinti per Facebook",
             shareViaTwitter: "Bendrinti per Twitter",
+            print: "Į_Create a map print_š",
+            fetchPrint: "Į_Get the map print_š",
             help: "Pagalba"
         },
         labels: {

@@ -9,6 +9,8 @@
             shareViaEmail: "Jaga e-maili teel",
             shareViaFacebook: "Jaga läbi Facebook-i",
             shareViaTwitter: "Jaga läbi Twitter-i",
+            print: "Į_Create a map print_š",
+            fetchPrint: "Į_Get the map print_š",
             help: "Abi"
         },
         labels: {

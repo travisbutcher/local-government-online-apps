@@ -9,6 +9,8 @@
             shareViaEmail: "Per E-Mail freigeben",
             shareViaFacebook: "Über Facebook freigeben",
             shareViaTwitter: "Über Twitter freigeben",
+            print: "ä_Create a map print_Ü",
+            fetchPrint: "ä_Get the map print_Ü",
             help: "Hilfe"
         },
         labels: {

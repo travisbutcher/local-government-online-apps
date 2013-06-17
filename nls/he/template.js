@@ -9,6 +9,8 @@
             shareViaEmail: "שתף בדוא\"ל",
             shareViaFacebook: "שתף בפייסבוק",
             shareViaTwitter: "שתף בטוויטר",
+            print: "כן_Create a map print_ש",
+            fetchPrint: "כן_Get the map print_ש",
             help: "עזרה"
         },
         labels: {

@@ -9,6 +9,8 @@
             shareViaEmail: "Koplietot caur epastu",
             shareViaFacebook: "Koplietot caur Facebook",
             shareViaTwitter: "Koplietot caur Twitter",
+            print: "Į_Create a map print_š",
+            fetchPrint: "Į_Get the map print_š",
             help: "Palīdzība"
         },
         labels: {

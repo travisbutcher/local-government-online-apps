@@ -9,6 +9,8 @@
             shareViaEmail: "Отправить по электронной почте",
             shareViaFacebook: "Разместить в Facebook",
             shareViaTwitter: "Разместить в Twitter",
+            print: "Ж_Create a map print_Я",
+            fetchPrint: "Ж_Get the map print_Я",
             help: "Справка"
         },
         labels: {
