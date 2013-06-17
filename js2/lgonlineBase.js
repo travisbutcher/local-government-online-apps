@@ -540,7 +540,24 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          * @memberOf js.LGGraphic#
          */
         applyTheme: function (withHover, node) {
+            domClass.remove(node || this.rootDiv, "appTheme2");
             domClass.add(node || this.rootDiv, "appTheme");
+            if (withHover) {
+                domClass.add(node || this.rootDiv, "appThemeHover");
+            }
+        },
+
+        /**
+         * Applies the alternate form of the current theme class to the object.
+         * @param {boolean} [withHover] Node has hover color or not; no
+         *        hover color if omitted
+         * @param {string|object} [node] Node to receive style; applied
+         *        to the calling object if omitted
+         * @memberOf js.LGGraphic#
+         */
+        applyThemeAltBkgd: function (withHover, node) {
+            domClass.remove(node || this.rootDiv, "appTheme");
+            domClass.add(node || this.rootDiv, "appTheme2");
             if (withHover) {
                 domClass.add(node || this.rootDiv, "appThemeHover");
             }

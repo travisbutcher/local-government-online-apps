@@ -35,7 +35,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "
         constructor: function () {
             var styleString = "",
                 pThis = this,
-                colors = ["#fff", "#333333", "#5d5d5d"];  // make sure that we have something
+                colors = ["#fff", "#333333", "#5d5d5d", "#5d5d5d"];  // make sure that we have something
 
             // Retrieve the theme definition from the color table
             array.some(this.colorTable, function (themeDefn) {
@@ -48,6 +48,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "
 
             // Set the theme
             styleString += ".appTheme{color:" + colors[0] + ";background-color:" + colors[1] + "}";
+            styleString += ".appTheme2{color:" + colors[0] + ";background-color:" + colors[3] + "}";
             styleString += ".appThemeHover:hover{background-color:" + colors[2] + "}";
             this.injectCSS(styleString);
         }

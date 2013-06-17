@@ -108,28 +108,28 @@
             "parentDiv": "contentDiv",
             "colorTable": [{
                 "theme": "DarkGray",
-                "colors": ["#fff", "#333333", "#5d5d5d"]
+                "colors": ["#fff", "#333333", "#5d5d5d", "#5d5d5d"]
             }, {
                 "theme": "DarkGreen",
-                "colors": ["#fff", "DarkGreen", "#9bcd9b"]
+                "colors": ["#fff", "DarkGreen", "#9bcd9b", "#9bcd9b"]
             }, {
                 "theme": "DodgerBlue",
-                "colors": ["#fff", "#104e8b", "#1a78d7"]
+                "colors": ["#fff", "#104e8b", "#1a78d7", "#1a78d7"]
             }, {
                 "theme": "Gray",
-                "colors": ["#fff", "Gray", "#aaaaaa"]
+                "colors": ["#fff", "Gray", "#aaaaaa", "#aaaaaa"]
             }, {
                 "theme": "Brick",
-                "colors": ["#fff", "#9c661f", "#d89438"]
+                "colors": ["#fff", "#9c661f", "#d89438", "#d89438"]
             }, {
                 "theme": "Thistle",
-                "colors": ["#fff", "#8b7b8b", "#b3a8b3"]
+                "colors": ["#fff", "#8b7b8b", "#b3a8b3", "#b3a8b3"]
             }, {
                 "theme": "Turquoise",
-                "colors": ["#fff", "#00868b", "#00dadf"]
+                "colors": ["#fff", "#00868b", "#00dadf", "#00dadf"]
             }, {
                 "theme": "Orange",
-                "colors": ["#fff", "#cd8500", "#ffb122"]
+                "colors": ["#fff", "#cd8500", "#ffb122", "#ffb122"]
             }]
         }
     }, {
