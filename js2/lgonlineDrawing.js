@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js,esri,setTimeout,clearTimeout,setInterval,clearInterval */
+/*jslint sloppy:true,plusplus:true */
 /*
  | Copyright 2013 Esri
  |
@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDrawing", ["dojo/topic", "dojo/Deferred", "dojo/DeferredList", "js/lgonlineMap"], function (topic, Deferred, DeferredList) {
+define("js/lgonlineDrawing", ["dojo/topic", "dojo/Deferred", "js/lgonlineMap"], function (topic, Deferred) {
 
     //========================================================================================================================//
 
@@ -99,39 +99,41 @@ define("js/lgonlineDrawing", ["dojo/topic", "dojo/Deferred", "dojo/DeferredList"
          * @memberOf js.LGHighlighter#
          */
         createHighlightGraphics: function (geometry, attributes, infoTemplate) {
-             var i, highlightGraphics = new Array();
+            var i, highlightGraphics = [];
 
-             if (geometry.type === "polyline") {
-                 // Create a line symbol using the configured line highlight color
-                 highlightGraphics.push(new esri.Graphic(geometry,
-                     new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                     this.lineHiliteColor, 3),
-                     attributes, infoTemplate));
+            if (geometry.type === "polyline") {
+                // Create a line symbol using the configured line highlight color
+                highlightGraphics.push(new esri.Graphic(geometry,
+                    new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                        this.lineHiliteColor, 3),
+                    attributes, infoTemplate));
 
-             } else {
-                 if (geometry.type === "point") {
-                     // Create a series of concentric circle symbols using the configured line highlight color
-                     for (i = 0; i <= 4; i++) {
-                         highlightGraphics.push(new esri.Graphic(geometry,
-                             new esri.symbol.SimpleMarkerSymbol(
-                                 esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, (i + 16) * 2.5,
-                                 new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                                     new dojo.Color(this.lineHiliteColor), 3),
-                                     new dojo.Color([0, 0, 0, 0])),
-                             attributes, infoTemplate));
-                     }
+            } else {
+                if (geometry.type === "point") {
+                    // Create a series of concentric circle symbols using the configured line highlight color
+                    for (i = 0; i <= 4; ++i) {
+                        highlightGraphics.push(new esri.Graphic(geometry,
+                            new esri.symbol.SimpleMarkerSymbol(
+                                esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE,
+                                (i + 16) * 2.5,
+                                new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                                    new dojo.Color(this.lineHiliteColor), 3),
+                                new dojo.Color([0, 0, 0, 0])
+                            ),
+                            attributes, infoTemplate));
+                    }
 
-                 } else {
-                     // Create a polygon symbol using the configured line & fill highlight colors
-                     highlightGraphics.push(new esri.Graphic(geometry,
-                         new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                         new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                         this.lineHiliteColor, 3), this.fillHiliteColor),
-                         attributes, infoTemplate));
-                 }
-             }
+                } else {
+                    // Create a polygon symbol using the configured line & fill highlight colors
+                    highlightGraphics.push(new esri.Graphic(geometry,
+                        new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+                            new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                                this.lineHiliteColor, 3), this.fillHiliteColor),
+                        attributes, infoTemplate));
+                }
+            }
 
-             return highlightGraphics;
+            return highlightGraphics;
         },
 
         /**
@@ -156,66 +158,71 @@ define("js/lgonlineDrawing", ["dojo/topic", "dojo/Deferred", "dojo/DeferredList"
             focusFinished.then(  //??? centerAt/setZoom conflict workaround
                 function () {    //??? centerAt/setZoom conflict workaround
 
-            if (newZoomLevel) {
-                zoomFinished = pThis.mapObj.setZoom(newZoomLevel);
-            } else {
-                zoomFinished = new Deferred();
-                zoomFinished.resolve();
-            }
-            zoomFinished.then(  //??? centerAt/setZoom conflict workaround
-                function () {   //??? centerAt/setZoom conflict workaround
-
-            // Display the highlight graphic
-            if (highlightGraphics.length > 1) {
-                // Clear extant animated highlight
-                if (pThis.intervalTerminator) {
-                    clearTimeout(pThis.intervalTerminator);
-                    clearInterval(pThis.intervalID);
-                }
-
-                // Create a highlight
-                i = 0;
-                increasingRadius = true;
-                pThis.intervalID = setInterval(function () {
-                    pThis.highlighterLayer.clear();
-                    pThis.highlighterLayer.add(highlightGraphics[i]);
-
-                    if (increasingRadius) i++;
-                    else i--;
-                    if (i == highlightGraphics.length) {
-                        increasingRadius = false;
-                        i--;
-                    } else if (i < 0) {
-                        increasingRadius = true;
-                        i = 0;
+                    if (newZoomLevel) {
+                        zoomFinished = pThis.mapObj.setZoom(newZoomLevel);
+                    } else {
+                        zoomFinished = new Deferred();
+                        zoomFinished.resolve();
                     }
-                }, 120);  // ms
+                    zoomFinished.then(  //??? centerAt/setZoom conflict workaround
+                        function () {   //??? centerAt/setZoom conflict workaround
 
-                // Discard the highlight after some time
-                pThis.intervalTerminator = setTimeout(function () {
-                    clearInterval(pThis.intervalID);
-                    pThis.intervalTerminator = null;
-                    pThis.intervalID = null;
-                    pThis.highlighterLayer.clear();
-                }, 5000);  // ms
-            } else {
-                pThis.highlighterLayer.clear();
-                pThis.highlighterLayer.add(highlightGraphics[0]);
-            }
+                            // Display the highlight graphic
+                            if (highlightGraphics.length > 1) {
+                                // Clear extant animated highlight
+                                if (pThis.intervalTerminator) {
+                                    clearTimeout(pThis.intervalTerminator);
+                                    clearInterval(pThis.intervalID);
+                                }
 
-            // If we have attributes and a desire to complement the highlight with
-            // a popup, prep & display the popup
-            if (showFeaturePopup) {
-                //??? centerAt/setZoom conflict workaround
-                //???(new DeferredList([focusFinished, zoomFinished])).then(
-                //???    function (results) {
-                        pThis.mapObj.showPopupWithFeature(newMapCenter, highlightGraphics[0]);
-                //???    }
-                //???);
-            }
+                                // Create a highlight
+                                i = 0;
+                                increasingRadius = true;
+                                pThis.intervalID = setInterval(function () {
+                                    pThis.highlighterLayer.clear();
+                                    pThis.highlighterLayer.add(highlightGraphics[i]);
 
-            });  //??? centerAt/setZoom conflict workaround
-            });  //??? centerAt/setZoom conflict workaround
+                                    if (increasingRadius) {
+                                        ++i;
+                                    } else {
+                                        --i;
+                                    }
+                                    if (i === highlightGraphics.length) {
+                                        increasingRadius = false;
+                                        --i;
+                                    } else if (i < 0) {
+                                        increasingRadius = true;
+                                        i = 0;
+                                    }
+                                }, 120);  // ms
+
+                                // Discard the highlight after some time
+                                pThis.intervalTerminator = setTimeout(function () {
+                                    clearInterval(pThis.intervalID);
+                                    pThis.intervalTerminator = null;
+                                    pThis.intervalID = null;
+                                    pThis.highlighterLayer.clear();
+                                }, 5000);  // ms
+                            } else {
+                                pThis.highlighterLayer.clear();
+                                pThis.highlighterLayer.add(highlightGraphics[0]);
+                            }
+
+                            // If we have attributes and a desire to complement the highlight with
+                            // a popup, prep & display the popup
+                            if (showFeaturePopup) {
+                                //??? centerAt/setZoom conflict workaround
+                                //???(new DeferredList([focusFinished, zoomFinished])).then(
+                                //???    function (results) {
+                                pThis.mapObj.showPopupWithFeature(newMapCenter, highlightGraphics[0]);
+                                //???    }
+                                //???);
+                            }
+
+                        }
+                    );  //??? centerAt/setZoom conflict workaround
+                }
+            );  //??? centerAt/setZoom conflict workaround
         }
     });
 
