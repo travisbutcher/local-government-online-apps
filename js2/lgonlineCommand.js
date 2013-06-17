@@ -452,9 +452,6 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 this.log("No print task configured", true);
                 return;
             }
-            if (!this.printSpecification) {
-                this.printSpecification = {};
-            }
         },
 
         /**
@@ -483,14 +480,14 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 printParams.map = mapInstance.mapInfo.map;
                 printParams.outSpatialReference = mapInstance.mapInfo.map.spatialReference;
                 printParams.template = new PrintTemplate();
-                printParams.template.format = pThis.printSpecification.format || "PDF";
-                printParams.template.layout = pThis.printSpecification.layout || "Letter ANSI A Landscape";
+                printParams.template.format = pThis.format || "PDF";
+                printParams.template.layout = pThis.layout || "Letter ANSI A Landscape";
                 printParams.template.layoutOptions = {
-                    titleText: pThis.printSpecification.title,
-                    authorText: pThis.printSpecification.author,
-                    copyrightText: pThis.printSpecification.copyrightText
+                    titleText: pThis.title,
+                    authorText: pThis.author,
+                    copyrightText: pThis.copyrightText
                 };
-                printParams.template.preserveScale = pThis.toBoolean(pThis.printSpecification.preserveScale, false);
+                printParams.template.preserveScale = pThis.toBoolean(pThis.preserveScale, false);
                 printParams.template.showAttribution = true;
 
                 // Run the job
