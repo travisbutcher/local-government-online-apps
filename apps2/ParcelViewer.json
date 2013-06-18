@@ -239,7 +239,7 @@
         }
     }, {
         "classname": "js.LGGallery",
-        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-top:6px}",
+        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanel table{border-spacing:0px}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-top:6px}",
         "config": {
             "rootId": "commandPanel",
             "parentDiv": "headerFrame",
