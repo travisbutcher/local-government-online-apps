@@ -11,9 +11,6 @@
         "highlighter.highlightZoomLevel": 16,
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
-        "printMap.title": "",
-        "printMap.author": "",
-        "printMap.layout": "Letter ANSI A Landscape",
         "helpMessageBox.content": "Parcel Viewer<hr><br>The Parcel Viewer provides the general public and other interested parties local government property tax and assessment information and supplements that information with lifestyle and internet broadband information for a given neighborhood.<br><br>To locate a parcel, simply click on the map or enter an address or parcel number in the search box and select a parcel from the list."
     },
 
@@ -99,49 +96,6 @@
             "fieldName": "basemapBox.basemapgroupOwner",
             "type": "string",
             "tooltip": "ArcGIS.com username of owner of basemap group"
-        }]
-    }, {
-        "category": "Printing",
-        "fields": [{
-            "label": "Title",
-            "fieldName": "printMap.title",
-            "type": "string",
-            "tooltip": "Text to display as the printed map's title"
-        }, {
-            "label": "Author",
-            "fieldName": "printMap.author",
-            "type": "string",
-            "tooltip": "Text to display as the printed map's author"
-        }, {
-            "label": "Orientation",
-            "fieldName": "printMap.layout",
-            "type": "string",
-            "options": [{
-                "label": "Letter ANSI A Landscape",
-                "value": "Letter ANSI A Landscape"
-            }, {
-                "label": "Letter ANSI A Portrait",
-                "value": "Letter ANSI A Portrait"
-            }, {
-                "label": "Tabloid ANSI B Landscape",
-                "value": "Tabloid ANSI B Landscape"
-            }, {
-                "label": "Tabloid ANSI B Portrait",
-                "value": "Tabloid ANSI B Portrait"
-            }, {
-                "label": "A3 Landscape",
-                "value": "A3 Landscape"
-            }, {
-                "label": "A3 Portrait",
-                "value": "A3 Portrait"
-            }, {
-                "label": "A4 Landscape",
-                "value": "A4 Landscape"
-            }, {
-                "label": "A4 Portrait",
-                "value": "A4 Portrait"
-            }],
-            "tooltip": "Orientation and size of the printed map's PDF"
         }]
     }, {
         "category": "Help",
