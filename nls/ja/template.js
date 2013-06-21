@@ -1,4 +1,21 @@
-﻿define(
+﻿/** @license
+ | ArcGIS for Local Government
+ | Version 10.2
+ | Copyright 2012 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
+define(
 ({
         tooltips: {
             search: "検索",
@@ -9,8 +26,10 @@
             shareViaEmail: "電子メールで共有",
             shareViaFacebook: "Facebook で共有",
             shareViaTwitter: "Twitter で共有",
-            print: "須_Create a map print_鷗",
-            fetchPrint: "須_Get the map print_鷗",
+            print: "マップ印刷の作成",
+            fetchPrint: "マップ印刷の取得",
+            landscape: "横",
+            portrait: "縦",
             help: "ヘルプ"
         },
         labels: {

@@ -11,9 +11,6 @@
         "highlighter.highlightZoomLevel": 16,
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
-        "printMap.title": "",
-        "printMap.author": "",
-        "printMap.layout": "Letter ANSI A Landscape",
         "helpMessageBox.content": "Parcel Viewer<hr><br>The Parcel Viewer provides the general public and other interested parties local government property tax and assessment information and supplements that information with lifestyle and internet broadband information for a given neighborhood.<br><br>To locate a parcel, simply click on the map or enter an address or parcel number in the search box and select a parcel from the list."
     },
 
@@ -99,49 +96,6 @@
             "fieldName": "basemapBox.basemapgroupOwner",
             "type": "string",
             "tooltip": "ArcGIS.com username of owner of basemap group"
-        }]
-    }, {
-        "category": "Printing",
-        "fields": [{
-            "label": "Title",
-            "fieldName": "printMap.title",
-            "type": "string",
-            "tooltip": "Text to display as the printed map's title"
-        }, {
-            "label": "Author",
-            "fieldName": "printMap.author",
-            "type": "string",
-            "tooltip": "Text to display as the printed map's author"
-        }, {
-            "label": "Orientation",
-            "fieldName": "printMap.layout",
-            "type": "string",
-            "options": [{
-                "label": "Letter ANSI A Landscape",
-                "value": "Letter ANSI A Landscape"
-            }, {
-                "label": "Letter ANSI A Portrait",
-                "value": "Letter ANSI A Portrait"
-            }, {
-                "label": "Tabloid ANSI B Landscape",
-                "value": "Tabloid ANSI B Landscape"
-            }, {
-                "label": "Tabloid ANSI B Portrait",
-                "value": "Tabloid ANSI B Portrait"
-            }, {
-                "label": "A3 Landscape",
-                "value": "A3 Landscape"
-            }, {
-                "label": "A3 Portrait",
-                "value": "A3 Portrait"
-            }, {
-                "label": "A4 Landscape",
-                "value": "A4 Landscape"
-            }, {
-                "label": "A4 Portrait",
-                "value": "A4 Portrait"
-            }],
-            "tooltip": "Orientation and size of the printed map's PDF"
         }]
     }, {
         "category": "Help",
@@ -239,7 +193,7 @@
         }
     }, {
         "classname": "js.LGGallery",
-        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanel table{border-spacing:0px}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-top:6px}",
+        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanel table{border-spacing:0px}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;text-align:center;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-top:6px}",
         "config": {
             "rootId": "commandPanel",
             "parentDiv": "headerFrame",
@@ -276,13 +230,34 @@
         }
     }, {
         "classname": "js.LGPrintMap",
+        "styles": ".absolute{position:absolute}.printMapBox{display:none;width:269px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .printMapBox{border-radius:8px}.printFormatsPanel{height:52px;margin:0px;padding:2px;overflow:hidden;text-align:center;vertical-align:middle}.pushbuttonOn{border:1px solid blue}.printDlogItem{margin:3px!important}",
         "config": {
             "rootId": "printMap",
             "parentDiv": "contentFrame",
-            "mapId": "map",
+            "rootClass": "printMapBox",
+            "horizOffset": -2,
+            "vertOffset": 2,
             "asynchronous": false,
             "format": "PDF",
             "preserveScale": true,
+            "title": "",
+            "author": "",
+            "orientationButtonClass": "commandButton printDlogItem",
+            "orientationButtonIconClass": "commandIcon",
+            "landscapeButtonIconUrl": "images/landscapeDoc.png",
+            "landscapeButtonTooltip": "@tooltips.landscape",
+            "landscapeServerSpec": "Letter ANSI A Landscape",
+            "portraitButtonIconUrl": "images/portraitDoc.png",
+            "portraitButtonTooltip": "@tooltips.portrait",
+            "portraitServerSpec": "Letter ANSI A Portrait",
+            "titleHint": "title",
+            "titleClass": "printDlogItem",
+            "authorHint": "author",
+            "authorClass": "printDlogItem",
+            "printButtonIconUrl": "images/print.png",
+            "printButtonClass": "commandButton printDlogItem",
+            "printButtonIconClass": "commandIcon",
+            "printButtonTooltip": "@tooltips.print",
             "copyrightText": null,
             "dependencyId": "map",
             "trigger": "print",
@@ -466,18 +441,18 @@
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
             "publish": "print",
-            "triggerVisible": "printingReady",
+            "dependencyId": "printMap",
             "triggerEnable": "printingReady",
             "triggerDisable": "printing",
             "isVisible": false,
-            "isEnabled": false
+            "isEnabled": true
         }
     }, {
         "classname": "js.LGCommandToggle",
         "config": {
             "tooltip": "@tooltips.fetchPrint",
-            "iconUrl": "images/mapDoc.png",
-            "iconDisabledUrl": "images/mapDocDisabled.png",
+            "iconUrl": "images/doc.png",
+            "iconDisabledUrl": "images/docDisabled.png",
             "rootId": "fetchPrint",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
