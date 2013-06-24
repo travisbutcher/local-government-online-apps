@@ -1336,6 +1336,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 attributeSeparator = "",
                 attributeSeparatorReset = "  OR  ";  // thanks to Tim H.: single spaces don't work with some DBs
 
+            // Prepare the search term and the search query pattern for the desired casing handling
             if (this.caseInsensitiveSearch === true) {
                 processedSearchText = searchText.toUpperCase();
                 attributePattern = "UPPER(${0}) LIKE '" + this.searchPattern + "'";
@@ -1344,11 +1345,17 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 attributePattern = "${0} LIKE '" + this.searchPattern + "'";
             }
 
+            // Escape single quotes, which are used to bound the search term in the query
+            processedSearchText = processedSearchText.replace(/'/g, "''");
+
+            // Replace the search term into the search query for each field to be searched
             array.forEach(this.searchFields, function (searchField) {
                 searchParam = searchParam + attributeSeparator
                     + dojo.string.substitute(attributePattern, [searchField, processedSearchText]);
                 attributeSeparator = attributeSeparatorReset;
             });
+
+            // Launch the combined query
             if (0 < searchParam.length) {
                 this.generalSearchParams.where = searchParam;
                 this.searcher.execute(this.generalSearchParams, callback, errback);
