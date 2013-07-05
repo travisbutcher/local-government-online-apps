@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color", "js/lgonlineBase"], function (array, utils, topic, Color) {
+define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "dojo/query", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color", "esri/dijit/InfoWindowLite", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, query, utils, topic, Color, InfoWindowLite) {
 
     //========================================================================================================================//
 
@@ -34,7 +34,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
 
         /**
          * Performs class-specific setup before waiting for a
-         * dependency.
+         * dependency; saves a copy of the dependency instance.
          * @memberOf js.LGMapDependency#
          * @param {object} dependsOn LG object that this object depends
          *        on
@@ -123,14 +123,11 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
              * @member {Deferred} ready
              * @memberOf js.LGMap#
              */
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
 
             options = {ignorePopups: false};
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
-
-            this.popup = new esri.dijit.Popup(null, dojo.create("div"));
-            options.mapOptions.infoWindow = this.popup;
 
             // Set up configured extents
             if (this.xmin && this.ymin && this.xmax && this.ymax) {
@@ -186,6 +183,8 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
             // Set defaults for missing params
             this.lineHiliteColor = new Color(this.lineHiliteColor || "#00ffff");
             this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 255, 255, 0.1]);
+            this.featureZoomFactor = this.featureZoomFactor || 2;
+            this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
 
             // Create the map
             if (this.webmap) {
@@ -194,7 +193,47 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
 
             utils.createMap(this.mapId, this.rootDiv, options).then(
                 function (response) {
+                    var popupContentDiv;
+
                     pThis.mapInfo = response;
+
+                    // Fill in the missing parts so that an InfoWindowLite can serve as a popup
+                    pThis.popup = new esri.dijit.InfoWindowLite(null, dojo.create("div", null, map.root));
+                    if (!pThis.popup.clearFeatures) {
+                        pThis.popup.clearFeatures = function () {
+                            pThis.popup.setContent("");
+                        };
+                    }
+                    if (!pThis.popup.setFeatures) {
+                        pThis.popup.setFeatures = function (features) {
+                            // features is an array of features or Deferreds to features;
+                            // the InfoWindowLite only uses the first one
+                            if (features && features.length > 0) {
+                                features[0].then(function (feature) {
+                                    // Resolution of Deferred is also an array
+                                    if (feature && feature.length > 0) {
+                                        if (pThis.popupTemplate) {
+                                            feature[0].setInfoTemplate(pThis.popupTemplate);
+                                        }
+                                        pThis.popup.setContent(feature[0].getContent());
+                                    }
+                                });
+                            }
+                        };
+                    }
+                    pThis.popup.startup();
+                    pThis.mapInfo.map.setInfoWindow(pThis.popup);
+
+                    // Fix popup's content-area scrolling for Android and iOS
+                    popupContentDiv = query(".simpleInfoWindow .content")[0];
+                    touchScroll(popupContentDiv);
+
+                    //for some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
+                    //this is a bit of a hack to set it manually
+                    if (!response.map.spatialReference) {
+                        pThis.mapInfo.map.spatialReference = new esri.SpatialReference({wkid: 102100});
+                    }
+
                     //pThis.listeners.push(
                     //    dojo.connect(pThis.mapInfo.map, "onUnload", function () {  // release event listeners upon unload
                     //        // http://help.arcgis.com/en/webapi/javascript/arcgis/jshelp/inside_events.html
@@ -204,10 +243,10 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
                     //    });
                     //);
                     //pThis.listeners.push(
-                    dojo.connect(window, "resize", pThis.mapInfo.map, function () {
+                    on(window, "resize", lang.hitch(pThis.mapInfo.map, function () {
                         pThis.mapInfo.map.resize();
                         pThis.mapInfo.map.reposition();
-                    });
+                    }));
                     //);
 
                     // Jump to the initial extents
@@ -240,11 +279,9 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
 
                     // Start listening for position updates
                     pThis.positionHandle = topic.subscribe("position", function (newCenterPoint) {
-                        pThis.tempGraphicsLayer.clear();
-
                         // Highlight the point's position if it's in the same coord system as the map
                         if (newCenterPoint.spatialReference.wkid === pThis.mapInfo.map.spatialReference.wkid) {
-                            pThis.highlightPoint(newCenterPoint);
+                            topic.publish("highlightItem", newCenterPoint);
 
                         // Otherwise, convert the position into the map's spatial reference before highlighting it
                         } else {
@@ -252,7 +289,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
                             if (newCenterPoint.spatialReference.wkid === 4326
                                     && pThis.mapInfo.map.spatialReference.wkid === 102100) {
                                 newCenterPoint = esri.geometry.geographicToWebMercator(newCenterPoint);
-                                pThis.highlightPoint(newCenterPoint);
+                                topic.publish("highlightItem", newCenterPoint);
 
                             // Otherwise, use the geometry service
                             } else if (esri.config.defaults.geometryService) {
@@ -262,7 +299,7 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
                                 esri.config.defaults.geometryService.project(params).then(
                                     function (geometries) {
                                         newCenterPoint = geometries[0];
-                                        pThis.highlightPoint(newCenterPoint);
+                                        topic.publish("highlightItem", newCenterPoint);
                                     }
                                 );
 
@@ -277,10 +314,11 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
 
                     // Start listening for feature highlights
                     pThis.showFeatureHandle = topic.subscribe("showFeature", function (feature) {
-                        pThis.tempGraphicsLayer.clear();
-
-                        // Do the highlight
-                        pThis.highlightFeature(feature);
+                        if (pThis.popupTemplate) {
+                            // Assign the popup template to the highlight item
+                            feature.infoTemplate = pThis.popupTemplate;
+                        }
+                        topic.publish("highlightItem", feature);
                     });
 
                     pThis.ready.resolve(pThis);
@@ -313,90 +351,47 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
         },
 
         /**
-         * Highlights a point by drawing a marker over it and centers
-         * the map on the point.
-         * @param {object} newCenterPoint Point to highlight
-         * @memberOf js.LGMap#
+         * Shows the map's popup using content from the supplied feature.
          */
-        highlightPoint: function (newCenterPoint) {
-            // Shift the map
-            this.mapInfo.map.centerAt(newCenterPoint);
-
-            // Draw the location indicator
-            this.tempGraphicsLayer.add(
-                new esri.Graphic(newCenterPoint,
-                    new esri.symbol.PictureMarkerSymbol("images/youAreHere.png", 30, 30), //???
-                    null, null)
-            );
+        showPopupWithFeature: function (popupLocation, feature) {
+            this.popup.setContent(feature.getContent());
+            this.mapInfo.map.infoWindow.show(this.mapInfo.map.toScreen(popupLocation));
         },
 
         /**
-         * Highlights a polyline or polygon by drawing a line symbol
-         * over its boundaries and centers the map on 4x the extents of
-         * the feature.
-         * @param {object} feature Feature to highlight
+         * Sets the map's extent.
+         * @param {extent} extent The desired map display extent
          * @memberOf js.LGMap#
          */
-        highlightFeature: function (feature) {
-            var extent, symbol, highlightGraphic, newMapCenter, focusFinished, pThis = this;
+        setExtent: function(extent) {
+            return this.mapInfo.map.setExtent(extent);
+        },
 
-            if (feature.geometry && feature.geometry.getExtent) {
-                extent = feature.geometry.getExtent();
+        /**
+         * Centers the map at the specified point.
+         * @param {point} mapPoint The desired map centerpoint
+         * @memberOf js.LGMap#
+         */
+        centerAt: function(mapPoint) {
+            return this.mapInfo.map.centerAt(mapPoint);
+        },
+
+        /**
+         * Zooms the map to the specified level, constrained
+         * to the map's minimum-maximum zoom level range if
+         * that range exists.
+         * @param {number} zoom The desired zoom level
+         * @memberOf js.LGMap#
+         */
+        setZoom: function(zoom) {
+            var minZoom = this.mapInfo.map.getMinZoom(),
+                maxZoom = this.mapInfo.map.getMaxZoom();
+
+            // Constrain the zoom to the map's zoom levels if the map has them
+            if (minZoom >= 0 && maxZoom >= 0) {
+                zoom = Math.max(minZoom, Math.min(maxZoom, zoom));
             }
-
-            // Polyline or polygon symbol whose extents are used to reposition & rezoom the map
-            if (extent) {
-                // Shift the map
-                focusFinished = this.mapInfo.map.setExtent(extent.expand(4));
-                newMapCenter = extent.getCenter();
-
-                // Create the feature highlight
-                if (feature.geometry.type === "polyline") {
-                    symbol = new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                        this.lineHiliteColor, 3);
-                } else {
-                    symbol = new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                        new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                            this.lineHiliteColor, 3), this.fillHiliteColor);
-                }
-                highlightGraphic = new esri.Graphic(feature.geometry,
-                    symbol, feature.attributes, null);
-
-            // Point symbol used to reposition the map
-            } else {
-                if (feature.geometry) {
-                    newMapCenter = feature.geometry;
-                } else {
-                    newMapCenter = feature;
-                }
-
-                // Shift the map
-                focusFinished = this.mapInfo.map.centerAt(newMapCenter);
-
-                // Create the feature highlight
-                highlightGraphic = new esri.Graphic(newMapCenter,
-                    new esri.symbol.PictureMarkerSymbol("images/youAreHere.png", 30, 30), //???
-                    null, null);
-            }
-
-            // Display the highlight
-            this.tempGraphicsLayer.add(highlightGraphic);
-
-            // If we have a popup, prep & display it
-            if (this.popupTemplate) {
-                // Assign the popup template to the highlight & populate the infoWindow;
-                // we need to clear the infoWindow's feature list because the infoWindow
-                // doesn't work well with a mix of direct-click feature selection and this
-                // routine's feature
-                highlightGraphic.setInfoTemplate(this.popupTemplate);
-                this.popup.clearFeatures();
-                this.popup.setContent(highlightGraphic.getContent());
-
-                // When the map is done with recentering, show the infoWindow
-                focusFinished.then(function () {
-                    pThis.mapInfo.map.infoWindow.show(pThis.mapInfo.map.toScreen(newMapCenter));
-                });
-            }
+            return this.mapInfo.map.setZoom(zoom);
         },
 
         /**
@@ -456,6 +451,15 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
         },
 
         /**
+         * Returns the operational layers in the map.
+         * @return {array} List of layers
+         * @memberOf js.LGMap#
+         */
+        getOperationalLayers: function () {
+            return this.mapInfo.itemInfo.itemData.operationalLayers;
+        },
+
+        /**
          * Creates a graphics layer for the object's map.
          * @param {string} layerId Name for layer
          * @return {GraphicsLayer} Created graphics layer
@@ -466,7 +470,6 @@ define("js/lgonlineMap", ["dojo/_base/array", "esri/arcgis/utils", "dojo/topic",
             gLayer.id = layerId;
             return this.mapInfo.map.addLayer(gLayer);
         }
-
     });
 
     //========================================================================================================================//

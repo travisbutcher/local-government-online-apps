@@ -2,7 +2,7 @@
 /*jslint sloppy:true,evil:true,regexp:true,unparam:true */
 /** @license
  | ArcGIS for Local Government
- | Version 10.1.2
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "esri/arcgis/Portal", "esri/IdentityManager", "dojo/require!esri/utils"], function (Deferred, DeferredList, utils, script, lang, commonConfig, Portal) {
+define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "esri/arcgis/Portal", "esri/IdentityManager", "dojo/require!esri/utils"], function (on, Deferred, DeferredList, utils, script, lang, commonConfig, esriPortal) {
 
     //========================================================================================================================//
 
@@ -59,14 +59,14 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
                 || location.protocol + '//' + "www.arcgis.com";  // fallback
 
             // Launch the portal
-            this.portal = new Portal(this.portalUrl);
             timerId = setTimeout(
                 function () {
                     pThis.ready.reject(pThis);
                 },
                 this.timeout
             );
-            dojo.connect(this.portal, "onLoad", function () {
+            this.portal = new esriPortal.Portal(this.portalUrl);
+            on(this.portal, "ready", function () {
                 clearTimeout(timerId);
                 pThis.ready.resolve(pThis);
             });

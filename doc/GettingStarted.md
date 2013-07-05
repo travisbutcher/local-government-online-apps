@@ -27,7 +27,9 @@ Advanced configuration is an optional part of setting up a web application templ
 publishers, and one uses a text editor to perform it.  It specifies which UI elements are to appear,
 the order in which they are to appear, and the CSS to display them.  There is no need to modify this
 part of a web application template in order to use the app--it is only there to make it easier to modify
-the app without touching the JavaScript or to customize the app without having to host it.
+the app without touching the JavaScript or to customize the app without having to host it.  For more information
+about advanced configuration, see the
+[Advanced Configuration document](https://github.com/Esri/local-government-online-apps/blob/master/doc/AdvancedConfiguration.md).
 
 ### Elements of the basic configuration
 
@@ -84,39 +86,14 @@ file.
 When you use the app out of the box, it uses a default configuration completely defined in a file found
 in the `apps1` folder, the `ParcelViewer.json` file.
 
+For more information about the contents of the configuration parts, see the
+[Advanced Configuration document](https://github.com/Esri/local-government-online-apps/blob/master/doc/AdvancedConfiguration.md).
+
 #### Where's the webmap ID stored?
 
 The "values" section of the basic configuration begins with a "webmap" element, which labels the ID of
 the webmap to be used by the app.
 
-## A sample advanced configuration
-
-We can override the default configuration by specifying a configuration file on your server using a URL
-parameter.  To illustrate this, copy `apps1\ParcelViewer.json` into `apps1\Color.json`, then edit
-`Color.json`.  We'll change the meaning of the color theme "DarkGray" from
-
-* foreground color:  #fff
-* background color:  #333333
-* highlight color:  #5d5d5d
-
-to
-
-* foreground color:  #fff
-* background color:  #555
-* highlight color:  #888
-
-We do this by changing the JSON configuration file’s line 105 from
-
-    "colors": ["#fff", "#333333", "#5d5d5d"]
-
-to
-
-    "colors": ["#fff", "#555", "#888"]
-
-(This change gives us a way to verify that we're not using the default configuration file).  Now try
-`http://<yourServer>/<yourSite>/s1.html?app=apps1/Color`
-and you'll see that the app color theme, while still configured as "DarkGray", is lighter both in its
-background and in its highlighting as you hover over menu buttons.
 
 ## Configuration sources
 
@@ -149,100 +126,6 @@ the web application.  For example, try
 again after making this change.
 
 
-## Another advanced configuration:  change the custom utility services
-
-The application is configured to use four services:
-
-1. Bing maps key
-2. Geometry server URL
-3. Printing task URL
-4. Geocoding server URL
-
-These service parameters are all stored in the file commonConfig.js. Each URL parameter is preceded by
-"location.protocol +" so that it will work whether your site uses http or https.
-
-
-## Another advanced configuration:  show the help text upon launch
-
-For this, we'll add to our configuration an instance of class `js.LGCallMethods`; this class calls
-methods of objects.  The help text is shown in a `js.LGMessageBox`, which has `js.LGGraphic` as an
-ancestor.  `js.LGGraphic` has the method `setIsVisible()`, which takes true or false as its only
-argument to make the graphic visible or invisible, respectively.  Since the `js.LGMessageBox` item was
-named "helpMessageBox" in the supplied JSON configuration file, change the end of the supplied JSON
-configuration file from
-
-        }]
-    }
-
-to
-
-        }, {
-            "classname": "js.LGCallMethods",
-            "config": {
-                "todo": [
-                    {"rootId": "helpMessageBox", "method": "setIsVisible", "arg": "true"}
-                ]
-            }
-        }]
-    }
-
-to get the help display to appear as the app starts.
-
-
-## Another advanced configuration:  show the search box as a left-side, top-to-bottom sidebar
-
-For this, we'll change the positioning configuration for the search box.  The search box is an instance
-of class `js.LGSearchBoxByText`, which has `js.LGGraphic` as an ancestor.  `js.LGGraphic` has two
-parameters called `horizOffset` and `vertOffset` to guide the positioning of the graphic.  These
-parameters take a single number or a pair of numbers.  Numbers greater than zero stand for the offset
-from the left (for `horizOffset`) or top (for `vertOffset`) in pixels; numbers less than zero stand for
-the offset from the right or bottom; numbers equal to zero indicate centering.  A pair of numbers
-permits you to tie the graphic to both edges.  E.g., the original values in the supplied JSON
-configuration file are
-
-    "horizOffset": -2,
-    "vertOffset": [2, -2],
-
-which mean that
-
-* horizontally, the search box is two pixels from the right edge of the map area
-* vertically, the search box is two pixels from the top and bottom edges of the map area
-
-If a maximum width or height constraint exists in CSS, then the right/bottom constraint in a pair of
-numbers is overridden by the CSS if the map area is larger than the maximum.  In the supplied JSON
-configuration file, e.g., there is a `max-height:224px;` in the `styles` (CSS) part of the
-`js.LGSearchBoxByText` configuration, so the search box will not be two pixels from the bottom until
-the map window gets shorter than 229 pixels.
-
-So two changes are made for this customization:
-
-* change `horizOffset`'s value to 2
-* remove the `max-height:224px;` text from the item's styles.
-
-The new search box definition becomes
-
-    }, {
-        "classname": "js.LGSearchBoxByText",
-        "styles": ".searchBox{display:none;width:200px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .searchBox{border-radius:8px}.resultsListBox{width:96%;top:53px;overflow:auto}.okIE .resultsListBox{position:absolute;bottom:4px}.lt-ie9 .resultsListBox{width:100%;height:182px}.resultsListTable{width:97%;margin:4px}.lt-ie9 .resultsListTable{width:87%}.resultsListBody{width:80%}.resultsListSearching{background-image:url('images/loading.gif');background-position:center center;background-repeat:no-repeat;width:100%;height:1.5em}.resultsListEntry{width:84%;margin:2px;padding:4px;cursor:pointer}",
-        "config": {
-            "trigger": "search",
-            "publish": "showFeature",
-            "parentDiv": "contentFrame",
-            "rootId": "searchBox",
-            "rootClass": "searchBox",
-            "horizOffset": 2,
-            "vertOffset": [2, -2],
-            "searcher": "featureSearcher",
-            "showPrompt": "@prompts.search",
-            "resultsListBoxClass": "resultsListBox",
-            "resultsListTableClass": "resultsListTable",
-            "resultsListBodyClass": "resultsListBody",
-            "resultsListSearchingClass": "resultsListSearching",
-            "resultsListEntryClass": "resultsListEntry"
-        }
-    }, {
-
-
 ## Question:  why is there s1.html and s2.html, js1 and js2, apps1 and apps2?
 
 The main HTML file has a name that reflects its membership in a series of generic apps rather than a
@@ -258,14 +141,6 @@ within those environments, so with the next online apps release, the Esri-suppli
 application template will start using the next series for *new* web applications--already-published
 web applications have a URL within them pointing to the series under which they were published and
 will not need to be changed.
-
-
-## Question:  why don't you wrap the long "styles" lines?
-
-In order to help catch typographic errors, our configuration files are run through a
-JSON validator such as [JSONLint](http://jsonlint.com/) and our source files are run through a
-JavaScript validator such as [JSLint](http://www.jslint.com/). Inserting a break into the `styles`
-string would create invalid JSON, so we leave the text continuous to be able to use a validator.
 
 
 ## Final note:  basic and advanced configuration are available to you even if ArcGIS.com hosts the application

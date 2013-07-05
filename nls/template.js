@@ -1,6 +1,6 @@
 ﻿/** @license
  | ArcGIS for Local Government
- | Version 10.1.2
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,10 @@ define({
             shareViaEmail: "Share via email",
             shareViaFacebook: "Share via Facebook",
             shareViaTwitter: "Share via Twitter",
+            print: "Print map",
+            fetchPrint: "View printed map",
+            landscape: "Landscape page orientation",
+            portrait: "Portrait page orientation",
             help: "Help"
         },
         labels: {

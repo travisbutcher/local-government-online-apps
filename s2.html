@@ -7,7 +7,7 @@
 <head>
     <meta charset=utf-8>
     <!--
-     | Version 10.1.2
+     | Version 10.2
      | Copyright 2012 Esri
      |
      | Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,8 +34,8 @@
 
     <title>Local Government online app</title>
     <meta name="description" content="Local Government online app">
-    <link rel="stylesheet" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/dojo/dijit/themes/claro/claro.css"/>
-    <link rel="stylesheet" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/js/esri/css/esri.css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.6/js/dojo/dijit/themes/claro/claro.css"/>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.6/js/esri/css/esri.css" />
     <link rel="apple-touch-icon-precomposed" href="images/onlineapp.png" />
     <style>
         html, body {
@@ -61,12 +61,12 @@
         .transparent {
             opacity:0.0;filter:Alpha(opacity=0);
         }
-        @media screen and (max-height: 550px){.contentPane{height:300px}}
-        @media screen and (max-height: 500px){.contentPane{height:250px}}
-        @media screen and (max-height: 450px){.contentPane{height:200px}}
-        @media screen and (max-height: 400px){.contentPane{height:150px}}
-        @media screen and (max-height: 350px){.contentPane{height:100px}}
-        @media screen and (max-height: 300px){.contentPane{height:50px}}
+        @media screen and (max-height:550px){.contentPane{max-height:300px}}
+        @media screen and (max-height:500px){.contentPane{max-height:250px}}
+        @media screen and (max-height:450px){.contentPane{max-height:200px}}
+        @media screen and (max-height:400px){.contentPane{max-height:150px}}
+        @media screen and (max-height:350px){.contentPane{max-height:100px}}
+        @media screen and (max-height:300px){.contentPane{max-height:50px}}
     </style>
 
 </head>
@@ -101,7 +101,7 @@
         dojoConfig.cacheBust = true;
     </script>
     <!--<![endif]-->
-    <script src="http://serverapi.arcgisonline.com/jsapi/arcgis/3.5/"></script>
+    <script src="http://js.arcgis.com/3.6/"></script>
     <script src="js2/libs.js"></script>
     <script src="js2/lgonlineStart.js"></script>
 </body>

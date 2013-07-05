@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo/on", "dojo/dom-style", "dojo/_base/array", "dojo/topic", "esri/dijit/BasemapGallery", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, registry, domConstruct, on, domStyle, array, topic, BasemapGallery) {
+define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, domStyle, domClass, array, topic, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate) {
 
     //========================================================================================================================//
 
@@ -75,7 +75,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * the specified map is available.
          */
         constructor: function () {
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
         },
 
         /**
@@ -126,7 +126,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 basemapsGroup: basemapGroup,
                 bingMapsKey: this.mapObj.commonConfig.bingMapsKey,
                 map: this.mapObj.mapInfo.map
-            }, dojo.create('div')).placeAt(this.rootDiv);
+            }, domConstruct.create('div')).placeAt(this.rootDiv);
             galleryHolder.set('content', basemapGallery.domNode);
 
             basemapGallery.startup();
@@ -172,7 +172,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 // For each item in to-do list, get the id of the item, then call the specified method with the specified arg
                 array.forEach(this.todo, function (task) {
                     try {
-                        target = dojo.byId(task.rootId);
+                        target = dom.byId(task.rootId);
                         if (target) {
                             target = target.getLGObject();
                             if (target) {
@@ -189,7 +189,206 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGCommand", [js.LGGraphic, js.LGDependency], {
+    dojo.declare("js.LGButton", js.LGGraphic, {
+        /**
+         * Constructs an LGButton.
+         *
+         * @constructor
+         * @class
+         * @name js.LGButton
+         * @extends js.LGGraphic
+         * @classdesc
+         * Builds and manages a UI object that represents a button.
+         */
+        constructor: function () {
+            var attrs;
+
+            this.applyTheme(true);
+
+            // If we have an icon, add it to the face of the button
+            if (this.iconUrl) {
+                attrs = {src: this.iconUrl};
+                if (this.iconClass) {
+                    attrs.className = this.iconClass;
+                }
+                this.iconImg = domConstruct.create("img", attrs, this.rootDiv);
+            }
+            // If we have text, add it to the face of the button
+            if (this.displayText) {
+                attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
+                if (this.displayTextClass) {
+                    attrs.className = this.displayTextClass;
+                }
+                domConstruct.create("div", attrs, this.rootDiv);
+            }
+
+            if (this.tooltip) {
+                this.rootDiv.title = this.checkForSubstitution(this.tooltip);
+            }
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGRadioButton", js.LGButton, {
+        /**
+         * Constructs an LGRadioButton.
+         *
+         * @constructor
+         * @class
+         * @name js.LGRadioButton
+         * @extends js.LGButton
+         * @classdesc
+         * Builds and manages a UI object that represents a pushbutton,
+         * a button that shows on and off states, that participates in
+         * a radiobutton control.
+         */
+        constructor: function () {
+            // Set the initial state
+            this.isOn = this.toBoolean(this.isOn, false);
+            this.setIsOn(this.isOn);
+
+            // Placeholder for radiobutton controller integration
+            this.controller = null;
+
+            // Use clicks to toggle state
+            on(this.rootDiv, "click", this.handleClick);
+        },
+
+        /**
+         * Sets the radiobutton controller for this button.
+         * @param {object} controllerToUse Controller object
+         * @memberOf js.LGRadioButton#
+         */
+        setController: function (controllerToUse) {
+            this.controller = controllerToUse;
+        },
+
+        /**
+         * Sets the button into the on or off state.
+         * @param {boolean} isOn Indicates if button should be on (true)
+         *        or off
+         * @memberOf js.LGRadioButton#
+         */
+        setIsOn: function (isOn) {
+            this.isOn = isOn;
+            if (this.isOn) {
+                this.applyThemeAltBkgd(true);
+            } else {
+                this.applyTheme(true);
+            }
+        },
+
+        /**
+         * Handles a click event.
+         * @param {object} evt Click event
+         * @this {js.LGRadioButton's rootDiv or subclass instance}
+         * @private
+         * @memberOf js.LGRadioButton#
+         */
+        handleClick: function (evt) {
+            var obj = evt.currentTarget.getLGObject();
+            if (obj.controller) {
+                obj.controller.selectMember(obj);
+            }
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGRadioButtonController", js.LGObject, {
+        /**
+         * Constructs an LGRadioButtonController.
+         *
+         * @constructor
+         * @class
+         * @name js.LGRadioButtonController
+         * @extends LGObject
+         * @classdesc
+         * Manages a set of objects so that one and only one
+         * is selected.
+         */
+        constructor: function () {
+            this.members = [];
+            this.currentMember = null;
+        },
+
+        /**
+         * Adds an object to the controller's control and calls the
+         * object's setController function to establish a backlink.
+         * @param {object} controllee Object to control
+         * @memberOf js.LGRadioButtonController#
+         */
+        addMember: function (controllee) {
+            this.members.push(controllee);
+            controllee.setController(this);
+        },
+
+        /**
+         * Selects one of the controller's objects.
+         * @param {number|string|object} selection Object to select; if
+         *        number, it is the zero-based index of controllees
+         *        (indexed in order of insertion); if string, it is a
+         *        controllee value to search (the first found is
+         *        selected); if an object, it is matched by rootId to
+         *        controllees (the first found is selected)
+         * @memberOf js.LGRadioButtonController#
+         */
+        selectMember: function (selection) {
+            var idOfNewSelected, pThis = this;
+
+            // Clear current selection
+            if (this.currentMember) {
+                this.currentMember.setIsOn(false);
+                this.currentMember = null;
+            }
+
+            // Convert index-based selection to an item
+            if (typeof selection === "number") {
+                if (this.members.length > 0) {
+                    selection = Math.max(0, Math.min(selection, pThis.members.length - 1));
+                    pThis.currentMember = pThis.members[selection];
+                    pThis.currentMember.setIsOn(true);
+                }
+
+            // Switch the selection to the member with the specified value
+            } else if (typeof selection === "string") {
+                array.some(this.members, function (member) {
+                    if (member.value === selection) {
+                        pThis.currentMember = member;
+                        pThis.currentMember.setIsOn(true);
+                        return true;
+                    }
+                    return false;
+                });
+
+            // Switch to the supplied selection by id
+            } else if (selection) {
+                idOfNewSelected = selection.rootId;
+                array.some(this.members, function (member) {
+                    if (member.rootId === idOfNewSelected) {
+                        pThis.currentMember = member;
+                        pThis.currentMember.setIsOn(true);
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        },
+
+        /**
+         * Returns the currently-selected controllee.
+         * @return {object} Current controllee or null
+         * @memberOf js.LGRadioButtonController#
+         */
+        getCurrentMember: function () {
+            return this.currentMember;
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGCommand", [js.LGButton, js.LGDependency], {
         /**
          * Constructs an LGCommand.
          *
@@ -233,36 +432,11 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * @constructor
          * @class
          * @name js.LGCommand
-         * @extends js.LGGraphic, js.LGDependency
+         * @extends js.LGButton, js.LGDependency
          * @classdesc
          * Builds and manages a UI object that represents a command.
          */
         constructor: function () {
-            var attrs;
-
-            this.applyTheme(true);
-
-            // If we have an icon, add it to the face of the button
-            if (this.iconUrl) {
-                attrs = {src: this.iconUrl};
-                if (this.iconClass) {
-                    attrs.className = this.iconClass;
-                }
-                this.iconImg = dojo.create("img", attrs, this.rootDiv);
-            }
-            // If we have text, add it to the face of the button
-            if (this.displayText) {
-                attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
-                if (this.displayTextClass) {
-                    attrs.className = this.displayTextClass;
-                }
-                dojo.create("div", attrs, this.rootDiv);
-            }
-
-            if (this.tooltip) {
-                this.rootDiv.title = this.checkForSubstitution(this.tooltip);
-            }
-
             // Hook up a click on the root div to the click handler; we use the root div so that
             // one can click outside of the icon and text
             if (this.publish) {
@@ -297,17 +471,103 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
         /**
          * Handles a click event.
          * @param {object} evt Click event
-         * @this {js.LGCommand}
+         * @this {rootDiv of js.LGCommand's rootDiv or subclass instance}
          * @private
          * @memberOf js.LGCommand#
-         * @override
          */
         handleClick: function (evt) {
             var obj = evt.currentTarget.getLGObject();
             topic.publish("command", obj.publish);
             topic.publish(obj.publish, obj.publishArg);
         }
+    });
 
+    //========================================================================================================================//
+
+    dojo.declare("js.LGCommandToggle", js.LGCommand, {
+        /**
+         * Constructs an LGCommandToggle.
+         *
+         * @constructor
+         * @class
+         * @name js.LGCommandToggle
+         * @extends js.LGCommand
+         * @classdesc
+         * Builds and manages a UI object that represents a command that
+         * can toggle its enabled and/or visibility states.
+         */
+        constructor: function () {
+            var pThis = this;
+
+            // Set initial state
+            this.iconDisabledUrl = this.iconDisabledUrl || this.iconUrl;
+            this.isEnabled = this.toBoolean(this.isEnabled, true);
+            pThis.setIsEnabled(this.isEnabled);
+
+            this.isVisible = this.toBoolean(this.isVisible, true);
+            pThis.setIsVisible(this.isVisible);
+
+            // Handle enable/disable triggers
+            if (this.triggerEnable) {
+                topic.subscribe(this.triggerEnable, function () {
+                    pThis.isEnabled = true;
+                    pThis.setIsEnabled(pThis.isEnabled);
+                });
+            }
+            if (this.triggerDisable) {
+                topic.subscribe(this.triggerDisable, function () {
+                    pThis.isEnabled = false;
+                    pThis.setIsEnabled(pThis.isEnabled);
+                });
+            }
+
+            // Handle visible/invisible triggers
+            if (this.triggerVisible) {
+                topic.subscribe(this.triggerVisible, function () {
+                    pThis.isVisible = true;
+                    pThis.setIsVisible(pThis.isVisible);
+                });
+            }
+            if (this.triggerInvisible) {
+                topic.subscribe(this.triggerInvisible, function () {
+                    pThis.isVisible = false;
+                    pThis.setIsVisible(pThis.isVisible);
+                });
+            }
+        },
+
+        /**
+         * Enables or disables the command.
+         * @param {boolean} isEnabled Indicates if graphic should be
+         *        enabled (true) or disabled
+         * @memberOf js.LGCommandToggle#
+         */
+        setIsEnabled: function (isEnabled) {
+            this.isEnabled = isEnabled;
+            if (this.isEnabled) {
+                this.iconImg.src = this.iconUrl;
+                domClass.add(this.rootDiv, "appThemeHover");
+            } else {
+                this.iconImg.src = this.iconDisabledUrl;
+                domClass.remove(this.rootDiv, "appThemeHover");
+            }
+        },
+
+        /**
+         * Handles a click event.
+         * @param {object} evt Click event
+         * @this {js.LGCommandToggle's rootDiv or subclass instance}
+         * @private
+         * @memberOf js.LGCommandToggle#
+         * @override
+         */
+        handleClick: function (evt) {
+            var obj = evt.currentTarget.getLGObject();
+
+            if (obj.isEnabled) {
+                obj.inherited("handleClick", arguments);
+            }
+        }
     });
 
     //========================================================================================================================//
@@ -339,6 +599,209 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
     //========================================================================================================================//
 
+    dojo.declare("js.LGPrintMap", js.LGMapBasedMenuBox, {
+        /**
+         * Constructs an LGPrintMap.
+         *
+         * @constructor
+         * @class
+         * @name js.LGPrintMap
+         * @extends LGMapBasedMenuBox
+         * @classdesc
+         * Prints the configured map.
+         */
+        constructor: function () {
+            var landscapeBtn, portraitBtn, okBtn, pThis = this;
+
+            // Set up the print dialog box
+            this.radioButtonController = new js.LGRadioButtonController();
+
+            landscapeBtn = new js.LGRadioButton({
+                rootId: this.rootId + "_landscape",
+                parentDiv: this.rootId,
+                iconUrl: this.landscapeButtonIconUrl,
+                rootClass: this.orientationButtonClass,
+                iconClass: this.orientationButtonIconClass,
+                tooltip: this.checkForSubstitution(this.landscapeButtonTooltip),
+                value: this.landscapeServerSpec
+            });
+            landscapeBtn.setIsVisible(true);
+            this.radioButtonController.addMember(landscapeBtn);
+            domStyle.set(landscapeBtn.rootDiv, "display", "inline-block");
+
+            portraitBtn = new js.LGRadioButton({
+                rootId: this.rootId + "_portrait",
+                parentDiv: this.rootId,
+                iconUrl: this.portraitButtonIconUrl,
+                rootClass: this.orientationButtonClass,
+                iconClass: this.orientationButtonIconClass,
+                tooltip: this.checkForSubstitution(this.portraitButtonTooltip),
+                value: this.portraitServerSpec
+            });
+            portraitBtn.setIsVisible(true);
+            this.radioButtonController.addMember(portraitBtn);
+            domStyle.set(portraitBtn.rootDiv, "display", "inline-block");
+
+            this.titleEntryTextBox = new TextBox({
+                id: this.rootId + "_titleEntry",
+                value: this.title,
+                trim: true,
+                placeHolder: this.titleHint
+            }).placeAt(this.rootId);
+            domStyle.set(this.titleEntryTextBox.domNode, "width", "97%");
+            domClass.add(this.titleEntryTextBox.domNode, this.titleClass);
+
+            this.authorEntryTextBox = new TextBox({
+                id: this.rootId + "_authorEntry",
+                value: this.author,
+                trim: true,
+                placeHolder: this.authorHint
+            }).placeAt(this.rootId);
+            domStyle.set(this.authorEntryTextBox.domNode, "width", "97%");
+            domClass.add(this.authorEntryTextBox.domNode, this.authorClass);
+
+            okBtn = new js.LGButton({
+                rootId: this.rootId + "_doPrint",
+                parentDiv: this.rootId,
+                iconUrl: this.printButtonIconUrl,
+                rootClass: this.printButtonClass,
+                iconClass: this.printButtonIconClass,
+                tooltip: this.checkForSubstitution(this.printButtonTooltip)
+            });
+            okBtn.setIsVisible(true);
+            domStyle.set(okBtn.rootDiv, "display", "inline-block");
+
+            this.radioButtonController.selectMember(0);
+
+            // Await the OK from our dialog before launching print job
+            on(okBtn.rootDiv, "click", function () {
+                var selectedLayout, printParams;
+
+                // Broadcast status; our LGDropdownBox ancestor has already made our dialog box visible
+                topic.publish(pThis.publishWorking);
+
+                // Hide the dialog box; we don't need to have it take up space while
+                // the server is off doing the print job
+                pThis.setIsVisible(false);
+
+                // Create print parameters with full template
+                selectedLayout = pThis.radioButtonController.getCurrentMember();
+                selectedLayout = selectedLayout ? selectedLayout.value : null;
+
+                printParams = new PrintParameters();
+                printParams.map = pThis.mapObj.mapInfo.map;
+                printParams.outSpatialReference = pThis.mapObj.mapInfo.map.spatialReference;
+                printParams.template = new PrintTemplate();
+                printParams.template.format = pThis.format || "PDF";
+                printParams.template.layout = selectedLayout || pThis.layout || "Letter ANSI A Landscape";
+                printParams.template.layoutOptions = {
+                    titleText: pThis.titleEntryTextBox.value,
+                    authorText: pThis.authorEntryTextBox.value,
+                    copyrightText: pThis.copyrightText
+                };
+                printParams.template.preserveScale = pThis.toBoolean(pThis.preserveScale, false);
+                printParams.template.showAttribution = true;
+
+                // Run the job
+                pThis.printTask.execute(printParams,
+                    function (result) {
+                        /* success */
+                        // Broadcast status
+                        topic.publish(pThis.publishReady);
+                        topic.publish(pThis.publishPrintUrl, result.url);
+                    }, function (error) {
+                        /* failure */
+                        // Broadcast status
+                        topic.publish(pThis.publishReady);
+                        pThis.log("Print failed: " + error.message, true);
+                    }
+                    );
+            });
+        },
+
+        /**
+         * Checks that the instance has its prerequisites.
+         * @throws {string} "no print task configured" if the the
+         *        common configuration does not include a print
+         *        task
+         * @memberOf js.LGPrintMap#
+         * @override
+         */
+        checkPrerequisites: function () {
+            if (this.commonConfig.helperServices &&
+                    this.commonConfig.helperServices.printTask &&
+                    this.commonConfig.helperServices.printTask.url) {
+                this.printTask = new PrintTask(
+                    this.commonConfig.helperServices.printTask.url,
+                    {
+                        async: false  // depends on print service
+                    }
+                );
+            } else {
+                this.log("no print task configured");
+                throw "no print task configured";
+            }
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGFetchPrintedMap", [js.LGObject, js.LGMapDependency], {
+        /**
+         * Constructs an LGFetchPrintedMap.
+         *
+         * @constructor
+         * @class
+         * @name js.LGFetchPrintedMap
+         * @extends js.LGObject, js.LGMapDependency
+         * @classdesc
+         * In response to a message, responds with another message with
+         * the URL of the printed map.
+         */
+        constructor: function () {
+            this.fetchPrintUrl = null;
+            this.printAvailabilityTimeoutMinutes = this.toNumber(this.printAvailabilityTimeoutMinutes, 10);  // minutes
+            this.printTimeouter = null;
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGFetchPrintedMap#
+         * @override
+         */
+        onDependencyReady: function () {
+            var pThis = this;
+            // Now that the map (our dependency) is ready, finish setup
+
+            // Cache the URL to the print when triggered
+            topic.subscribe(this.triggerPrintUrl, function (url) {
+                // Cancel any timeout we've got going
+                clearTimeout(pThis.printTimeouter);
+
+                // Make the URL available
+                pThis.fetchPrintUrl = url;
+                topic.publish(pThis.publishPrintAvailable);
+
+                // Set up an expiration for this URL
+                if (pThis.printAvailabilityTimeoutMinutes > 0) {
+                    pThis.printTimeouter = setTimeout(function () {
+                        topic.publish(pThis.publishPrintNotAvailable);
+                    }, pThis.printAvailabilityTimeoutMinutes * 60000);
+                }
+            });
+
+            // Fetch the print when triggered
+            topic.subscribe(this.trigger, function () {
+                if (pThis.fetchPrintUrl !== null) {
+                    topic.publish(pThis.publish, pThis.fetchPrintUrl);
+                }
+            });
+        }
+    });
+
+    //========================================================================================================================//
+
     dojo.declare("js.LGLocate", js.LGObject, {
         /**
          * Constructs an LGLocate.
@@ -352,10 +815,16 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * the browser's location.
          */
         constructor: function () {
-            var pThis = this;
+            var pThis = this, backupTimeoutTimer,
+                // Make backup timeout that's later than the geolocation timeout
+                // so that we don't get overlapping timeouts. Also, the backup
+                // timeout occurs if the user takes too long to decide to accept
+                // or to deny the location request (no harm in this--just an alert
+                // appears).
+                cTimeout = 8000, cBackupTimeout = 16000;  // timeouts are in ms
 
             // Object is ready only if geolocation is supported
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
             if (!Modernizr.geolocation) {
                 this.ready.reject(pThis);
 
@@ -363,8 +832,16 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 // Start listening for a position request
                 topic.subscribe(this.trigger, function () {
 
+                    // Set a backup timeout because if one chooses "not now" for providing
+                    // the position, the geolocation call does not return or time out
+                    backupTimeoutTimer = setTimeout(function () {
+                        alert(pThis.checkForSubstitution("@messages.geolocationTimeout"));
+                    }, cBackupTimeout);
+
                     // Try to get the current position
                     navigator.geolocation.getCurrentPosition(function (position) {
+                        clearTimeout(backupTimeoutTimer);
+
                         pThis.log("go to " + position.coords.latitude + " " + position.coords.longitude);
                         topic.publish(pThis.publish, new esri.geometry.Point(
                             position.coords.longitude,
@@ -372,8 +849,10 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                             new esri.SpatialReference({ wkid: 4326 })
                         ));
                     }, function (error) {
-                        // Report the location failure
                         var message;
+                        clearTimeout(backupTimeoutTimer);
+
+                        // Report the location failure
                         switch (error.code) {
                         case error.PERMISSION_DENIED:
                             message = pThis.checkForSubstitution("@messages.geolocationDenied");
@@ -387,7 +866,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                         }
                         alert(message);
                     }, {
-                        timeout: 30000
+                        timeout: cTimeout
                     });
                 });
                 this.ready.resolve(pThis);
@@ -410,7 +889,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          */
         constructor: function () {
             if (this.busyIndicator) {
-                this.busyIndicator = dojo.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
             }
         },
 
@@ -520,7 +999,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             this.searcher.outSpatialReference = new esri.SpatialReference({"wkid": this.outWkid});
             this.params = {};
             this.params.outFields = this.outFields;
-            this.ready = new dojo.Deferred();
+            this.ready = new Deferred();
             this.ready.resolve(this);
         },
 
@@ -549,7 +1028,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * @memberOf js.LGSearchAddress#
          * @override
          */
-        toList: function (results, searchText) {
+        toList: function (results) {
             var ok, pThis = this, resultsList = [];
             if (results) {
                 // Filter results by desired score and locator
@@ -622,14 +1101,14 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
 
             domConstruct.create("label",
                 {"for": textBoxId, innerHTML: this.checkForSubstitution(this.showPrompt)}, this.rootId);
-            searchEntryTextBox = new dijit.form.TextBox({
+            searchEntryTextBox = new TextBox({
                 id: textBoxId,
                 value: "",
                 trim: true,
                 placeHolder: this.hint,
                 intermediateChanges: true
             }).placeAt(this.rootId);
-            domStyle.set(registry.byId(textBoxId).domNode, "width", "99%");
+            domStyle.set(searchEntryTextBox.domNode, "width", "99%");
 
             resultsListBox = domConstruct.create("div",
                 {className: this.resultsListBoxClass}, this.rootId);
@@ -639,7 +1118,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 {className: this.resultsListBodyClass}, table);
             touchScroll(resultsListBox);
 
-            searcher = dojo.byId(this.searcher).getLGObject();
+            searcher = dom.byId(this.searcher).getLGObject();
             lastSearchString = "";
             lastSearchTime = 0;
             stagedSearch = null;
@@ -649,7 +1128,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 var searchText = searchEntryTextBox.get("value");
                 if (lastSearchString !== searchText) {
                     lastSearchString = searchText;
-                    dojo.empty(tableBody);
+                    domConstruct.empty(tableBody);
 
                     // Clear any staged search
                     clearTimeout(stagedSearch);
@@ -674,7 +1153,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                                 }
 
                                 // Show results
-                                dojo.empty(tableBody);  // to get rid of searching indicator
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
                                 resultsList = searcher.toList(results, searchText);
 
                                 now = (new Date()).getTime();
@@ -700,7 +1179,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                                 pThis.log("LGSearchBoxByText_1: " + error.message);
 
                                 lastSearchString = "";  // so that we can quickly repeat this search
-                                dojo.empty(tableBody);  // to get rid of searching indicator
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
                             });
                         }, 1000);
                     }
@@ -726,13 +1205,8 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
             if (!this.searchPattern || this.searchPattern.indexOf("${1}") < 0) {
                 this.searchPattern = "%${1}%";
             }
-            if (this.caseInsensitiveSearch === undefined || this.caseInsensitiveSearch === "true"
-                    || this.caseInsensitiveSearch === true) {
-                this.caseInsensitiveSearch = true;
-            } else {
-                this.caseInsensitiveSearch = false;
-            }
-            this.ready = new dojo.Deferred();
+            this.caseInsensitiveSearch = this.toBoolean(this.caseInsensitiveSearch, true);
+            this.ready = new Deferred();
         },
 
         /**
@@ -862,6 +1336,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 attributeSeparator = "",
                 attributeSeparatorReset = "  OR  ";  // thanks to Tim H.: single spaces don't work with some DBs
 
+            // Prepare the search term and the search query pattern for the desired casing handling
             if (this.caseInsensitiveSearch === true) {
                 processedSearchText = searchText.toUpperCase();
                 attributePattern = "UPPER(${0}) LIKE '" + this.searchPattern + "'";
@@ -870,11 +1345,17 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
                 attributePattern = "${0} LIKE '" + this.searchPattern + "'";
             }
 
+            // Escape single quotes, which are used to bound the search term in the query
+            processedSearchText = processedSearchText.replace(/'/g, "''");
+
+            // Replace the search term into the search query for each field to be searched
             array.forEach(this.searchFields, function (searchField) {
                 searchParam = searchParam + attributeSeparator
                     + dojo.string.substitute(attributePattern, [searchField, processedSearchText]);
                 attributeSeparator = attributeSeparatorReset;
             });
+
+            // Launch the combined query
             if (0 < searchParam.length) {
                 this.generalSearchParams.where = searchParam;
                 this.searcher.execute(this.generalSearchParams, callback, errback);
@@ -1000,7 +1481,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
         constructor: function () {
             var pThis = this;
             if (this.busyIndicator) {
-                this.busyIndicator = dojo.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
             }
             topic.subscribe(this.trigger, function () {
                 pThis.share();
@@ -1100,7 +1581,7 @@ define("js/lgonlineCommand", ["dijit", "dijit/registry", "dojo/dom-construct", "
          * @name js.LGShareAppExtents
          * @extends js.LGShare, js.LGMapDependency
          * @classdesc
-         * Extends  simple sharing to include the app's map's current
+         * Extends simple sharing to include the app's map's current
          * extents.
          */
 

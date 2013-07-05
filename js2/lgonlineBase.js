@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic"], function (domConstruct, domStyle, domClass, array, topic) {
+define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "dojo/_base/lang"], function (domConstruct, dom, on, domStyle, domClass, array, topic, lang) {
 
     //========================================================================================================================//
 
@@ -67,7 +67,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
             // If a parent div is supplied, make sure that it exists
             if (this.parentDiv !== undefined) {
                 parentDiv = this.parentDiv;
-                parentDivObj = dojo.byId(parentDiv);
+                parentDivObj = dom.byId(parentDiv);
                 if (!parentDivObj) {
                     parentDiv = null;
                 }
@@ -204,7 +204,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
                 attributeChain = attributePath.split(".");
                 for (x = 0; x < attributeChain.length; x = x + 1) {
                     if (null === objAtEnd) {
-                        objAtEnd = dojo.byId(attributeChain[x]).getLGObject();
+                        objAtEnd = dom.byId(attributeChain[x]).getLGObject();
                     } else {
                         objAtEnd = objAtEnd[attributeChain[x]];
                     }
@@ -214,6 +214,76 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
             }
 
             return objAtEnd;
+        },
+
+        /** Normalizes a boolean value to true or false.
+         * @param {boolean|string} boolValue A true or false
+         *        value that is returned directly or a string
+         *        "true" or "false" (case-insensitive) that
+         *        is checked and returned; if neither a
+         *        a boolean or a usable string, falls back to
+         *        defaultValue
+         * @param {boolean} [defaultValue] A true or false
+         *        that is returned if boolValue can't be
+         *        used; if not defined, true is returned
+         * @memberOf js.LGObject#
+         */
+        toBoolean: function (boolValue, defaultValue) {
+            var lowercaseValue;
+
+            // Shortcut true|false
+            if (boolValue === true) {
+                return true;
+            }
+            if (boolValue === false) {
+                return false;
+            }
+
+            // Handle a true|false string
+            if (typeof boolValue === "string") {
+                lowercaseValue = boolValue.toLowerCase();
+                if (lowercaseValue === "true") {
+                    return true;
+                }
+                if (lowercaseValue === "false") {
+                    return false;
+                }
+            }
+            // Fall back to default
+            if (defaultValue === undefined) {
+                return true;
+            }
+            return defaultValue;
+        },
+
+        /** Normalizes a number value.
+         * @param {number|string} numValue A number that is
+         *        returned directly or a string that is
+         *        attempted as a number; if neither a
+         *        a number or a usable string, falls back to
+         *        defaultValue
+         * @param {boolean} [defaultValue] A number
+         *        that is returned if numValue can't be
+         *        used; if not defined, 0 is returned
+         * @memberOf js.LGObject#
+         */
+        toNumber: function (numValue, defaultValue) {
+            // Shortcut number
+            if (typeof numValue === "number") {
+                return numValue;
+            }
+
+            // Handle a non-number
+            numValue = new Number(numValue);
+            if (!isNaN(numValue)) {
+                return numValue;
+            }
+
+            // Fall back to default
+            if (defaultValue === undefined) {
+                return 0;
+            }
+            return defaultValue;
         },
 
         /**
@@ -236,7 +306,6 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
                 window.gLogMessageBox.append(message);
             }
         }
-
     });
 
     //========================================================================================================================//
@@ -279,7 +348,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          */
         constructor: function () {
             // Do class-specific adjustments whenever the window is resized
-            dojo.connect(window, "resize", this, this.handleWindowResize, true);
+            on(window, "resize", lang.hitch(this, this.handleWindowResize));
             this.handleWindowResize();
         },
 
@@ -287,10 +356,34 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * Shows or hides the graphic.
          * @param {boolean} isVisible Indicates if graphic should be
          *        shown (true) or hidden
+         * @param {boolean} [hasSubstance] Indicates if graphic should
+         *        have DOM substance even when it is not visible. If
+         *        hasSubstance is omitted or is false, then the
+         *        "visibility" style is set to "visible" and the
+         *        isVisible parameter toggles the "display" style
+         *        between "block" and "none". If hasSubstance is true,
+         *        then the "display" style is set to "block" and the
+         *        isVisible parameter toggles the "visiblity" style
+         *        between "visible" and "hidden".
          * @memberOf js.LGGraphic#
          */
-        setIsVisible: function (isVisible) {
-            domStyle.set(this.getRootDiv(), "display", isVisible ? "block" : "none");
+        setIsVisible: function (isVisible, hasSubstance) {
+            if (!hasSubstance) {  // null or false
+                domStyle.set(this.getRootDiv(), "display", isVisible ? "block" : "none");
+                domStyle.set(this.getRootDiv(), "visibility", "visible");
+            } else {
+                domStyle.set(this.getRootDiv(), "display", "block");
+                domStyle.set(this.getRootDiv(), "visibility", isVisible ? "visible" : "hidden");
+            }
+        },
+
+        /**
+         * Reports the graphic's visibility
+         * @return {boolean} True if graphic is visible
+         * @memberOf js.LGGraphic#
+         */
+        getIsVisible: function () {
+            return domStyle.get(this.getRootDiv(), "display") !== "none";
         },
 
         /**
@@ -298,8 +391,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * @memberOf js.LGGraphic#
          */
         toggleVisibility: function () {
-            var isVisibleNow = domStyle.get(this.getRootDiv(), "display") !== "none";
-            domStyle.set(this.getRootDiv(), "display", isVisibleNow ? "none" : "block");
+            domStyle.set(this.getRootDiv(), "display", this.getIsVisible() ? "none" : "block");
         },
 
         /**
@@ -448,12 +540,28 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * @memberOf js.LGGraphic#
          */
         applyTheme: function (withHover, node) {
+            domClass.remove(node || this.rootDiv, "appTheme2");
             domClass.add(node || this.rootDiv, "appTheme");
             if (withHover) {
                 domClass.add(node || this.rootDiv, "appThemeHover");
             }
-        }
+        },
 
+        /**
+         * Applies the alternate form of the current theme class to the object.
+         * @param {boolean} [withHover] Node has hover color or not; no
+         *        hover color if omitted
+         * @param {string|object} [node] Node to receive style; applied
+         *        to the calling object if omitted
+         * @memberOf js.LGGraphic#
+         */
+        applyThemeAltBkgd: function (withHover, node) {
+            domClass.remove(node || this.rootDiv, "appTheme");
+            domClass.add(node || this.rootDiv, "appTheme2");
+            if (withHover) {
+                domClass.add(node || this.rootDiv, "appThemeHover");
+            }
+        }
     });
 
     //========================================================================================================================//
@@ -465,7 +573,6 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
          * @constructor
          * @class
          * @name js.LGDependency
-         * @extends js.LGGraphic
          * @classdesc
          * Provides a mixin for handling a ready dependency on another
          * object.
@@ -474,7 +581,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom-style", "dojo/dom-cla
             var dependsOn, pThis = this;
 
             if (this.dependencyId) {
-                dependsOn = dojo.byId(this.dependencyId).getLGObject();
+                dependsOn = dom.byId(this.dependencyId).getLGObject();
                 this.onDependencyPrep(dependsOn);
                 dependsOn.ready.then(function () {
                     pThis.onDependencyReady();

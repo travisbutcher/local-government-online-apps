@@ -2,7 +2,7 @@
 /*jslint sloppy:true */
 /** @license
  | ArcGIS for Local Government
- | Version 10.1.2
+ | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,6 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineApp", ["js/lgonlineBase", "js/lgonlineCommand", "js/lgonlineFrame", "js/lgonlineMap", "js/lgonlineOutput"], function () {
+define("js/lgonlineApp", ["js/lgonlineBase", "js/lgonlineCommand", "js/lgonlineDrawing", "js/lgonlineFrame", "js/lgonlineMap", "js/lgonlineOutput"], function () {
     return {};
 });
