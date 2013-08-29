@@ -1623,4 +1623,177 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
     //========================================================================================================================//
 
+    dojo.declare("js.LGFilterLayers1", [js.LGDropdownBox, js.LGMapDependency], {
+        /**
+         * Constructs an LGFilterLayers1.
+         *
+         * @constructor
+         * @class
+         * @name js.LGFilterLayers1
+         * @extends js.LGDropdownBox, js.LGMapDependency
+         * @classdesc
+         * Filters layers that have a specified field by setting definition expressions using that field.
+         */
+        constructor: function () {
+
+
+
+        },
+
+        /**
+        * Performs class-specific setup when the dependency is
+        * satisfied.
+        * @memberOf js.LGFilterLayers1#
+        * @override
+        */
+        onDependencyReady: function () {
+            var layerAndDefExpObject;
+            this.layers = [];
+
+            // Build a list of layers that contain the managed field
+            if (this.fieldname1) {
+                // Loop through all the operation layers added to the map. If layer type is Feature layer, find if layer has
+                // the managed field.  If so, push the field type and layer object to an array of objects.
+                array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                    if (mapLayer.layerObject) {
+                        if (mapLayer.layerObject.type === "Feature Layer") {
+                            for (field = 0; field < mapLayer.layerObject.fields.length; field += 1) {
+                                if (mapLayer.layerObject.fields[field].name === this.fieldname1) {
+
+                                    layerAndDefExpObject = {
+                                        "layerObject": mapLayer.layerObject,
+                                        "floorFieldType": mapLayer.layerObject.fields[field].type
+                                    };
+                                    this.layers.push(layerAndDefExpObject);
+                                    this.setLayerDefinitionExpression(mapLayer.layerObject, this.value1);
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }));
+
+                // Set the definitions for the layers containing the managed field
+                applyFilter();
+            }
+        },
+
+        /**
+        * Loops through the layers array on which definition expression is applied and calls
+        * setLayerDefinitionExpression with the new value.
+        * @memberOf js.LGFilterLayers1#
+        */
+        onValueChange: function () {
+            this.value1 = this.input.value.trim();
+
+            var newValue, message, field, pThis = this;
+            this.mapObj.mapInfo.map.infoWindow.hide();
+            newValue = this.input.value.trim();
+            topic.publish("input", newValue);
+            //loop through the layers to apply the definition expression.Only the features that match the definition expression are displayed.
+            array.forEach(pThis.layers, function (layer) {
+                pThis.setLayerDefinitionExpression(layer.layerObject, layer.floorFieldType, newValue);
+                layer.layerObject.clearSelection();
+                //check if the floor value entered in the input exceeds the maximum length of the floor field
+                for (field = 0; field < layer.layerObject.fields.length; field += 1) {
+                    if (layer.layerObject.fields[field].name === pThis.floorField) {
+                        //if the length of the input value is greater than the floor field length throw an alert
+                        if ((pThis.input.value.trim().length > layer.layerObject.fields[field].length)) {
+                            message = pThis.checkForSubstitution("@messages.invalidValue");
+                            alert(string.substitute(message, [layer.layerObject.fields[field].length]));
+                        }
+                    }
+                }
+            });
+        },
+
+        /**
+        * Loops through the layers array on which definition expression is applied and calls
+        * setLayerDefinitionExpression with the new value.
+        * @memberOf js.LGFilterLayers1#
+        */
+        applyFilter: function () {
+            array.forEach(this.layers, lang.hitch(this, function (layer) {
+                this.setLayerDefinitionExpression(layer.layerObject, layer.floorFieldType, newValue);
+                layer.layerObject.clearSelection();
+                //check if the floor value entered in the input exceeds the maximum length of the floor field
+                for (field = 0; field < layer.layerObject.fields.length; field += 1) {
+                    if (layer.layerObject.fields[field].name === this.fieldname1) {
+                        //if the length of the input value is greater than the floor field length throw an alert
+                        if ((pThis.input.value.trim().length > layer.layerObject.fields[field].length)) {
+                            message = pThis.checkForSubstitution("@messages.invalidValue");
+                            alert(string.substitute(message, [layer.layerObject.fields[field].length]));
+                        }
+                    }
+                }
+            }));
+        }
+
+
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGFilterLayers1WithDefaults", [js.LGFilterLayers1, js.LGDefaults], {
+        /**
+         * Constructs an LGFilterLayers1WithDefaults.
+         *
+         * @constructor
+         * @class
+         * @name js.LGFilterLayers1WithDefaults
+         * @extends js.LGFilterLayers1, js.LGDefaults
+         * @classdesc
+         * Filters layers that have a specified field by setting definition expressions using that field and also
+         * broadcasts changes to the field as a default.
+         */
+        constructor: function () {
+
+
+
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGEditTemplatePicker", [js.LGDropdownBox, js.LGMapDependency], {
+        /**
+         * Constructs an LGEditTemplatePicker.
+         *
+         * @constructor
+         * @class
+         * @name js.LGEditTemplatePicker
+         * @extends js.LGDropdownBox, js.LGMapDependency
+         * @classdesc
+         * Displays an Editing Template Picker.
+         */
+        constructor: function () {
+
+
+
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGEditTemplatePickerWithDefaults", [js.LGEditTemplatePicker, js.LGDefaults], {
+        /**
+         * Constructs an LGEditTemplatePickerWithDefaults.
+         *
+         * @constructor
+         * @class
+         * @name js.LGEditTemplatePickerWithDefaults
+         * @extends js.LGEditTemplatePicker, js.LGDefaults
+         * @classdesc
+         * Displays an Editing Template Picker that contains default values for specified fields.
+         */
+        constructor: function () {
+
+
+
+        }
+    });
+
+    //========================================================================================================================//
+
 });

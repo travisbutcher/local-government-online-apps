@@ -470,7 +470,6 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                 this.mapInfo.clickEventHandle.remove();
             }
         }
-
     });
 
     //========================================================================================================================//
