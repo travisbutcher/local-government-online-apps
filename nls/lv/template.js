@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Koplietot caur Twitter",
             print: "Drukāt karti",
             fetchPrint: "Skatīties kartes druku",
-            landscape: "Ainava",
-            portrait: "Portrets",
+            landscape: "Ainavas lapas izvietojums",
+            portrait: "Portreta lapas izvietojums",
             help: "Palīdzība"
         },
         labels: {

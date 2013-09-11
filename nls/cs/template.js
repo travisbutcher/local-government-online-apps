@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2013 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Sdílet na Twitteru",
             print: "Vytisknout mapu",
             fetchPrint: "Zobrazit vytištěnou mapu",
-            landscape: "Na šířku",
-            portrait: "Na výšku",
+            landscape: "Orientace stránky na šířku",
+            portrait: "Orientace stránky na výšku",
             help: "Nápověda"
         },
         labels: {

@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -26,10 +26,10 @@ define(
             shareViaEmail: "通过电子邮件共享",
             shareViaFacebook: "通过 Facebook 共享",
             shareViaTwitter: "通过 Twitter 共享",
-            print: "创建地图打印",
-            fetchPrint: "获取地图打印",
-            landscape: "横向",
-            portrait: "纵向",
+            print: "打印地图",
+            fetchPrint: "查看打印的地图",
+            landscape: "横向页面方向",
+            portrait: "纵向页面方向",
             help: "帮助"
         },
         labels: {

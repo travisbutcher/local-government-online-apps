@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Del via Twitter",
             print: "Skriv ut kart",
             fetchPrint: "Vis kartutskriften",
-            landscape: "Liggende",
-            portrait: "Stående",
+            landscape: "Liggende papirretning",
+            portrait: "Stående papirretning",
             help: "Hjelp"
         },
         labels: {

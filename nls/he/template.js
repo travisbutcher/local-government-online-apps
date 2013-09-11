@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "שתף בטוויטר",
             print: "הדפס מפה",
             fetchPrint: "צפייה במפה המודפסת",
-            landscape: "לרוחב",
-            portrait: "לאורך",
+            landscape: "כיוון דף לרוחב",
+            portrait: "כיוון דף לאורך",
             help: "עזרה"
         },
         labels: {

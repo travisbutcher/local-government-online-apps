@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Partajare prin Twitter",
             print: "Imprimare dată",
             fetchPrint: "Vizualizare hartă imprimată",
-            landscape: "Peisaj",
-            portrait: "Portret",
+            landscape: "Orientare pagină peisaj",
+            portrait: "Orientare pagină portret",
             help: "Ajutor"
         },
         labels: {

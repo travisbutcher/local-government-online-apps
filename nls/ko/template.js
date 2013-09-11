@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Twitter를 통해 공유",
             print: "맵 인쇄",
             fetchPrint: "인쇄된 맵 보기",
-            landscape: "가로",
-            portrait: "세로",
+            landscape: "가로 페이지 방향",
+            portrait: "세로 페이지 방향",
             help: "도움말"
         },
         labels: {

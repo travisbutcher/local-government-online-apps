@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Twitter で共有",
             print: "マップの印刷",
             fetchPrint: "印刷されたマップの表示",
-            landscape: "横",
-            portrait: "縦",
+            landscape: "横向きページ",
+            portrait: "縦向きページ",
             help: "ヘルプ"
         },
         labels: {

@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2013 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Jaa Twitterin kautta",
             print: "Tulosta kartta",
             fetchPrint: "Näytä tulostettu kartta",
-            landscape: "Maisema",
-            portrait: "Muotokuva",
+            landscape: "Vaakasuuntainen sivu",
+            portrait: "Pystysuuntainen sivu",
             help: "Ohje"
         },
         labels: {

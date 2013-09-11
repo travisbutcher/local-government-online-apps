@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Bendrinti per Twitter",
             print: "Spausdinti žemėlapį",
             fetchPrint: "Peržiūrėti spausdintą žemėlapį",
-            landscape: "Gulsčiai",
-            portrait: "Stačiai",
+            landscape: "Horizontalus išdėstymas",
+            portrait: "Vertikalus išdėstymas",
             help: "Pagalba"
         },
         labels: {

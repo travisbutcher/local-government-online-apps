@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Delen via Twitter",
             print: "Kaart afdrukken",
             fetchPrint: "Afgedrukte kaart weergeven",
-            landscape: "Liggend",
-            portrait: "Staand",
+            landscape: "Liggende stand",
+            portrait: "Staande stand",
             help: "Help"
         },
         labels: {

@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Condividi tramite Twitter",
             print: "Stampa mappa",
             fetchPrint: "Visualizza mappa stampata",
-            landscape: "Orizzontale",
-            portrait: "Verticale",
+            landscape: "Orientamento pagina orizzontale",
+            portrait: "Orientamento pagina verticale",
             help: "Guida"
         },
         labels: {

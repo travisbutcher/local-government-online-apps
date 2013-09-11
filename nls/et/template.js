@@ -1,4 +1,4 @@
-﻿/** @license
+﻿/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
@@ -28,8 +28,8 @@ define(
             shareViaTwitter: "Jaga läbi Twitter-i",
             print: "Prindi kaart",
             fetchPrint: "Vaata prinditud kaarti",
-            landscape: "Horisontaalpaigutus",
-            portrait: "Vertikaalpaigutus",
+            landscape: "Horisontaalpaigutusega leht",
+            portrait: "Vertikaalpaigutusega leht",
             help: "Abi"
         },
         labels: {
