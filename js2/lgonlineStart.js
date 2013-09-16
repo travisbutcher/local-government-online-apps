@@ -31,6 +31,11 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
             };
         }
 
+        // Supply a default app UI if one is not defined
+        if (!defaultAppUI) {
+            defaultAppUI = "apps2/GeneralMap";
+        }
+
         // Bring in language files
         dojo.requireLocalization("esriTemplate", "template");
 
@@ -53,7 +58,7 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
                         });
 
                         // Read the UI spec
-                        (new js.LGUIBuilder(window.location.search, null, "apps2/GeneralMap")).ready.then(
+                        (new js.LGUIBuilder(window.location.search, null, defaultAppUI)).ready.then(
                             function (theBuilder) {
                                 uiElementsReady.then(function () {
                                     // Build the UI
