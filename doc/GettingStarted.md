@@ -4,10 +4,10 @@
 
 It is ready to run using sample data, so you can set it up on your server to test that it will
 work in that environment.  A good starting URL after the appropriate server and site name substitutions
-would simply be `http://<yourServer>/<yourSite>/s1.html`.  Zoom in a bit and click on a parcel to get
-its details popup (defined in the sample data's webmap).  Try a search for a parcel (e.g., "1916301027")
-or an address (e.g., "42757 Woodward Ave").  Change the basemap.  Send the current extents to someone via
-email.
+would simply be `http://<yourServer>/<yourSite>/ParcelViewer.html` (for the Parcel Viewer download).
+Zoom in a bit and click on a parcel to get its details popup (defined in the sample data's webmap).
+Try a search for a parcel (e.g., "1916301027") or an address (e.g., "42757 Woodward Ave").  Change the basemap.
+Send the current extents to someone via email.
 
 With familiarity about what the app does, you can see where you want to customize it.  To begin, we need
 to understand how to configure the app.
@@ -84,7 +84,7 @@ values in a template and its ui in a file, but one could put all three in a temp
 file.
 
 When you use the app out of the box, it uses a default configuration completely defined in a file found
-in the `apps1` folder, the `ParcelViewer.json` file.
+in the `apps2` folder. E.g., the ParcelViewer.html app uses the `ParcelViewer.json` file.
 
 For more information about the contents of the configuration parts, see the
 [Advanced Configuration document](https://github.com/Esri/local-government-online-apps/blob/master/doc/AdvancedConfiguration.md).
@@ -100,29 +100,29 @@ the webmap to be used by the app.
 Another way for the app to get the configuration is from an ArcGIS Online web application.  Each web
 application has a unique ID, e.g., "a915b6cb73d640b0834ee607b91c8141".  You can have the app use the
 configuration from that web application via the URL parameter "appid":
-`http://<yourServer>/<yourSite>/s1.html?appid=28d43bbf94e4499fbb71e1e19a261d60`
+`http://<yourServer>/<yourSite>/ParcelViewer.html?appid=28d43bbf94e4499fbb71e1e19a261d60`
 
 This is the configuration that is used by hosted applications, which would use
-`http://www.arcgis.com/apps/Solutions/s1.html?appid=28d43bbf94e4499fbb71e1e19a261d60`
-for this app.
+`http://www.arcgis.com/apps/Solutions/s2.html?appid=28d43bbf94e4499fbb71e1e19a261d60`
+for this app. ("s2.html" is the same as "ParcelViewer.html", but with a generic map as its default user interface.)
 
 If you want to always have your users use `Color.json` for the advanced configuration, you can change
-line 60 in `js1\lgonlineStart.js` from
+line 61 in `js2\lgonlineStart.js` from
 
-    (new js.LGUIBuilder(window.location.search, null, "apps1/ParcelViewer")).ready.then(
+    (new js.LGUIBuilder(window.location.search, null, defaultAppUI)).ready.then(
 
 to
 
-    (new js.LGUIBuilder(window.location.search, "apps1/Color")).ready.then(
+    (new js.LGUIBuilder(window.location.search, "apps2/Color")).ready.then(
 
 This change gives you complete control over where the advanced configuration comes from:  It instructs
-the app to use `apps1/Color.json` for the advanced configuration regardless of whether the URL has "app="
+the app to use `apps2/Color.json` for the advanced configuration regardless of whether the URL has "app="
 or "appid=".  (We also removed the default configuration file specification--the third argument--for
 clarity.)  Note that basic configuration will still come from the appid if it is supplied, but if
 you've changed the meaning of "DarkGray" and you deleted Twitter and Facebook from the sharing menu in
 your JSON configuration file, then those changes will exist regardless of the advanced configuration in
 the web application.  For example, try
-`http://<yourServer>/<yourSite>/s1.html?appid=28d43bbf94e4499fbb71e1e19a261d60`
+`http://<yourServer>/<yourSite>/ParcelViewer.html?appid=28d43bbf94e4499fbb71e1e19a261d60`
 again after making this change.
 
 
@@ -130,7 +130,7 @@ again after making this change.
 
 The main HTML file has a name that reflects its membership in a series of generic apps rather than a
 particular configuration of the apps.  This was done because the actual app is driven by the JSON
-configuration:  `s1.html` launched with `apps1\ParcelViewer.json` creates a Parcel Viewer app, but
+configuration:  `s2.html` launched with `apps2\ParcelViewer.json` creates a Parcel Viewer app, but
 it can also be launched with your own `HydrantFinder.json`, or `ParkSearch.json`, or....
 
 We've organized the releases into series, with the initial release being series 1.  The idea is that,
@@ -141,6 +141,9 @@ within those environments, so with the next online apps release, the Esri-suppli
 application template will start using the next series for *new* web applications--already-published
 web applications have a URL within them pointing to the series under which they were published and
 will not need to be changed.
+
+The download contains a customized HTML filename: instead of having a generic map as its default user interface
+should the user interface argument be omitted from the URL, it has a domain-specific default user interface.
 
 
 ## Final note:  basic and advanced configuration are available to you even if ArcGIS.com hosts the application

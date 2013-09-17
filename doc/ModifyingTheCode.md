@@ -10,7 +10,8 @@ JavaScript and with the Dojo Toolkit.
 and thus speed.
 * jsonlineStart.js contains the code to launch the app.
 * jsonlineBuildUI.js contains two classes--LGUIBuilder and LGArcGISAccess--for building the user interface.
-* jsonlineApp.js contains (directly or through references) the classes that LGUIBuilder uses in the user interface.
+* jsonlineApp.js contains (directly for online or through references in the download) the classes that LGUIBuilder uses in the
+user interface.
 
 ### Documentation
 

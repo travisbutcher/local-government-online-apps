@@ -12,7 +12,7 @@ section.  The key WMA item in the description is the URL.
 
 1.  web mapping application-ties a template and webmap together and stores some customizations
     1.  description's URL:  points to application's software with a parameter for the WMA's arcgis.com ID; e.g.,
-    http://localgovtemplates2.esri.com/online/s1.html?appid=a915b6cb73d640b0834ee607b91c8141; this is copied from the template
+    http://localgovtemplates2.esri.com/online/s2.html?appid=a915b6cb73d640b0834ee607b91c8141; this is copied from the template
     when the WMA is created
     2.  data section:
         1.  arcgis.com id of the template that was used to create the WMA
@@ -21,7 +21,7 @@ section.  The key WMA item in the description is the URL.
         to the configuration that one can do post-publication such as title, color, etc.)
 2.  web mapping application template-defines the basic customization UI and provides the URL to the underlying software used by
 the WMA
-    1.  description's URL:  points to application's software only; e.g., http://localgovtemplates2.esri.com/online/s1.html
+    1.  description's URL:  points to application's software only; e.g., http://localgovtemplates2.esri.com/online/s2.html
     2.  data section:  a JSON structure with 2-3 parts
         1.  "values":  the default values for the basic configuration (quotes are used because that's the JSON format-tag-value
         pairs, with tags as quoted strings)
@@ -41,9 +41,9 @@ splash screen.  But the software supports this feature-we just have to change th
 we'll create a web mapping application template that includes the "ui" section, and all WMAs created from that template will use
 that feature.
 
-If you were to take the apps1/ParcelViewer.json file and copy it into a web mapping application template (see
+If you were to take the apps2/ParcelViewer.json file and copy it into a web mapping application template (see
 [Adding configurable parameters to templates](http://resources.arcgis.com/en/help/arcgisonline/index.html#/Adding_configurable_parameters_to_templates/010q000000ns000000/)),
-you'd get the out-of-the-box ParcelViewer.  (The apps1/ParcelViewer_template.json
+you'd get the out-of-the-box ParcelViewer.  (The apps2/ParcelViewer_template.json
 file is the ParcelViewer.json file without the "ui" section.)  So if we make the modification described below
 [below](https://github.com/Esri/local-government-online-apps/blob/master/doc/AdvancedConfiguration.md#another-advanced-configuration--show-the-help-text-upon-launch)
 to the ParcelViewer.json file before pasting it into the template, we'll get the splash screen.
@@ -52,7 +52,7 @@ to the ParcelViewer.json file before pasting it into the template, we'll get the
 ## A sample advanced configuration
 
 We can override the default configuration by specifying a configuration file on your server using a URL
-parameter.  To illustrate this, copy `apps1\ParcelViewer.json` into `apps1\Color.json`, then edit
+parameter.  To illustrate this, copy `apps2\ParcelViewer.json` into `apps2\Color.json`, then edit
 `Color.json`.  We'll change the meaning of the color theme "DarkGray" from
 
 * foreground color:  #fff
@@ -74,7 +74,8 @@ to
     "colors": ["#fff", "#555", "#888"]
 
 (This change gives us a way to verify that we're not using the default configuration file).  Now try
-`http://<yourServer>/<yourSite>/s1.html?app=apps1/Color`
+`http://<yourServer>/<yourSite>/ParcelViewer.html?app=apps2/Color` (if you're starting with the Parcel Viewer template
+download) or `http://<yourServer>/<yourSite>/s2.html?app=apps2/Color` (if you're starting with the GitHub repository)
 and you'll see that the app color theme, while still configured as "DarkGray", is lighter both in its
 background and in its highlighting as you hover over menu buttons.
 
@@ -89,7 +90,9 @@ The application is configured to use four services:
 4. Geocoding server URL
 
 These service parameters are all stored in the file commonConfig.js. Each URL parameter is preceded by
-"location.protocol +" so that it will work whether your site uses http or https.
+"location.protocol +" so that it will work whether your site uses http or https. The commonConfig.js file
+settings are only used to provide a backup if corresponding online services are missing -- online-provided
+services take priority if they exist.
 
 
 ## Another advanced configuration:  show the help text upon launch
