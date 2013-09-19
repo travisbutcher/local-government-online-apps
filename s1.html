@@ -7,7 +7,7 @@
 <head>
     <meta charset=utf-8>
     <!--
-     | Version 10.1.2
+     | Version 10.2
      | Copyright 2012 Esri
      |
      | Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@
      | See the License for the specific language governing permissions and
      | limitations under the License.
     -->
-    <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9,IE=10" />
+    <!--[if IE 8]><meta http-equiv="X-UA-Compatible" content="IE=7"><![endif]-->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -34,8 +34,8 @@
 
     <title>Local Government online app</title>
     <meta name="description" content="Local Government online app">
-    <link rel="stylesheet" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.7/js/dojo/dijit/themes/claro/claro.css"/>
-    <link rel="stylesheet" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.7/js/esri/css/esri.css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/claro/claro.css"/>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.7/js/esri/css/esri.css" />
     <link rel="apple-touch-icon-precomposed" href="images/onlineapp.png" />
     <style>
         html, body {
@@ -101,7 +101,7 @@
         dojoConfig.cacheBust = true;
     </script>
     <!--<![endif]-->
-    <script src="http://serverapi.arcgisonline.com/jsapi/arcgis/3.7/"></script>
+    <script src="http://js.arcgis.com/3.7/"></script>
     <script src="js1/libs.js"></script>
     <script src="js1/lgonlineStart.js"></script>
 </body>
