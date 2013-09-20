@@ -158,6 +158,9 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             // need to have a complete set of the latter
             if (this.ex) {
                 minmax = this.ex.split(",");
+                if (minmax.length === 1) {
+                    minmax = this.ex.split("%2C");
+                }
                 try {
                     extents = {
                         xmin: Number(minmax[0]),
