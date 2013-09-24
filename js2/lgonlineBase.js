@@ -150,9 +150,8 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
                 customStyles.appendChild(cssText);
             }
 
-            // http://paulirish.com/2011/surefire-dom-element-insertion/
-            firstScript = document.getElementsByTagName("script")[0];
-            firstScript.parentNode.insertBefore(customStyles, firstScript);
+            // Add the style *after* existing styles so that it'll override them
+            document.body.appendChild(customStyles);
 
             return customStyles;
         },
