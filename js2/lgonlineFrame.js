@@ -33,24 +33,69 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "
          * as foreground, background, and hover.
          */
         constructor: function () {
-            var styleString = "",
-                pThis = this,
-                colors = ["#fff", "#333333", "#5d5d5d", "#5d5d5d"];  // make sure that we have something
+            var i, styleString = "", pThis = this,
+                defaultColors = ["#fff", "#333333", "#5d5d5d", "#5d5d5d"];
 
             // Retrieve the theme definition from the color table
+            this.colors = [];
             array.some(this.colorTable, function (themeDefn) {
                 if (pThis.theme === themeDefn.theme) {
-                    colors = themeDefn.colors;
+                    pThis.colors = themeDefn.colors;
                     return true;
                 }
                 return false;
             });
 
+            // Make sure that we have a full set of colors
+            if (this.colors.length < defaultColors.length) {
+                for (i = this.colors.length; i < defaultColors.length; ++i) {
+                    this.colors.push(defaultColors[i]);
+                }
+            }
+
             // Set the theme
-            styleString += ".appTheme{color:" + colors[0] + ";background-color:" + colors[1] + "}";
-            styleString += ".appTheme2{color:" + colors[0] + ";background-color:" + colors[3] + "}";
-            styleString += ".appThemeHover:hover{background-color:" + colors[2] + "}";
+            styleString += ".appTheme{color:" + this.colors[0] + ";background-color:" + this.colors[1] + "}";
+            styleString += ".appTheme2{color:" + this.colors[0] + ";background-color:" + this.colors[3] + "}";
+            styleString += ".appThemeHover:hover{background-color:" + this.colors[2] + "}";
             this.injectCSS(styleString);
+        },
+
+        /**
+         * Returns the color to be used for drawing text.
+         * @return {string} Color string as defined in LGColorizer's JSON
+         * @memberOf js.LGColorizer#
+         */
+        foregroundColor: function () {
+            return this.colors[0];
+        },
+
+        /**
+         * Returns the color to be used for the background area.
+         * @return {string} Color string as defined in LGColorizer's JSON
+         * @memberOf js.LGColorizer#
+         */
+        backgroundColor: function () {
+            return this.colors[1];
+        },
+
+        /**
+         * Returns the color to be used for the background area when the
+         * cursor is hovering over the item.
+         * @return {string} Color string as defined in LGColorizer's JSON
+         * @memberOf js.LGColorizer#
+         */
+        hoverColor: function () {
+            return this.colors[2];
+        },
+
+        /**
+         * Returns the color to be used for an alternate background area,
+         * to provide a contrast with the primary background area color, e.g.
+         * @return {string} Color string as defined in LGColorizer's JSON
+         * @memberOf js.LGColorizer#
+         */
+        alternateBackgroundColor: function () {
+            return this.colors[3];
         }
     });
 
