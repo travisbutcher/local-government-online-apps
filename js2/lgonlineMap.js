@@ -125,7 +125,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
              */
             this.ready = new Deferred();
 
-            options = {};
+            options = { ignorePopups: this.toBoolean(this.ignorePopups, false) };
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
 
@@ -185,12 +185,6 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             if (this.commonConfig && this.commonConfig.bingMapsKey) {
                 options.bingMapsKey = this.commonConfig.bingMapsKey;
             }
-
-            // Set defaults for missing params
-            this.lineHiliteColor = new Color(this.lineHiliteColor || "#00ffff");
-            this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 255, 255, 0.1]);
-            this.featureZoomFactor = this.featureZoomFactor || 2;
-            this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
 
             // Create the map
             if (this.webmap) {

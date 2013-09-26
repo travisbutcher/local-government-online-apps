@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/event", "dojo/_base/lang", "dojo/topic", "dojo/string", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/toolbars/draw", "esri/toolbars/edit", "esri/graphic", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/editing/TemplatePicker", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, domStyle, domClass, array, event, lang, topic, string, TextBox, BasemapGallery, Draw, Edit, Graphic, PrintTask, PrintParameters, PrintTemplate, TemplatePicker) {
+define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/topic", "dojo/string", "dojo/aspect", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, domStyle, domClass, array, lang, topic, string, aspect, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, TemplatePicker, Editor) {
 
     //========================================================================================================================//
 
@@ -37,6 +37,8 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             this.applyTheme(false);
 
+            this.isShowable = true;
+
             // Start listening for activation/deactivation call
             if (this.trigger) {
                 topic.subscribe("command", function (sendingTrigger) {
@@ -51,12 +53,26 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         },
 
         /**
+         * Sets whether or not this dropdown will be shown with future triggerings.
+         * @param {boolean} makeShowable Indicates if dropdown may be shown
+         * @memberOf js.LGDropdownBox#
+         */
+        setShowable: function (makeShowable) {
+            this.isShowable = makeShowable;
+            if (!this.isShowable && this.getIsVisible()) {
+                this.toggleVisibility();
+            }
+        },
+
+        /**
          * Handles a trigger by toggling visibility.
          * @param {object} [data] Data accompanying trigger.
          * @memberOf js.LGDropdownBox#
          */
         handleTrigger: function () {
-            this.toggleVisibility();
+            if (this.isShowable) {
+                this.toggleVisibility();
+            }
         }
     });
 
@@ -1686,17 +1702,15 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 }).placeAt(this.rootId);
                 domStyle.set(field1EntryTextBox.domNode, "width", "99%");
                 if (this.tooltip) {
-                    field1EntryTextBox.set("title", this.checkForSubstitution(this.tooltip));;
+                    field1EntryTextBox.set("title", this.checkForSubstitution(this.tooltip));
                 }
 
                 // Handle future changes to the filter; we accept intermediate changes so that the user doesn't have
                 // to click away from the text box to apply the filter, but this means that we have to ignore the case
                 // where the user has erased all content from the text box
                 on(field1EntryTextBox, "change", lang.hitch(this, function () {
-                    if (field1EntryTextBox.value !== "") {
-                        this.value1 = field1EntryTextBox.value;
-                        this.onValueChanged();
-                    }
+                    this.value1 = field1EntryTextBox.value.trim();
+                    this.onValueChanged();
                 }));
             }
         },
@@ -1730,18 +1744,20 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         * @memberOf js.LGFilterLayers1#
         */
         setLayerDefinitionExpression: function (layer, fieldType) {
-            var defExpression = "";
+            var defExpression = layer.defaultDefinitionExpression;
             try {
-                if (fieldType === "esriFieldTypeString") {
-                    defExpression = string.substitute(this.defnExpression, {
-                        "fieldname1": this.fieldname1,
-                        "value1": "'" + this.value1 + "'"
-                    });
-                } else if (fieldType === "esriFieldTypeInteger") {
-                    defExpression = string.substitute(this.defnExpression, {
-                        "fieldname1": this.fieldname1,
-                        "value1": this.value1
-                    });
+                if (this.value1 && this.value1 !== "") {
+                    if (fieldType === "esriFieldTypeString") {
+                        defExpression = string.substitute(this.defnExpression, {
+                            "fieldname1": this.fieldname1,
+                            "value1": "'" + this.value1 + "'"
+                        });
+                    } else if (fieldType === "esriFieldTypeInteger") {
+                        defExpression = string.substitute(this.defnExpression, {
+                            "fieldname1": this.fieldname1,
+                            "value1": this.value1
+                        });
+                    }
                 }
                 layer.setDefinitionExpression(defExpression);
             } catch (ignore) {
@@ -1840,151 +1856,126 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * @override
          */
         onDependencyReady: function () {
-            var pThis = this, templatePickerHolder, templatePickerDiv, templatePicker,
-                drawToolbar, editToolbar, currentLayer = null, selectedTemplate;
+            var pThis = this, mapInfo, map, templatePickerHolder, templatePickerDiv,
+                templatePicker, editorSettings, editor;
 
-            // Build a list of editable layers
+            // Build a list of editable layers in this map
+            mapInfo = this.mapObj.mapInfo;
             this.layerInfos = [];
             this.layers = [];
-            array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+            array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                 if (mapLayer.layerObject) {
                     if (mapLayer.layerObject.isEditable()) {
-                        //this.layerInfos.push({
-                        //    "layerObject": mapLayer.layerObject
-                        //});
+                        // Layers list for esri.dijit.editing.Editor
+                        this.layerInfos.push({
+                            "featureLayer": mapLayer.layerObject
+                        });
+                        // Layers list for esri.dijit.editing.TemplatePicker
                         this.layers.push(mapLayer.layerObject);
                     }
                 }
             }));
 
-            // Create an editing tool
-            editToolbar = new Edit(this.mapObj.mapInfo.map);
+            if (this.layers.length === 0) {
+                // If there are no editable layers, we won't display the empty picker
+                this.setShowable(false);
 
-            // When editor is deactivated, save changes
-            editToolbar.on("deactivate", function (evt) {
-                pThis.updateItem(currentLayer, evt.graphic);
-            });
+            } else {
+                // Create a template picker and its associated editor for this map
+                map = mapInfo.map;
 
-            // Set up editing click behaviors for layers
-            array.forEach(this.layers, function (layer) {
-                var editingEnabled = false;
+                //------------------------- Template Picker dijit -------------------------
+                // The template picker will not size properly if its containing divs have no
+                // substance, so we'll hide the divs but give them substance (i.e., "display" is
+                // "block" and "visibility" is "hidden")
+                this.setIsVisible(false, true);
 
-                // On double click: Toggle editing state for features that support editing
-                layer.on("dbl-click", function (evt) {
-                    event.stop(evt);
-                    if (editingEnabled === false) {
-                        editingEnabled = true;
-                        editToolbar.activate(Edit.EDIT_VERTICES, evt.graphic);
-                    } else {
-                        currentLayer = this;
-                        editToolbar.deactivate();
-                        editingEnabled = false;
-                    }
+                // Create a frame to hold the picker within the dropdown
+                templatePickerHolder = domConstruct.create("div",
+                    { className: this.templatePickerHolderClass });
+                domConstruct.place(templatePickerHolder, this.rootId);
+
+                // Create a div that will become the picker
+                templatePickerDiv = domConstruct.create("div");
+                domConstruct.place(templatePickerDiv, templatePickerHolder);
+
+                // Create a template picker using the editable layers
+                templatePicker = new TemplatePicker({
+                    featureLayers: this.layers,
+                    rows: "auto",
+                    columns: 2,
+                    grouping: true
+                }, templatePickerDiv);
+                templatePicker.startup();
+                touchScroll(templatePicker);
+
+                // For compatibility with the dropdown mechanism, we'll switch to hiding the
+                // divs without substance (i.e., "display" is "none" and "visibility" is "visible")
+                this.setIsVisible(false, false);
+
+                //------------------------- Editor dijit -------------------------
+                // Create an editing tool linked to the template picker
+                editorSettings = {
+                    map: map,
+                    templatePicker: templatePicker,
+                    toolbarVisible: false,
+                    layerInfos: this.layerInfos
+                };
+                editor = new Editor({ settings: editorSettings }, templatePickerDiv);
+                editor.startup();
+
+                // Provide a hook for preprocessing the edit before it is committed
+                aspect.before(editor, "_applyEdits", function (edits) {
+                    // "edits" is an array of edits; each edit contains the layer to be edited as well
+                    // as optional arrays "adds", "updates", and "deletes"
+                    array.forEach(edits, function (layerEdits) {
+                        if (layerEdits.adds) {
+                            pThis.preprocessEditAdds(layerEdits);
+                        }
+                        if (layerEdits.updates) {
+                            pThis.preprocessEditUpdates(layerEdits);
+                        }
+                        if (layerEdits.deletes) {
+                            pThis.preprocessEditDeletes(layerEdits);
+                        }
+                    });
                 });
 
-                // On single click: Delete clicked-on feature if ctrl key is depressed
-                layer.on("click", function (evt) {
-                    if (evt.ctrlKey === true || evt.metaKey === true) {
-                        event.stop(evt);
-                        pThis.deleteItem(layer, evt.graphic);
-                        currentLayer = this;
-                        editToolbar.deactivate();
-                        editingEnabled = false;
-                    }
-                });
-
-            });
-
-            // The template picker will not size properly if its containing divs have no
-            // substance, so we'll hide the divs but give them substance (i.e., "display" is
-            // "block" and "visibility" is "hidden")
-            this.setIsVisible(false, true);
-
-            // Create a frame to hold the picker within the dropdown
-            templatePickerHolder = domConstruct.create("div",
-                { className: this.templatePickerHolderClass });
-            domConstruct.place(templatePickerHolder, this.rootId);
-
-            // Create a div that will become the picker
-            templatePickerDiv = domConstruct.create("div");
-            domConstruct.place(templatePickerDiv, templatePickerHolder);
-
-            // Create a template picker using the editable layers
-            templatePicker = new TemplatePicker({
-                featureLayers: this.layers,
-                rows: "auto",
-                columns: 2,
-                grouping: true
-            }, templatePickerDiv);
-            templatePicker.startup();
-            //touchScroll(templatePicker);
-
-            // For compatibility with the dropdown mechanism, we'll switch to hiding the
-            // divs without substance (i.e., "display" is "none" and "visibility" is "visible")
-            this.setIsVisible(false, false);
-
-            // Create a drawing tool for creating new graphics for the editable layers
-            drawToolbar = new Draw(this.mapObj.mapInfo.map);
-
-            // If a template is selected, turn on the appropriate drawing tool;
-            // if a template is de-selected, turn off the drawing and editing tools
-            templatePicker.on("selection-change", function () {
-                selectedTemplate = templatePicker.getSelected();
-                if (selectedTemplate) {
-                    switch (selectedTemplate.featureLayer.geometryType) {
-                    case "esriGeometryPoint":
-                        drawToolbar.activate(Draw.POINT);
-                        break;
-                    case "esriGeometryPolyline":
-                        drawToolbar.activate(Draw.POLYLINE);
-                        break;
-                    case "esriGeometryPolygon":
-                        drawToolbar.activate(Draw.POLYGON);
-                        break;
-                    }
-                } else {
-                    drawToolbar.deactivate();
-                    editToolbar.deactivate();
-                }
-            });
-
-            // When drawing completed, turn off the drawing and editing tools and save the created graphic
-            drawToolbar.on("draw-end", function (evt) {
-                var newAttributes, newGraphic;
-
-                drawToolbar.deactivate();
-                editToolbar.deactivate();
-                newAttributes = lang.mixin({}, selectedTemplate.template.prototype.attributes);
-                newGraphic = new Graphic(evt.geometry, null, newAttributes);
-                pThis.addItem(selectedTemplate.featureLayer, newGraphic);
-                templatePicker.clearSelection();
-            });
+                //--------------------------------------------------
+            }
 
             this.inherited(arguments);
         },
 
         /**
-         * Adds a graphic to a layer.
+         * Preprocesses a set of "add" edits for a layer.
+         * @param {object} layerEdits Structure containing "layer"--the layer to be
+         * edited--and "adds"--an array of objects to be added
          * @memberOf js.LGEditTemplatePicker#
          */
-        addItem: function (featureLayer, graphic) {
-            featureLayer.applyEdits([graphic], null, null);  // add
+        preprocessEditAdds: function (layerEdits) {
+            return layerEdits;
         },
 
         /**
-         * Updates a graphic in a layer.
+         * Preprocesses a set of "update" edits for a layer.
+         * @param {object} layerEdits Structure containing "layer"--the layer to be
+         * edited--and "updates"--an array of objects to be updated
          * @memberOf js.LGEditTemplatePicker#
          */
-        updateItem: function (featureLayer, graphic) {
-            featureLayer.applyEdits(null, [graphic], null);  // update
+        preprocessEditUpdates: function (layerEdits) {
+            return layerEdits;
+
         },
 
         /**
-         * Deletes a graphic from a layer.
+         * Preprocesses a set of "delete" edits for a layer.
+         * @param {object} layerEdits Structure containing "layer"--the layer to be
+         * edited--and "deletes"--an array of objects to be deleted
          * @memberOf js.LGEditTemplatePicker#
          */
-        deleteItem: function (featureLayer, graphic) {
-            featureLayer.applyEdits(null, null, [graphic]);  // delete
+        preprocessEditDeletes: function (layerEdits) {
+            return layerEdits;
         }
     });
 
@@ -2002,13 +1993,16 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
 
         /**
-         * Adds a graphic to a layer.
+         * Preprocesses a set of "add" edits for a layer.
+         * @param {object} layerEdits Structure containing "layer"--the layer to be
+         * edited--and "adds"--an array of objects to be added
          * @memberOf js.LGEditTemplatePickerWithDefaults#
          * @override
          */
-        addItem: function (featureLayer, graphic) {
-            graphic.attributes[this.defaultValues.fieldname1] = this.defaultValues.value1;
-            this.inherited(arguments);
+        preprocessEditAdds: function (layerEdits) {
+            layerEdits.adds[0].attributes[this.defaultValues.fieldname1] = this.defaultValues.value1;
+
+            return layerEdits;
         }
     });
 

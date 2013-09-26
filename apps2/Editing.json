@@ -158,7 +158,8 @@
             "rootId": "map",
             "rootClass": "mapContainer",
             "parentDiv": "contentFrame",
-            "fill": true
+            "fill": true,
+            "ignorePopups": true
         }
     }, {
         "classname": "js.LGHighlighter",
