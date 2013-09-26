@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "dojo/query", "esri/arcgis/utils", "dojo/topic", "dojo/_base/Color", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, query, utils, topic, Color) {
+define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "dojo/query", "esri/arcgis/utils", "dojo/_base/Color", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, query, utils, Color) {
 
     //========================================================================================================================//
 
@@ -245,10 +245,10 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                     pThis.tempGraphicsLayer = pThis.createGraphicsLayer("tempGraphicsLayer");
 
                     // Start listening for position updates
-                    pThis.positionHandle = topic.subscribe("position", function (newCenterPoint) {
+                    pThis.positionHandle = pThis.subscribeToMessage("position", function (newCenterPoint) {
                         // Highlight the point's position if it's in the same coord system as the map
                         if (newCenterPoint.spatialReference.wkid === pThis.mapInfo.map.spatialReference.wkid) {
-                            topic.publish("highlightItem", newCenterPoint);
+                            pThis.publishMessage("highlightItem", newCenterPoint);
 
                         // Otherwise, convert the position into the map's spatial reference before highlighting it
                         } else {
@@ -256,7 +256,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                             if (newCenterPoint.spatialReference.wkid === 4326
                                     && pThis.mapInfo.map.spatialReference.wkid === 102100) {
                                 newCenterPoint = esri.geometry.geographicToWebMercator(newCenterPoint);
-                                topic.publish("highlightItem", newCenterPoint);
+                                pThis.publishMessage("highlightItem", newCenterPoint);
 
                             // Otherwise, use the geometry service
                             } else if (esri.config.defaults.geometryService) {
@@ -266,7 +266,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                                 esri.config.defaults.geometryService.project(params).then(
                                     function (geometries) {
                                         newCenterPoint = geometries[0];
-                                        topic.publish("highlightItem", newCenterPoint);
+                                        pThis.publishMessage("highlightItem", newCenterPoint);
                                     }
                                 );
 
@@ -280,12 +280,12 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                     });
 
                     // Start listening for feature highlights
-                    pThis.showFeatureHandle = topic.subscribe("showFeature", function (feature) {
+                    pThis.showFeatureHandle = pThis.subscribeToMessage("showFeature", function (feature) {
                         if (pThis.popupTemplate) {
                             // Assign the popup template to the highlight item
                             feature.infoTemplate = pThis.popupTemplate;
                         }
-                        topic.publish("highlightItem", feature);
+                        pThis.publishMessage("highlightItem", feature);
                     });
 
                     pThis.ready.resolve(pThis);

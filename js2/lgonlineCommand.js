@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/topic", "dojo/string", "dojo/aspect", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, domStyle, domClass, array, lang, topic, string, aspect, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, TemplatePicker, Editor) {
+define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dojo/aspect", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, domStyle, domClass, array, lang, string, aspect, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, TemplatePicker, Editor) {
 
     //========================================================================================================================//
 
@@ -41,12 +41,12 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             // Start listening for activation/deactivation call
             if (this.trigger) {
-                topic.subscribe("command", function (sendingTrigger) {
+                this.subscribeToMessage("command", function (sendingTrigger) {
                     if (sendingTrigger !== pThis.trigger) {
                         pThis.setIsVisible(false);
                     }
                 });
-                topic.subscribe(this.trigger, function (data) {
+                this.subscribeToMessage(this.trigger, function (data) {
                     pThis.handleTrigger(data);
                 });
             }
@@ -493,8 +493,8 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
         handleClick: function (evt) {
             var obj = evt.currentTarget.getLGObject();
-            topic.publish("command", obj.publish);
-            topic.publish(obj.publish, obj.publishArg);
+            obj.publishMessage("command", obj.publish);
+            obj.publishMessage(obj.publish, obj.publishArg);
         }
     });
 
@@ -525,13 +525,13 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             // Handle enable/disable triggers
             if (this.triggerEnable) {
-                topic.subscribe(this.triggerEnable, function () {
+                this.subscribeToMessage(this.triggerEnable, function () {
                     pThis.isEnabled = true;
                     pThis.setIsEnabled(pThis.isEnabled);
                 });
             }
             if (this.triggerDisable) {
-                topic.subscribe(this.triggerDisable, function () {
+                this.subscribeToMessage(this.triggerDisable, function () {
                     pThis.isEnabled = false;
                     pThis.setIsEnabled(pThis.isEnabled);
                 });
@@ -539,13 +539,13 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             // Handle visible/invisible triggers
             if (this.triggerVisible) {
-                topic.subscribe(this.triggerVisible, function () {
+                this.subscribeToMessage(this.triggerVisible, function () {
                     pThis.isVisible = true;
                     pThis.setIsVisible(pThis.isVisible);
                 });
             }
             if (this.triggerInvisible) {
-                topic.subscribe(this.triggerInvisible, function () {
+                this.subscribeToMessage(this.triggerInvisible, function () {
                     pThis.isVisible = false;
                     pThis.setIsVisible(pThis.isVisible);
                 });
@@ -600,12 +600,12 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * Opens a URL in response to a message.
          */
         constructor: function () {
-            topic.subscribe(this.sameWinTrigger, function (url) {
+            this.subscribeToMessage(this.sameWinTrigger, function (url) {
                 if (url) {
                     window.open(url, "_parent");
                 }
             });
-            topic.subscribe(this.newWinTrigger, function (url) {
+            this.subscribeToMessage(this.newWinTrigger, function (url) {
                 if (url) {
                     window.open(url, "_blank");
                 }
@@ -694,7 +694,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 var selectedLayout, printParams;
 
                 // Broadcast status; our LGDropdownBox ancestor has already made our dialog box visible
-                topic.publish(pThis.publishWorking);
+                pThis.publishMessage(pThis.publishWorking);
 
                 // Hide the dialog box; we don't need to have it take up space while
                 // the server is off doing the print job
@@ -723,12 +723,12 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                     function (result) {
                         /* success */
                         // Broadcast status
-                        topic.publish(pThis.publishReady);
-                        topic.publish(pThis.publishPrintUrl, result.url);
+                        pThis.publishMessage(pThis.publishReady);
+                        pThis.publishMessage(pThis.publishPrintUrl, result.url);
                     }, function (error) {
                         /* failure */
                         // Broadcast status
-                        topic.publish(pThis.publishReady);
+                        pThis.publishMessage(pThis.publishReady);
                         pThis.log("Print failed: " + error.message, true);
                     }
                     );
@@ -791,26 +791,26 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             // Now that the map (our dependency) is ready, finish setup
 
             // Cache the URL to the print when triggered
-            topic.subscribe(this.triggerPrintUrl, function (url) {
+            this.subscribeToMessage(this.triggerPrintUrl, function (url) {
                 // Cancel any timeout we've got going
                 clearTimeout(pThis.printTimeouter);
 
                 // Make the URL available
                 pThis.fetchPrintUrl = url;
-                topic.publish(pThis.publishPrintAvailable);
+                pThis.publishMessage(pThis.publishPrintAvailable);
 
                 // Set up an expiration for this URL
                 if (pThis.printAvailabilityTimeoutMinutes > 0) {
                     pThis.printTimeouter = setTimeout(function () {
-                        topic.publish(pThis.publishPrintNotAvailable);
+                        pThis.publishMessage(pThis.publishPrintNotAvailable);
                     }, pThis.printAvailabilityTimeoutMinutes * 60000);
                 }
             });
 
             // Fetch the print when triggered
-            topic.subscribe(this.trigger, function () {
+            this.subscribeToMessage(this.trigger, function () {
                 if (pThis.fetchPrintUrl !== null) {
-                    topic.publish(pThis.publish, pThis.fetchPrintUrl);
+                    pThis.publishMessage(pThis.publish, pThis.fetchPrintUrl);
                 }
             });
         }
@@ -846,7 +846,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             } else {
                 // Start listening for a position request
-                topic.subscribe(this.trigger, function () {
+                this.subscribeToMessage(this.trigger, function () {
 
                     // Set a backup timeout because if one chooses "not now" for providing
                     // the position, the geolocation call does not return or time out
@@ -859,7 +859,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                         clearTimeout(backupTimeoutTimer);
 
                         pThis.log("go to " + position.coords.latitude + " " + position.coords.longitude);
-                        topic.publish(pThis.publish, new esri.geometry.Point(
+                        pThis.publishMessage(pThis.publish, new esri.geometry.Point(
                             position.coords.longitude,
                             position.coords.latitude,
                             new esri.SpatialReference({ wkid: 4326 })
@@ -949,7 +949,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          *       process before publishing.
          */
         publish: function (subject, data) {
-            topic.publish(subject, data);
+            this.publishMessage(subject, data);
         },
 
         /**
@@ -1091,7 +1091,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * @override
          */
         publish: function (subject, data) {
-            topic.publish(subject, data);
+            this.publishMessage(subject, data);
         }
     });
 
@@ -1461,7 +1461,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                         representativeData = item;
                     }
 
-                    topic.publish(subject, representativeData);
+                    pThis.publishMessage(subject, representativeData);
                 } else {
                     // No-results failure
                     pThis.log("LGSearchFeatureLayer_1: no results");
@@ -1499,7 +1499,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             if (this.busyIndicator) {
                 this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
             }
-            topic.subscribe(this.trigger, function () {
+            this.subscribeToMessage(this.trigger, function () {
                 pThis.share();
             });
         },
@@ -1535,7 +1535,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                         if (tinyUrl) {
                             // Put the tiny URL into the sharing method's URL & launch the sharing method
                             shareUrl = esri.substitute({subject: subjectLine, url: tinyUrl}, pThis.shareUrl);
-                            topic.publish(pThis.publish, shareUrl);
+                            pThis.publishMessage(pThis.publish, shareUrl);
                         }
                     } catch (error) {
                         pThis.log("LGShare_1: " + error.toString());
@@ -1555,7 +1555,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             } else {
                 // Share the uncompressed URL
                 urlToShare = esri.substitute({subject: subjectLine, url: urlToShare}, this.shareUrl);
-                topic.publish(this.publish, urlToShare);
+                this.publishMessage(this.publish, urlToShare);
             }
         },
 

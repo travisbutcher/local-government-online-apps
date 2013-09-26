@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "js/lgonlineBase"], function (domConstruct, domClass) {
+define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "dojo/aspect", "dojo/topic", "js/lgonlineBase"], function (domConstruct, domClass, aspect, topic) {
 
     //========================================================================================================================//
 
@@ -122,7 +122,44 @@ define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "js/lgonlin
          */
         handleTrigger: function (data) {
             this.rootDiv.innerHTML = data.toString();
-            this.toggleVisibility();
+            this.setIsVisible(true);
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGMessageWatch", js.LGObject, {
+        /**
+         * Constructs an LGMessageWatch.
+         *
+         * @constructor
+         * @class
+         * @name js.LGMessageWatch
+         * @extends js.LGObject
+         * @classdesc
+         * Listens to and logs message passing.
+         */
+        constructor: function () {
+            var pThis = this;
+
+            topic.subscribe("publish", function (message) {
+                pThis.showMessage("message from", message);
+            });
+
+            topic.subscribe("receive", function (message) {
+                pThis.showMessage("received by", message);
+            });
+        },
+
+        /**
+         * Echoes a message to the log.
+         * @param {string} label Label to prefix message with
+         * @param {object} message Message structure containing id, tag, and data
+         * @memberOf js.LGMessageWatch#
+         */
+        showMessage: function (label, message) {
+            var dataString = JSON.stringify(message.data);
+            this.log(label + " " + message.id + ": \"" + message.tag + "\" " + (dataString || ""));
         }
     });
 

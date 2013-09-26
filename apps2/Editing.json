@@ -99,6 +99,12 @@
     }],
 
     "ui": [{
+        "classname": "js.LGMessageWatch",
+        "config": {
+            "rootId": "messageWatch",
+            "parentDiv": "contentFrame"
+        }
+    }, {
         "classname": "js.LGColorizer",
         "config": {
             "rootId": "colorizer",
@@ -197,6 +203,7 @@
     }, {
         "classname": "js.LGLaunchUrl",
         "config": {
+            "rootId": "launcher",
             "sameWinTrigger": "launch/parent",
             "newWinTrigger": "launch/blank"
         }
@@ -220,8 +227,8 @@
         "classname": "js.LGFilterLayers1WithDefaults",
         "styles": ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .filter{border-radius:8px}",
         "config": {
-            "tooltip": "@tooltips.filter",
             "rootId": "filter",
+            "tooltip": "@tooltips.filter",
             "parentDiv": "contentFrame",
             "rootClass": "filter",
             "horizOffset": -2,
@@ -279,8 +286,8 @@
     }, {
         "classname": "js.LGFetchPrintedMap",
         "config": {
-            "publish": "launch/blank",
             "rootId": "fetchPrintedMap",
+            "publish": "launch/blank",
             "parentDiv": "contentFrame",
             "dependencyId": "map",
             "trigger": "fetchPrint",
@@ -338,9 +345,9 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "locate",
             "tooltip": "@tooltips.locate",
             "iconUrl": "images/locate.png",
-            "rootId": "locate",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
@@ -350,9 +357,9 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "navigator",
             "tooltip": "@tooltips.collect",
             "iconUrl": "images/navigator.png",
-            "rootId": "navigator",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
@@ -362,9 +369,9 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "basemap",
             "tooltip": "@tooltips.basemap",
             "iconUrl": "images/basemap.png",
-            "rootId": "basemap",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
@@ -374,9 +381,9 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "share",
             "tooltip": "@tooltips.share",
             "iconUrl": "images/share.png",
-            "rootId": "share",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
@@ -386,11 +393,11 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "shareEmail",
             "displayText": "@labels.email",
             "displayTextClass": "commandText",
             "tooltip": "@tooltips.shareViaEmail",
             "iconUrl": "images/shareEmail.png",
-            "rootId": "share1",
             "parentDiv": "shareBox",
             "rootClass": "commandTextButton",
             "iconClass": "commandIcon",
@@ -399,11 +406,11 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "shareFB",
             "displayText": "@labels.Facebook",
             "displayTextClass": "commandText",
             "tooltip": "@tooltips.shareViaFacebook",
             "iconUrl": "images/shareFacebook.png",
-            "rootId": "share2",
             "parentDiv": "shareBox",
             "rootClass": "commandTextButton",
             "iconClass": "commandIcon",
@@ -412,11 +419,11 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "shareTw",
             "displayText": "@labels.Twitter",
             "displayTextClass": "commandText",
             "tooltip": "@tooltips.shareViaTwitter",
             "iconUrl": "images/shareTwitter.png",
-            "rootId": "share3",
             "parentDiv": "shareBox",
             "rootClass": "commandTextButton",
             "iconClass": "commandIcon",
@@ -425,10 +432,10 @@
     }, {
         "classname": "js.LGCommandToggle",
         "config": {
+            "rootId": "print",
             "tooltip": "@tooltips.print",
             "iconUrl": "images/print.png",
             "iconDisabledUrl": "images/printing.gif",
-            "rootId": "print",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
@@ -442,10 +449,10 @@
     }, {
         "classname": "js.LGCommandToggle",
         "config": {
+            "rootId": "fetchPrint",
             "tooltip": "@tooltips.fetchPrint",
             "iconUrl": "images/doc.png",
             "iconDisabledUrl": "images/docDisabled.png",
-            "rootId": "fetchPrint",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
@@ -459,9 +466,9 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
+            "rootId": "help",
             "tooltip": "@tooltips.help",
             "iconUrl": "images/help.png",
-            "rootId": "help",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
@@ -470,6 +477,7 @@
     }, {
         "classname": "js.LGShareAppExtents",
         "config": {
+            "rootId": "shareAppExtEmail",
             "trigger": "share/email",
             "publish": "launch/parent",
             "subject": ".titleBar.title",
@@ -482,6 +490,7 @@
     }, {
         "classname": "js.LGShareAppExtents",
         "config": {
+            "rootId": "shareAppExtFB",
             "trigger": "share/facebook",
             "publish": "launch/blank",
             "subject": ".titleBar.title",
@@ -494,6 +503,7 @@
     }, {
         "classname": "js.LGShareAppExtents",
         "config": {
+            "rootId": "shareAppExtTw",
             "trigger": "share/twitter",
             "publish": "launch/blank",
             "subject": ".titleBar.title",

@@ -299,11 +299,24 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
                 console.log(message);
             }
             if (publishError) {
-                topic.publish("error", message);
+                this.publishMessage("error", message);
             }
             if (window.gLogMessageBox) {
                 window.gLogMessageBox.append(message);
             }
+        },
+
+        publishMessage: function (tag, data) {
+            topic.publish("publish", {id: this.rootId, tag: tag, data: data});
+            topic.publish(tag, data);
+        },
+
+        subscribeToMessage: function (tag, handlingFunction) {
+            var pThis = this;
+            topic.subscribe(tag, function (data) {
+                topic.publish("receive", {id: pThis.rootId, tag: tag, data: data});
+            });
+            topic.subscribe(tag, handlingFunction);
         }
     });
 
@@ -636,7 +649,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          */
         listenForDefaultsUpdate: function () {
             var pThis = this;
-            topic.subscribe(this.listenForDefaultsTrigger, function (defaultValues) {
+            this.subscribeToMessage(this.listenForDefaultsTrigger, function (defaultValues) {
                 // Cache the defaults and give subclass(es) an opportunity to work with them
                 pThis.defaultValues = defaultValues;
                 pThis.onDefaultsUpdate();
@@ -665,7 +678,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          */
         broadcastDefaultsUpdate: function () {
             if (this.broadcastDefaultsPublish) {
-                topic.publish(this.broadcastDefaultsPublish, this.defaultValues);
+                this.publishMessage(this.broadcastDefaultsPublish, this.defaultValues);
             }
         }
     });
