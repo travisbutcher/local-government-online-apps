@@ -1,11 +1,12 @@
 {
     "values": {
-        "webmap": "0ebefb7ea74b425ebeb5853c42d01142",
-        "titleBar.title": "Editing",
+        "webmap": "37b42b87cd9547338051af892954f03b",
+        "titleBar.title": "Pre-Incident Planning",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "DarkGray",
-        "filter.fieldname1": "FLOOR",
+        "filter.hint1": "Floor number",
         "filter.value1": 1,
+        "filter.fieldname1": "FLOOR",
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
         "helpMessageBox.content": "Editing<hr><br>Editing provides a way to add and remove features from a map."
@@ -57,6 +58,11 @@
     }, {
         "category": "Editing",
         "fields": [{
+            "label": "Value hint",
+            "fieldName": "filter.hint1",
+            "type": "string",
+            "tooltip": "Prompt for filter value field"
+        }, {
             "label": "Value hint",
             "fieldName": "filter.value1",
             "type": "string",
@@ -155,6 +161,15 @@
             "fill": true
         }
     }, {
+        "classname": "js.LGHighlighter",
+        "config": {
+            "rootId": "highlighter",
+            "parentDiv": "contentFrame",
+            "dependencyId": "map",
+            "lineHiliteColor": "#0000ff",
+            "fillHiliteColor": [0, 0, 255, 0.1]
+        }
+    }, {
         "classname": "js.LGTitleBar",
         "styles": ".appTitleBar{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute}.titleIcon{height:48px;margin:4px;padding:0px;float:left}.titleText{height:48px;margin:4px;padding:0px;font-size:200%;vertical-align:middle;word-wrap:break-word;float:left}@media all and (max-width: 520px){.titleText{display:none}}",
         "config": {
@@ -183,6 +198,37 @@
         "config": {
             "sameWinTrigger": "launch/parent",
             "newWinTrigger": "launch/blank"
+        }
+    }, {
+        "classname": "js.LGEditTemplatePickerWithDefaults",
+        "styles": ".templateArea{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .templateArea{border-radius:8px}.templatePickerHolder {position:absolute;right:5px;top:5px;left:5px;bottom:5px;overflow-x:hidden;overflow-y:auto;}",
+        "config": {
+            "rootId": "iTemplateArea",
+            "parentDiv": "contentFrame",
+            "rootClass": "templateArea",
+            "templatePickerHolderClass": "templatePickerHolder",
+            "templatePickerDivClass": "templatePickerDiv",
+            "colorizerId": "colorizer",
+            "horizOffset": -2,
+            "vertOffset": [38, -40],
+            "trigger": "navigator",
+            "dependencyId": "map",
+            "listenForDefaultsTrigger": "floor"
+        }
+    }, {
+        "classname": "js.LGFilterLayers1WithDefaults",
+        "styles": ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .filter{border-radius:8px}",
+        "config": {
+            "tooltip": "@tooltips.filter",
+            "rootId": "filter",
+            "parentDiv": "contentFrame",
+            "rootClass": "filter",
+            "horizOffset": -2,
+            "vertOffset": 2,
+            "defnExpression": "${fieldname1}=${value1}",
+            "trigger": "navigator",
+            "dependencyId": "map",
+            "broadcastDefaultsPublish": "floor"
         }
     }, {
         "classname": "js.LGLocate",
@@ -303,7 +349,7 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
-            "tooltip": "@tooltips.navigator",
+            "tooltip": "@tooltips.collect",
             "iconUrl": "images/navigator.png",
             "rootId": "navigator",
             "parentDiv": "commandPanel",

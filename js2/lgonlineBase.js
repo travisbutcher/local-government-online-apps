@@ -626,34 +626,42 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
 
             // If we're mixed into a class that wants to listen for updates, set up the listener
             if (this.listenForDefaultsTrigger) {
-                listenForDefaultsUpdate();
+                this.listenForDefaultsUpdate();
             }
         },
 
         /**
          * Subscribe to the defaults message.
-         * @memberOf js.LGCommand#
+         * @memberOf js.LGDefaults#
          */
         listenForDefaultsUpdate: function () {
             var pThis = this;
             topic.subscribe(this.listenForDefaultsTrigger, function (defaultValues) {
                 // Cache the defaults and give subclass(es) an opportunity to work with them
                 pThis.defaultValues = defaultValues;
-                onDefaultsUpdate();
+                pThis.onDefaultsUpdate();
             });
         },
 
         /**
          * Performs class-specific behavior after a defaults message has been received.
-         * @memberOf js.LGCommand#
+         * @memberOf js.LGDefaults#
          */
         onDefaultsUpdate: function () {
             return null;
         },
 
         /**
+         * Performs class-specific behavior to change and broadcast defaults.
+         * @memberOf js.LGDefaults#
+         */
+        changeDefaults: function () {
+            this.broadcastDefaultsUpdate();
+        },
+
+        /**
          * Broadcasts the current defaults.
-         * @memberOf js.LGCommand#
+         * @memberOf js.LGDefaults#
          */
         broadcastDefaultsUpdate: function () {
             if (this.broadcastDefaultsPublish) {
