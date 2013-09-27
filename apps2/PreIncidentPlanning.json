@@ -9,7 +9,7 @@
         "filter.fieldname1": "FLOOR",
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
-        "helpMessageBox.content": "Editing<hr><br>Editing provides a way to add and remove features from a map."
+        "helpMessageBox.content": "Pre-Incident Planning provides a way to map the fire-suppression capabilities in an area, filtered by building floor or another term."
     },
 
     "configurationSettings": [{
@@ -56,14 +56,14 @@
             "tooltip": "Color theme to use"
         }]
     }, {
-        "category": "Editing",
+        "category": "Editing Filter",
         "fields": [{
             "label": "Value hint",
             "fieldName": "filter.hint1",
             "type": "string",
             "tooltip": "Prompt for filter value field"
         }, {
-            "label": "Value hint",
+            "label": "Value format hint",
             "fieldName": "filter.value1",
             "type": "string",
             "tooltip": "Text to display in the value field as a format hint"
