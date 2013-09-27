@@ -940,6 +940,9 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
                 attributePattern = "${0} LIKE '" + this.searchPattern + "'";
             }
 
+            // Escape single quotes, which are used to bound the search term in the query
+            processedSearchText = processedSearchText.replace(/'/g, "''");
+
             array.forEach(this.searchFields, function (searchField) {
                 searchParam = searchParam + attributeSeparator
                     + dojo.string.substitute(attributePattern, [searchField, processedSearchText]);
