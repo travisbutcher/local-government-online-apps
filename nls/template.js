@@ -1,4 +1,5 @@
-﻿/*
+﻿/*global define */
+/*
  | ArcGIS for Local Government
  | Version 10.2
  | Copyright 2012 Esri
