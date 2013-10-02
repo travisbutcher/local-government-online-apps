@@ -21,6 +21,8 @@ define(
             search: "Search",
             locate: "Current location",
             markup: "Submit correction",
+            collect: "Add content to map",
+            filter: "Filter map layers",
             basemap: "Switch basemap",
             share: "Share",
             shareViaEmail: "Share via email",
