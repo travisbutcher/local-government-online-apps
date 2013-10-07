@@ -83,7 +83,7 @@
             "label": "Zoom level for selected feature",
             "fieldName": "highlighter.highlightZoomLevel",
             "type": "number",
-            "constraints": {min: 0, places: 0},
+            "constraints": {"min": 0, "places": 0},
             "tooltip": "Sets the map zoom level to this level after selecting a feature"
         }, {
             "label": "Name of basemap group",
