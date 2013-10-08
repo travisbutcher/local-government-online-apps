@@ -4,7 +4,7 @@
         "titleBar.title": "My Government Services",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "DarkGray",
-        "searchBox.hint": "42757 Woodward Ave",
+        "searchBox.hint": "400 S Eagle St",
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
         "helpMessageBox.content": "Parcel Viewer<hr><br>The Parcel Viewer provides the general public and other interested parties local government property tax and assessment information and supplements that information with lifestyle and internet broadband information for a given neighborhood.<br><br>To locate a parcel, simply click on the map or enter an address or parcel number in the search box and select a parcel from the list."
@@ -90,28 +90,28 @@
             "parentDiv": "contentDiv",
             "colorTable": [{
                 "theme": "DarkGray",
-                "colors": ["#fff", "#333333", "#5d5d5d"]
+                "colors": ["#fff", "#333333", "#5d5d5d", "#5d5d5d"]
             }, {
                 "theme": "DarkGreen",
-                "colors": ["#fff", "DarkGreen", "#9bcd9b"]
+                "colors": ["#fff", "DarkGreen", "#9bcd9b", "#9bcd9b"]
             }, {
                 "theme": "DodgerBlue",
-                "colors": ["#fff", "#104e8b", "#1a78d7"]
+                "colors": ["#fff", "#104e8b", "#1a78d7", "#1a78d7"]
             }, {
                 "theme": "Gray",
-                "colors": ["#fff", "Gray", "#aaaaaa"]
+                "colors": ["#fff", "Gray", "#aaaaaa", "#aaaaaa"]
             }, {
                 "theme": "Brick",
-                "colors": ["#fff", "#9c661f", "#d89438"]
+                "colors": ["#fff", "#9c661f", "#d89438", "#d89438"]
             }, {
                 "theme": "Thistle",
-                "colors": ["#fff", "#8b7b8b", "#b3a8b3"]
+                "colors": ["#fff", "#8b7b8b", "#b3a8b3", "#b3a8b3"]
             }, {
                 "theme": "Turquoise",
-                "colors": ["#fff", "#00868b", "#00dadf"]
+                "colors": ["#fff", "#00868b", "#00dadf", "#00dadf"]
             }, {
                 "theme": "Orange",
-                "colors": ["#fff", "#cd8500", "#ffb122"]
+                "colors": ["#fff", "#cd8500", "#ffb122", "#ffb122"]
             }]
         }
     }, {
@@ -143,7 +143,14 @@
             "rootId": "map",
             "rootClass": "mapContainer",
             "parentDiv": "contentFrame",
-            "fill": true,
+            "fill": true
+        }
+    }, {
+        "classname": "js.LGHighlighter",
+        "config": {
+            "rootId": "highlighter",
+            "parentDiv": "contentFrame",
+            "dependencyId": "map",
             "lineHiliteColor": "#0000ff",
             "fillHiliteColor": [0, 0, 255, 0.1]
         }
@@ -161,7 +168,7 @@
         }
     }, {
         "classname": "js.LGGallery",
-        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-left:2px;margin-top:6px}",
+        "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanel table{border-spacing:0px}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;text-align:center;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-top:6px}",
         "config": {
             "rootId": "commandPanel",
             "parentDiv": "headerFrame",
@@ -176,10 +183,11 @@
         "config": {
             "rootId": "addressSearcher",
             "parentDiv": "contentFrame",
-            "searchUrl": "http://tasks.arcgisonline.com/ArcGIS/rest/services/Locators/TA_Address_NA_10/GeocodeServer",
+            "dependencyId": "map",
+            "searchUrl": "http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
             "addressParamName": "SingleLine",
             "minimumScore": 80,
-            "validLocators": ["US_RoofTop", "US_Streets", "US_StreetName"],
+            "validLocators": ["USA.StreetName", "USA.PointAddress", "USA.StreetAddress"],
             "outWkid": 102100,
             "outFields": ["Loc_name", "Match_addr"]
         }
