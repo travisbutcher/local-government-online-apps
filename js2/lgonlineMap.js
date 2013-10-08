@@ -270,6 +270,11 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                         pThis.publishMessage("highlightItem", feature);
                     });
 
+                    // Start broadcasting map clicks
+                    pThis.clickHandle = on(pThis.mapInfo.map, "click", function (evt) {
+                        pThis.publishMessage("mapClick", evt.mapPoint);
+                    });
+
                     pThis.ready.resolve(pThis);
                 },
                 function () {
