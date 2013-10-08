@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "dojo/query", "esri/arcgis/utils", "dojo/_base/Color", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, query, utils, Color) {
+define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "esri/arcgis/utils", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, utils) {
 
     //========================================================================================================================//
 
@@ -115,7 +115,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * Provides a UI web map display.
          */
         constructor: function () {
-            var options, minmax, extents = null, pThis = this;
+            var options, extents = null, pThis = this;
 
             /**
              * Provides a way to test the success or failure of the map
@@ -157,28 +157,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             // Override the initial extent from the configuration with URL extent values;
             // need to have a complete set of the latter
             if (this.ex) {
-                minmax = this.ex.split(",");
-                if (minmax.length === 1) {
-                    minmax = this.ex.split("%2C");
-                }
-                try {
-                    extents = {
-                        xmin: Number(minmax[0]),
-                        ymin: Number(minmax[1]),
-                        xmax: Number(minmax[2]),
-                        ymax: Number(minmax[3])
-                    };
-
-                    extents.spatialReference = {};
-                    if (minmax.length > 4) {
-                        extents.spatialReference.wkid = Number(minmax[4]);
-                    } else {
-                        extents.spatialReference.wkid = 102100;
-                    }
-                    extents = new esri.geometry.Extent(extents);
-                } catch (err2) {
-                    extents = null;
-                }
+                extents = this.getExtentsFromString(this.ex);
             }
 
             // Do we have a Bing maps key?
@@ -193,6 +172,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
             utils.createMap(this.mapId, this.rootDiv, options).then(
                 function (response) {
+                    var projectionParams;
                     pThis.mapInfo = response;
 
                     // For some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
@@ -222,10 +202,10 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                         // so we have to convert the extents to match the map
                         if (extents.spatialReference.wkid !== pThis.mapInfo.map.spatialReference.wkid) {
                             if (esri.config.defaults.geometryService) {
-                                var params = new esri.tasks.ProjectParameters();
-                                params.geometries = [extents];
-                                params.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(params).then(
+                                projectionParams = new esri.tasks.ProjectParameters();
+                                projectionParams.geometries = [extents];
+                                projectionParams.outSR = pThis.mapInfo.map.spatialReference;
+                                esri.config.defaults.geometryService.project(projectionParams).then(
                                     function (geometries) {
                                         extents = geometries[0];
                                         pThis.mapInfo.map.setExtent(extents);
@@ -246,6 +226,8 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                     // Start listening for position updates
                     pThis.positionHandle = pThis.subscribeToMessage("position", function (newCenterPoint) {
+                        var projectionParams2;
+
                         // Highlight the point's position if it's in the same coord system as the map
                         if (newCenterPoint.spatialReference.wkid === pThis.mapInfo.map.spatialReference.wkid) {
                             pThis.publishMessage("highlightItem", newCenterPoint);
@@ -260,10 +242,10 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                             // Otherwise, use the geometry service
                             } else if (esri.config.defaults.geometryService) {
-                                var params = new esri.tasks.ProjectParameters();
-                                params.geometries = [newCenterPoint];
-                                params.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(params).then(
+                                projectionParams2 = new esri.tasks.ProjectParameters();
+                                projectionParams2.geometries = [newCenterPoint];
+                                projectionParams2.outSR = pThis.mapInfo.map.spatialReference;
+                                esri.config.defaults.geometryService.project(projectionParams2).then(
                                     function (geometries) {
                                         newCenterPoint = geometries[0];
                                         pThis.publishMessage("highlightItem", newCenterPoint);
@@ -331,7 +313,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @param {extent} extent The desired map display extent
          * @memberOf js.LGMap#
          */
-        setExtent: function(extent) {
+        setExtent: function (extent) {
             return this.mapInfo.map.setExtent(extent);
         },
 
@@ -340,7 +322,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @param {point} mapPoint The desired map centerpoint
          * @memberOf js.LGMap#
          */
-        centerAt: function(mapPoint) {
+        centerAt: function (mapPoint) {
             return this.mapInfo.map.centerAt(mapPoint);
         },
 
@@ -351,7 +333,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @param {number} zoom The desired zoom level
          * @memberOf js.LGMap#
          */
-        setZoom: function(zoom) {
+        setZoom: function (zoom) {
             var minZoom = this.mapInfo.map.getMinZoom(),
                 maxZoom = this.mapInfo.map.getMaxZoom();
 
@@ -368,18 +350,72 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          *         ymin, xmax, ymax, spatial reference's wkid
          * @memberOf js.LGMap#
          */
-        getExtentsString: function () {
-            var extent, extentsString = "";
+        getMapExtentsAsString: function () {
+            var extentsString = "";
             if (this.mapInfo && this.mapInfo.map) {
-                extent = this.mapInfo.map.extent;
-                extentsString =
-                    extent.xmin.toFixed().toString() + "," +
-                    extent.ymin.toFixed().toString() + "," +
-                    extent.xmax.toFixed().toString() + "," +
-                    extent.ymax.toFixed().toString() + "," +
-                    extent.spatialReference.wkid.toString();
+                extentsString = this.getStringFromExtents(this.mapInfo.map.extent);
             }
             return extentsString;
+        },
+
+        /**
+         * Creates a string from extents.
+         * @param {object} extents Extents structure
+         * @return {string} Comma-separated extents in the order xmin,
+         *         ymin, xmax, ymax, spatial reference's wkid
+         * @see getExtentsFromString
+         * @memberOf js.LGMap#
+         */
+        getStringFromExtents: function (extents) {
+            var extentsString =
+                extents.xmin.toFixed().toString() + "," +
+                extents.ymin.toFixed().toString() + "," +
+                extents.xmax.toFixed().toString() + "," +
+                extents.ymax.toFixed().toString() + "," +
+                extents.spatialReference.wkid.toString();
+            return extentsString;
+        },
+
+        /**
+         * Creates extents from a string.
+         * @param {string} extentsString String containing comma-
+         *         separated xmin, ymin, xmax, ymax, and (optionally)
+         *         the spatial reference's wkid; comma separator
+         *         may take the escaped form "%2C"
+         * @return {object} Extents object containing xmin,
+         *         ymin, xmax, ymax set to the first four numbers
+         *         in the string; if the string contains a fifth
+         *         number, it is used as the wkid of the extents'
+         *         spatial reference, otherwise 102100 is used
+         * @see getStringFromExtents
+         * @memberOf js.LGMap#
+         */
+        getExtentsFromString: function (extentsString) {
+            var minmax, extents = null;
+
+            minmax = extentsString.split(",");
+            if (minmax.length === 1) {
+                minmax = extentsString.split("%2C");
+            }
+            try {
+                extents = {
+                    xmin: Number(minmax[0]),
+                    ymin: Number(minmax[1]),
+                    xmax: Number(minmax[2]),
+                    ymax: Number(minmax[3])
+                };
+
+                extents.spatialReference = {};
+                if (minmax.length > 4) {
+                    extents.spatialReference.wkid = Number(minmax[4]);
+                } else {
+                    extents.spatialReference.wkid = 102100;
+                }
+                extents = new esri.geometry.Extent(extents);
+            } catch (err2) {
+                extents = null;
+            }
+            return extents;
         },
 
         /**
