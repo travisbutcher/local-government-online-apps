@@ -4,7 +4,7 @@
         "titleBar.title": "Crowdsourcing",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "DarkGreen",
-        "searchBox.hint": "42757 Woodward Ave",
+        "searchBox.hint": "400 S Eagle St",
         "featureSearcher.searchLayerName": "Service Requests",
         "featureSearcher.searchFields": "REQUESTTYPE,COMMENTS,NAME",
         "highlighter.showFeaturePopup": true,
