@@ -999,14 +999,14 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGSearchAddress", js.LGSearch, {
+    dojo.declare("js.LGSearchAddress", [js.LGSearch, js.LGMapDependency], {
         /**
          * Constructs an LGSearchAddress.
          *
          * @constructor
          * @class
          * @name js.LGSearchAddress
-         * @extends js.LGSearch
+         * @extends js.LGSearch, js.LGMapDependency
          * @classdesc
          * Provides a searcher for addresses.
          */
@@ -1017,6 +1017,18 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             this.params.outFields = this.outFields;
             this.ready = new Deferred();
             this.ready.resolve(this);
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGSearchAddress#
+         * @override
+         */
+        onDependencyReady: function () {
+            this.params.searchExtent = this.mapObj.mapInfo.map.extent;
+
+            this.inherited(arguments);
         },
 
         /**
@@ -1092,115 +1104,6 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
         publish: function (subject, data) {
             this.publishMessage(subject, data);
-        }
-    });
-
-    //========================================================================================================================//
-
-    dojo.declare("js.LGSearchBoxByText", js.LGDropdownBox, {
-        /**
-         * Constructs an LGSearchBoxByText.
-         *
-         * @constructor
-         * @class
-         * @name js.LGSearchBoxByText
-         * @extends js.LGDropdownBox
-         * @classdesc
-         * Provides a UI display of a prompted text box followed by a
-         * list of results.
-         */
-        constructor: function () {
-            var pThis = this, textBoxId, searchEntryTextBox, resultsListBox, table, tableBody,
-                searcher, lastSearchString, lastSearchTime, stagedSearch;
-
-            textBoxId = this.rootId + "_entry";
-
-            domConstruct.create("label",
-                {"for": textBoxId, innerHTML: this.checkForSubstitution(this.showPrompt)}, this.rootId);
-            searchEntryTextBox = new TextBox({
-                id: textBoxId,
-                value: "",
-                trim: true,
-                placeHolder: this.hint,
-                intermediateChanges: true
-            }).placeAt(this.rootId);
-            domStyle.set(searchEntryTextBox.domNode, "width", "99%");
-
-            resultsListBox = domConstruct.create("div",
-                {className: this.resultsListBoxClass}, this.rootId);
-            table = domConstruct.create("table",
-                {className: this.resultsListTableClass}, resultsListBox);
-            tableBody = domConstruct.create("tbody",
-                {className: this.resultsListBodyClass}, table);
-            touchScroll(resultsListBox);
-
-            searcher = dom.byId(this.searcher).getLGObject();
-            lastSearchString = "";
-            lastSearchTime = 0;
-            stagedSearch = null;
-
-            // Run a search when the entry text changes
-            on(searchEntryTextBox, "change", function () {
-                var searchText = searchEntryTextBox.get("value");
-                if (lastSearchString !== searchText) {
-                    lastSearchString = searchText;
-                    domConstruct.empty(tableBody);
-
-                    // Clear any staged search
-                    clearTimeout(stagedSearch);
-
-                    if (searchText.length > 0) {
-                        // Stage a new search, which will launch if no new searches show up
-                        // before the timeout
-                        stagedSearch = setTimeout(function () {
-                            var searchingPlaceholder, thisSearchTime, now;
-
-                            searchingPlaceholder = domConstruct.create("tr", null, tableBody);
-                            domConstruct.create("td",
-                                {className: pThis.resultsListSearchingClass}, searchingPlaceholder);
-
-                            thisSearchTime = lastSearchTime = (new Date()).getTime();
-                            searcher.search(searchText, function (results) {
-                                var resultsList;
-
-                                // Discard searches made obsolete by new typing from user
-                                if (thisSearchTime < lastSearchTime) {
-                                    return;
-                                }
-
-                                // Show results
-                                domConstruct.empty(tableBody);  // to get rid of searching indicator
-                                resultsList = searcher.toList(results, searchText);
-
-                                now = (new Date()).getTime();
-                                pThis.log("retd " + resultsList.length + " items in "
-                                    + (now - thisSearchTime) / 1000 + " secs");
-
-                                if (resultsList.length > 0) {
-                                    array.forEach(resultsList, function (item) {
-                                        var tableRow, tableCell;
-
-                                        tableRow = domConstruct.create("tr",
-                                            null, tableBody);
-                                        tableCell = domConstruct.create("td",
-                                            {className: pThis.resultsListEntryClass, innerHTML: item.label}, tableRow);
-                                        pThis.applyTheme(true, tableCell);
-                                        on(tableCell, "click", function () {
-                                            searcher.publish(pThis.publish, item.data);
-                                        });
-                                    });
-                                }
-                            }, function (error) {
-                                // Query failure
-                                pThis.log("LGSearchBoxByText_1: " + error.message);
-
-                                lastSearchString = "";  // so that we can quickly repeat this search
-                                domConstruct.empty(tableBody);  // to get rid of searching indicator
-                            });
-                        }, 1000);
-                    }
-                }
-            });
         }
     });
 
@@ -1483,6 +1386,115 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
     //========================================================================================================================//
 
+    dojo.declare("js.LGSearchBoxByText", js.LGDropdownBox, {
+        /**
+         * Constructs an LGSearchBoxByText.
+         *
+         * @constructor
+         * @class
+         * @name js.LGSearchBoxByText
+         * @extends js.LGDropdownBox
+         * @classdesc
+         * Provides a UI display of a prompted text box followed by a
+         * list of results.
+         */
+        constructor: function () {
+            var pThis = this, textBoxId, searchEntryTextBox, resultsListBox, table, tableBody,
+                searcher, lastSearchString, lastSearchTime, stagedSearch;
+
+            textBoxId = this.rootId + "_entry";
+
+            domConstruct.create("label",
+                {"for": textBoxId, innerHTML: this.checkForSubstitution(this.showPrompt)}, this.rootId);
+            searchEntryTextBox = new TextBox({
+                id: textBoxId,
+                value: "",
+                trim: true,
+                placeHolder: this.hint,
+                intermediateChanges: true
+            }).placeAt(this.rootId);
+            domStyle.set(searchEntryTextBox.domNode, "width", "99%");
+
+            resultsListBox = domConstruct.create("div",
+                {className: this.resultsListBoxClass}, this.rootId);
+            table = domConstruct.create("table",
+                {className: this.resultsListTableClass}, resultsListBox);
+            tableBody = domConstruct.create("tbody",
+                {className: this.resultsListBodyClass}, table);
+            touchScroll(resultsListBox);
+
+            searcher = dom.byId(this.searcher).getLGObject();
+            lastSearchString = "";
+            lastSearchTime = 0;
+            stagedSearch = null;
+
+            // Run a search when the entry text changes
+            on(searchEntryTextBox, "change", function () {
+                var searchText = searchEntryTextBox.get("value");
+                if (lastSearchString !== searchText) {
+                    lastSearchString = searchText;
+                    domConstruct.empty(tableBody);
+
+                    // Clear any staged search
+                    clearTimeout(stagedSearch);
+
+                    if (searchText.length > 0) {
+                        // Stage a new search, which will launch if no new searches show up
+                        // before the timeout
+                        stagedSearch = setTimeout(function () {
+                            var searchingPlaceholder, thisSearchTime, now;
+
+                            searchingPlaceholder = domConstruct.create("tr", null, tableBody);
+                            domConstruct.create("td",
+                                {className: pThis.resultsListSearchingClass}, searchingPlaceholder);
+
+                            thisSearchTime = lastSearchTime = (new Date()).getTime();
+                            searcher.search(searchText, function (results) {
+                                var resultsList;
+
+                                // Discard searches made obsolete by new typing from user
+                                if (thisSearchTime < lastSearchTime) {
+                                    return;
+                                }
+
+                                // Show results
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
+                                resultsList = searcher.toList(results, searchText);
+
+                                now = (new Date()).getTime();
+                                pThis.log("retd " + resultsList.length + " items in "
+                                    + (now - thisSearchTime) / 1000 + " secs");
+
+                                if (resultsList.length > 0) {
+                                    array.forEach(resultsList, function (item) {
+                                        var tableRow, tableCell;
+
+                                        tableRow = domConstruct.create("tr",
+                                            null, tableBody);
+                                        tableCell = domConstruct.create("td",
+                                            {className: pThis.resultsListEntryClass, innerHTML: item.label}, tableRow);
+                                        pThis.applyTheme(true, tableCell);
+                                        on(tableCell, "click", function () {
+                                            searcher.publish(pThis.publish, item.data);
+                                        });
+                                    });
+                                }
+                            }, function (error) {
+                                // Query failure
+                                pThis.log("LGSearchBoxByText_1: " + error.message);
+
+                                lastSearchString = "";  // so that we can quickly repeat this search
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
+                            });
+                        }, 1000);
+                    }
+                }
+            });
+        }
+    });
+
+    //========================================================================================================================//
+
     dojo.declare("js.LGShare", js.LGObject, {
         /**
          * Constructs an LGShare.
@@ -1629,11 +1641,11 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         /**
          * Gets the app's map's extents.
          * @return {string} Extents as supplied by LGMap's
-         *         getExtentsString()
+         *         getMapExtentsAsString()
          * @memberOf js.LGShareAppExtents
          */
         getMapExtentsArg: function () {
-            return "ex=" + this.mapObj.getExtentsString();
+            return "ex=" + this.mapObj.getMapExtentsAsString();
         }
     });
 
