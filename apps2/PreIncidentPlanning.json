@@ -3,7 +3,7 @@
         "webmap": "37b42b87cd9547338051af892954f03b",
         "titleBar.title": "Pre-Incident Planning",
         "titleBar.iconUrl": "images/onlineapp.png",
-        "colorizer.theme": "DarkGray",
+        "colorizer.theme": "Brick",
         "searchBox.hint": "400 S Eagle St",
         "filter.hint1": "Floor number",
         "filter.value1": 1,
@@ -237,14 +237,16 @@
             "templatePickerDivClass": "templatePickerDiv",
             "colorizerId": "colorizer",
             "horizOffset": -2,
-            "vertOffset": [38, -40],
+            "vertOffset": [56, -40],
             "trigger": "navigator",
             "dependencyId": "map",
             "listenForDefaultsTrigger": "floor"
         }
     }, {
         "classname": "js.LGFilterLayers1WithDefaults",
-        "styles": ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .filter{border-radius:8px}",
+        "styles":
+        ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}"+
+        ".okIE .filter{border-radius:8px}",
         "config": {
             "rootId": "filter",
             "tooltip": "@tooltips.filter",

@@ -1847,6 +1847,9 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 this.applyFilter();
 
                 // Provide a UI to change the filter
+                domConstruct.create("label", {innerHTML: this.hint1},
+                    domConstruct.create("div", {}, this.rootId));
+
                 field1EntryTextBox = new TextBox({
                     id: this.rootId + "_field1",
                     value: this.value1,
