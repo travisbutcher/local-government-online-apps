@@ -154,7 +154,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          * @memberOf js.LGObject#
          */
         injectCSS: function (cssStr) {
-            var customStyles, cssText, firstScript;
+            var customStyles, cssText;
 
             // By Fredrik Johansson
             // http://www.quirksmode.org/bugreports/archives/2006/01/IE_wont_allow_documentcreateElementstyle.html#c4088
@@ -290,7 +290,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
             }
 
             // Handle a non-number
-            numValue = new Number(numValue);
+            numValue = parseFloat(numValue);
             if (!isNaN(numValue)) {
                 return numValue;
             }

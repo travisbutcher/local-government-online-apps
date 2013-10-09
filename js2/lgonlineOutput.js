@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "dojo/aspect", "dojo/topic", "js/lgonlineBase"], function (domConstruct, domClass, aspect, topic) {
+define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "dojo/topic", "js/lgonlineBase"], function (domConstruct, domClass, topic) {
 
     //========================================================================================================================//
 

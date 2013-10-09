@@ -48,7 +48,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "
 
             // Make sure that we have a full set of colors
             if (this.colors.length < defaultColors.length) {
-                for (i = this.colors.length; i < defaultColors.length; ++i) {
+                for (i = this.colors.length; i < defaultColors.length; i = i + 1) {
                     this.colors.push(defaultColors[i]);
                 }
             }
@@ -215,7 +215,7 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "
                 headerDivBox = dojo.marginBox(this.headerDiv);
 
                 contentHeight = rootDivBox.h - headerDivBox.h;
-                if(contentHeight > 0) {
+                if (contentHeight > 0) {
                     styleAttrs = {};
                     styleAttrs.top = headerDivBox.h + "px";
                     styleAttrs.height = (rootDivBox.h - headerDivBox.h) + "px";

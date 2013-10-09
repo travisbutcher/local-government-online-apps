@@ -1,4 +1,4 @@
-/*global require,dojo,window,Modernizr,console,js,location,esri */
+/*global require,dojo,window,Modernizr,console,js,location,esri,defaultAppUI:true */
 /*jslint sloppy:true */
 /** @license
  | ArcGIS for Local Government
@@ -26,7 +26,7 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
         // By Pradeep Kumar Mishra
         // http://stackoverflow.com/a/498995
         if (!String.prototype.trim) {
-            String.prototype.trim = function() {
+            String.prototype.trim = function () {
                 return this.replace(/^\s+|\s+$/g, '');
             };
         }

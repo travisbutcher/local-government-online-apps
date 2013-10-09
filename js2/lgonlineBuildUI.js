@@ -589,7 +589,7 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
          * @memberOf js.LGUIBuilder#
          */
         injectCSS: function (cssStr) {
-            var customStyles, cssText, firstScript;
+            var customStyles, cssText;
 
             // By Fredrik Johansson
             // http://www.quirksmode.org/bugreports/archives/2006/01/IE_wont_allow_documentcreateElementstyle.html#c4088
