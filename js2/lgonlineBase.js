@@ -108,6 +108,23 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         },
 
         /**
+         * Returns the LG object with the specified dom id.
+         * @param {string} id Dom id of item to find
+         * @return {object} LGObject or subclass, or null if the
+         *         dom id was not found or if it is not in the
+         *         LGObject class hierarchy
+         * @memberOf js.LGObject#
+         */
+        lgById: function (id) {
+            var lgItem = null,
+                domItem = dom.byId(id);
+            if (domItem && domItem.getLGObject) {
+                lgItem = domItem.getLGObject();
+            }
+            return lgItem;
+        },
+
+        /**
          * Deletes the item's associated div from the DOM.
          * @memberOf js.LGObject#
          */
@@ -203,7 +220,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
                 attributeChain = attributePath.split(".");
                 for (x = 0; x < attributeChain.length; x = x + 1) {
                     if (null === objAtEnd) {
-                        objAtEnd = dom.byId(attributeChain[x]).getLGObject();
+                        objAtEnd = this.lgById(attributeChain[x]);
                     } else {
                         objAtEnd = objAtEnd[attributeChain[x]];
                     }
@@ -593,7 +610,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
             var dependsOn, pThis = this;
 
             if (this.dependencyId) {
-                dependsOn = dom.byId(this.dependencyId).getLGObject();
+                dependsOn = this.lgById(this.dependencyId);
                 this.onDependencyPrep(dependsOn);
                 dependsOn.ready.then(function () {
                     pThis.onDependencyReady();

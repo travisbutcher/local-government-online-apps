@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dojo/aspect", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, domStyle, domClass, array, lang, string, aspect, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, TemplatePicker, Editor) {
+define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dojo/aspect", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, aspect, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, TemplatePicker, Editor) {
 
     //========================================================================================================================//
 
@@ -905,7 +905,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
         constructor: function () {
             if (this.busyIndicator) {
-                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = this.lgById(this.busyIndicator);
             }
         },
 
@@ -1016,7 +1016,6 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             this.params = {};
             this.params.outFields = this.outFields;
             this.ready = new Deferred();
-            this.ready.resolve(this);
         },
 
         /**
@@ -1027,7 +1026,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
         onDependencyReady: function () {
             this.params.searchExtent = this.mapObj.mapInfo.map.extent;
-
+            this.ready.resolve(this);
             this.inherited(arguments);
         },
 
@@ -1104,6 +1103,150 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
         publish: function (subject, data) {
             this.publishMessage(subject, data);
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGSearchMultiplexer", js.LGSearch, {
+        /**
+         * Constructs an LGSearchMultiplexer.
+         *
+         * @constructor
+         * @class
+         * @name js.LGSearchMultiplexer
+         * @extends js.LGSearch
+         * @classdesc
+         * Provides a searcher that multiplexes the work of other searchers.
+         */
+        constructor: function () {
+            var pThis = this, deferralWaitList = new Array();
+            this.ready = new Deferred();
+
+            // Get our searchers and build a list of their ready state deferrals
+            this.searchers = new Array();
+            if (this.searcherNames) {
+                array.forEach(this.searcherNames, function (searcherName) {
+                    var searcher = pThis.lgById(searcherName);
+                    if (searcher) {
+                        pThis.searchers.push(searcher);
+                        deferralWaitList.push(searcher.ready);
+                    }
+                });
+            }
+
+            // We're ready once all of our searchers are ready
+            (new DeferredList(deferralWaitList)).then(
+                function (results) {
+                    // Did both succeed?
+                    if (!results[0] || !results[1]) {
+                        pThis.ready.reject(pThis);
+                        return;
+                    }
+                    pThis.ready.resolve(pThis);
+                }
+            );
+        },
+
+        /**
+         * Launches a search of the instance's search type.
+         * @param {string|geometry} searchText Text or geometry to search
+         * @param {function} callback Function to call when search
+         *        results arrive; function takes the results as its sole
+         *        argument
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        search: function (searchText, callback, errback) {
+            var pThis = this,
+                mergedResultsList = new Array(),
+                searchersDoneWaitList = new Array(),
+                haveAllResults = new Deferred();
+
+            // Send the search text to each of our searchers
+            array.forEach(this.searchers, function (searcher, i) {
+                var searcherIsDone = new Deferred();
+                searchersDoneWaitList.push(searcherIsDone);
+                searcher.search(searchText, function (results) {
+                    // Add the index of the searcher to the results so that we're
+                    // able to do searcher-specific post-processing upon publishing
+                    var searcherResultsList = searcher.toList(results, searchText);
+                    searcherResultsList = array.map(searcherResultsList, function (item) {
+                        var newItem,
+                            supplementedData = {
+                                iSearcher: i,
+                                itemData: item.data
+                            };
+                        newItem = {
+                            data: supplementedData,
+                            label: item.label
+                        }
+                        return newItem;
+                    });
+                    mergedResultsList = mergedResultsList.concat(searcherResultsList);
+                    searcherIsDone.resolve();
+
+                }, function (error) {
+                    searcherIsDone.reject(error);
+                });
+
+            });
+
+            // Call the callback when all of our searchers are done
+            (new DeferredList(searchersDoneWaitList)).then(
+                function (results) {
+                    var ok = true;
+
+                    // If at least one searcher failed, call the errback
+                    if (errback) {
+                        ok = !array.some(results, function (result) {
+                            if (!result[0]) {
+                                errback(result[1]);
+                                return true;
+                            }
+                            return false;
+                        });
+                    }
+                    // If all searchers succeeded, call the callback
+                    if (ok && callback) {
+                        callback(mergedResultsList);
+                    }
+                }
+            );
+        },
+
+        /**
+         * Formats results into a list of structures; each structure
+         * contains a label and an optional data structure.
+         * @param {object} results Search-specific results
+         * @param {string} [searchText] Search text
+         * @return {array} List of structures; label is tagged with
+         *         "label" and data is tagged with "data"
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        toList: function (results) {
+            // Results have already been converted into a list in the search function,
+            // so we can simply send them back
+            return results;
+        },
+
+        /**
+         * Publishes the specified data after performing any post
+         * processing.
+         * @param {string} subject Publishing topic name
+         * @param {object} data Object to publish under topic
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        publish: function (subject, data) {
+            // Extract the searcher and the data packet and publish the data via the searcher
+            this.searchers[data.iSearcher].publish(subject, data.itemData);
         }
     });
 
@@ -1396,7 +1539,8 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * @extends js.LGDropdownBox
          * @classdesc
          * Provides a UI display of a prompted text box followed by a
-         * list of results.
+         * list of results. Works with subclass of LGSearch, which provides
+         * the searching and results formatting for this display.
          */
         constructor: function () {
             var pThis = this, textBoxId, searchEntryTextBox, resultsListBox, table, tableBody,
@@ -1423,7 +1567,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 {className: this.resultsListBodyClass}, table);
             touchScroll(resultsListBox);
 
-            searcher = dom.byId(this.searcher).getLGObject();
+            searcher = this.lgById(this.searcher);
             lastSearchString = "";
             lastSearchTime = 0;
             stagedSearch = null;
@@ -1509,7 +1653,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         constructor: function () {
             var pThis = this;
             if (this.busyIndicator) {
-                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = this.lgById(this.busyIndicator);
             }
             this.subscribeToMessage(this.trigger, function () {
                 pThis.share();
@@ -1843,7 +1987,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             // and deactivate the foreground colors in order to see the theme and we have to
             // manually set the theme for the selected item in the template picker because we
             // don't have a handle to the currently-selected item.)
-            colorizer = dojo.byId(this.colorizerId).getLGObject();
+            colorizer = this.lgById(this.colorizerId);
             styleString =
                 ".templatePicker{border:1px solid transparent!important;}" +
                 ".templatePicker .dojoxGrid{background-color:transparent;}" +
