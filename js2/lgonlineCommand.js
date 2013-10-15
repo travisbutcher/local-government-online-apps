@@ -1108,148 +1108,6 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGSearchMultiplexer", js.LGSearch, {
-        /**
-         * Constructs an LGSearchMultiplexer.
-         *
-         * @constructor
-         * @class
-         * @name js.LGSearchMultiplexer
-         * @extends js.LGSearch
-         * @classdesc
-         * Provides a searcher that multiplexes the work of other searchers.
-         */
-        constructor: function () {
-            var pThis = this, deferralWaitList = [];
-            this.ready = new Deferred();
-
-            // Get our searchers and build a list of their ready state deferrals
-            this.searchers = [];
-            if (this.searcherNames) {
-                array.forEach(this.searcherNames, function (searcherName) {
-                    var searcher = pThis.lgById(searcherName);
-                    if (searcher) {
-                        pThis.searchers.push(searcher);
-                        deferralWaitList.push(searcher.ready);
-                    }
-                });
-            }
-
-            // We're ready once all of our searchers are ready
-            (new DeferredList(deferralWaitList)).then(
-                function (results) {
-                    // Did both succeed?
-                    if (!results[0] || !results[1]) {
-                        pThis.ready.reject(pThis);
-                        return;
-                    }
-                    pThis.ready.resolve(pThis);
-                }
-            );
-        },
-
-        /**
-         * Launches a search of the instance's search type.
-         * @param {string|geometry} searchText Text or geometry to search
-         * @param {function} callback Function to call when search
-         *        results arrive; function takes the results as its sole
-         *        argument
-         * @memberOf js.LGSearchMultiplexer#
-         * @override
-         */
-        search: function (searchText, callback, errback) {
-            var mergedResultsList = [],
-                searchersDoneWaitList = [];
-
-            // Send the search text to each of our searchers
-            array.forEach(this.searchers, function (searcher, i) {
-                var searcherIsDone = new Deferred();
-                searchersDoneWaitList.push(searcherIsDone);
-                searcher.search(searchText, function (results) {
-                    // Add the index of the searcher to the results so that we're
-                    // able to do searcher-specific post-processing upon publishing
-                    var searcherResultsList = searcher.toList(results, searchText);
-                    searcherResultsList = array.map(searcherResultsList, function (item) {
-                        var newItem,
-                            supplementedData = {
-                                iSearcher: i,
-                                itemData: item.data
-                            };
-                        newItem = {
-                            data: supplementedData,
-                            label: item.label
-                        };
-                        return newItem;
-                    });
-                    mergedResultsList = mergedResultsList.concat(searcherResultsList);
-                    searcherIsDone.resolve();
-
-                }, function (error) {
-                    searcherIsDone.reject(error);
-                });
-
-            });
-
-            // Call the callback when all of our searchers are done
-            (new DeferredList(searchersDoneWaitList)).then(
-                function (results) {
-                    var ok = true;
-
-                    // If at least one searcher failed, call the errback
-                    if (errback) {
-                        ok = !array.some(results, function (result) {
-                            if (!result[0]) {
-                                errback(result[1]);
-                                return true;
-                            }
-                            return false;
-                        });
-                    }
-                    // If all searchers succeeded, call the callback
-                    if (ok && callback) {
-                        callback(mergedResultsList);
-                    }
-                }
-            );
-        },
-
-        /**
-         * Formats results into a list of structures; each structure
-         * contains a label and an optional data structure.
-         * @param {object} results Search-specific results
-         * @param {string} [searchText] Search text
-         * @return {array} List of structures; label is tagged with
-         *         "label" and data is tagged with "data"
-         * @memberOf js.LGSearchMultiplexer#
-         * @override
-         */
-        toList: function (results) {
-            // Results have already been converted into a list in the search function,
-            // so we can simply send them back
-            return results;
-        },
-
-        /**
-         * Publishes the specified data after performing any post
-         * processing.
-         * @param {string} subject Publishing topic name
-         * @param {object} data Object to publish under topic
-         * @see Interface stub. The data are those set up by the toList
-         *       function and could be final or intermediate results.
-         *       For intermediate results, the publish function is the
-         *       place for the searcher to complete the data-retrieval
-         *       process before publishing.
-         * @memberOf js.LGSearchMultiplexer#
-         * @override
-         */
-        publish: function (subject, data) {
-            // Extract the searcher and the data packet and publish the data via the searcher
-            this.searchers[data.iSearcher].publish(subject, data.itemData);
-        }
-    });
-
-    //========================================================================================================================//
-
     dojo.declare("js.LGSearchFeatureLayer", [js.LGSearch, js.LGMapDependency], {
         /**
          * Constructs an LGSearchFeatureLayer.
@@ -1522,6 +1380,148 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                     pThis.busyIndicator.setIsVisible(false);
                 }
             });
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGSearchMultiplexer", js.LGSearch, {
+        /**
+         * Constructs an LGSearchMultiplexer.
+         *
+         * @constructor
+         * @class
+         * @name js.LGSearchMultiplexer
+         * @extends js.LGSearch
+         * @classdesc
+         * Provides a searcher that multiplexes the work of other searchers.
+         */
+        constructor: function () {
+            var pThis = this, deferralWaitList = [];
+            this.ready = new Deferred();
+
+            // Get our searchers and build a list of their ready state deferrals
+            this.searchers = [];
+            if (this.searcherNames) {
+                array.forEach(this.searcherNames, function (searcherName) {
+                    var searcher = pThis.lgById(searcherName);
+                    if (searcher) {
+                        pThis.searchers.push(searcher);
+                        deferralWaitList.push(searcher.ready);
+                    }
+                });
+            }
+
+            // We're ready once all of our searchers are ready
+            (new DeferredList(deferralWaitList)).then(
+                function (results) {
+                    // Did both succeed?
+                    if (!results[0] || !results[1]) {
+                        pThis.ready.reject(pThis);
+                        return;
+                    }
+                    pThis.ready.resolve(pThis);
+                }
+            );
+        },
+
+        /**
+         * Launches a search of the instance's search type.
+         * @param {string|geometry} searchText Text or geometry to search
+         * @param {function} callback Function to call when search
+         *        results arrive; function takes the results as its sole
+         *        argument
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        search: function (searchText, callback, errback) {
+            var mergedResultsList = [],
+                searchersDoneWaitList = [];
+
+            // Send the search text to each of our searchers
+            array.forEach(this.searchers, function (searcher, i) {
+                var searcherIsDone = new Deferred();
+                searchersDoneWaitList.push(searcherIsDone);
+                searcher.search(searchText, function (results) {
+                    // Add the index of the searcher to the results so that we're
+                    // able to do searcher-specific post-processing upon publishing
+                    var searcherResultsList = searcher.toList(results, searchText);
+                    searcherResultsList = array.map(searcherResultsList, function (item) {
+                        var newItem,
+                            supplementedData = {
+                                iSearcher: i,
+                                itemData: item.data
+                            };
+                        newItem = {
+                            data: supplementedData,
+                            label: item.label
+                        };
+                        return newItem;
+                    });
+                    mergedResultsList = mergedResultsList.concat(searcherResultsList);
+                    searcherIsDone.resolve();
+
+                }, function (error) {
+                    searcherIsDone.reject(error);
+                });
+
+            });
+
+            // Call the callback when all of our searchers are done
+            (new DeferredList(searchersDoneWaitList)).then(
+                function (results) {
+                    var ok = true;
+
+                    // If at least one searcher failed, call the errback
+                    if (errback) {
+                        ok = !array.some(results, function (result) {
+                            if (!result[0]) {
+                                errback(result[1]);
+                                return true;
+                            }
+                            return false;
+                        });
+                    }
+                    // If all searchers succeeded, call the callback
+                    if (ok && callback) {
+                        callback(mergedResultsList);
+                    }
+                }
+            );
+        },
+
+        /**
+         * Formats results into a list of structures; each structure
+         * contains a label and an optional data structure.
+         * @param {object} results Search-specific results
+         * @param {string} [searchText] Search text
+         * @return {array} List of structures; label is tagged with
+         *         "label" and data is tagged with "data"
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        toList: function (results) {
+            // Results have already been converted into a list in the search function,
+            // so we can simply send them back
+            return results;
+        },
+
+        /**
+         * Publishes the specified data after performing any post
+         * processing.
+         * @param {string} subject Publishing topic name
+         * @param {object} data Object to publish under topic
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        publish: function (subject, data) {
+            // Extract the searcher and the data packet and publish the data via the searcher
+            this.searchers[data.iSearcher].publish(subject, data.itemData);
         }
     });
 
