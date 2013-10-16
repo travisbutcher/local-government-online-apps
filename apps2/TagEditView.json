@@ -416,7 +416,7 @@
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
             "dependencyId": "map",
-            "publish": "navigator"
+            "publish": "markup"
         }
     }, {
         "classname": "js.LGCommand",
