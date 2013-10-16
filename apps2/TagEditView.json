@@ -238,7 +238,7 @@
             "colorizerId": "colorizer",
             "horizOffset": -2,
             "vertOffset": [56, -40],
-            "trigger": "navigator",
+            "trigger": "markup",
             "dependencyId": "map",
             "listenForDefaultsTrigger": "floor"
         }
@@ -255,7 +255,7 @@
             "horizOffset": -2,
             "vertOffset": 2,
             "defnExpression": "${fieldname1}=${value1}",
-            "trigger": "navigator",
+            "trigger": "markup",
             "dependencyId": "map",
             "broadcastDefaultsPublish": "floor"
         }
@@ -409,9 +409,9 @@
     }, {
         "classname": "js.LGCommand",
         "config": {
-            "rootId": "navigator",
+            "rootId": "markup",
             "tooltip": "@tooltips.collect",
-            "iconUrl": "images/navigator.png",
+            "iconUrl": "images/markup.png",
             "parentDiv": "commandPanel",
             "rootClass": "commandButton",
             "iconClass": "commandIcon",
