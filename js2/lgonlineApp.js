@@ -1,7 +1,7 @@
 /*global define,js */
 /*jslint sloppy:true */
 /** @license
- | ArcGIS for Local Government
+ | ArcGIS Solutions
  | Version 10.2
  | Copyright 2012 Esri
  |

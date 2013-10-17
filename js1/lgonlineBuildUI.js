@@ -1,7 +1,7 @@
 /*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,console */
 /*jslint sloppy:true,evil:true,regexp:true,unparam:true */
 /** @license
- | ArcGIS for Local Government
+ | ArcGIS Solutions
  | Version 10.1.2
  | Copyright 2012 Esri
  |
@@ -37,8 +37,8 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
          * @class
          * @name js.LGArcGISAccess
          * @classdesc
-         * Supplements the ArcGIS Portal REST interface for Local
-         * Government applications.
+         * Supplements the ArcGIS Portal REST interface for Solutions
+         * applications.
          */
         constructor: function (args) {
             var timerId,
