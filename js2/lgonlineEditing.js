@@ -74,14 +74,17 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/on", "dojo/_base/array
             this.layerInfos = [];
             this.layers = [];
             array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
-                if (mapLayer.layerObject) {
-                    if (mapLayer.layerObject.isEditable()) {
+                var eLayer = mapLayer.layerObject;
+                if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()){
+                    if (mapLayer.capabilities && mapLayer.capabilities === "Query"){
+                        // capabilities set to Query, so editing was disabled in the web map
+                    } else {
                         // Layers list for esri.dijit.editing.Editor
                         this.layerInfos.push({
-                            "featureLayer": mapLayer.layerObject
+                            "featureLayer": eLayer
                         });
                         // Layers list for esri.dijit.editing.TemplatePicker
-                        this.layers.push(mapLayer.layerObject);
+                        this.layers.push(eLayer);
                     }
                 }
             }));
