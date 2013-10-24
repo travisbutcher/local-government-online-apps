@@ -1,6 +1,6 @@
 {
     "values": {
-        "webmap": "37b42b87cd9547338051af892954f03b",
+        "webmap": "796c572e6dcb4c88b77c024ae003bd88",
         "titleBar.title": "Tag, Edit, and View",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "Brick",
@@ -8,7 +8,7 @@
         "filter.hint1": "Floor number",
         "filter.value1": 1,
         "filter.fieldname1": "FLOOR",
-        "featureSearcher.searchLayerName": "FireSuppressionSystems - Fire Suppression Systems",
+        "featureSearcher.searchLayerName": "Fire Suppression Systems",
         "featureSearcher.searchFields": "COMPLEXID,PLANID,LOCDESC,COMMENTS",
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
