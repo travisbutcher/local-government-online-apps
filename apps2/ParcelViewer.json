@@ -226,8 +226,20 @@
             "itemClass": "commandPanelItem",
             "arrowClass": "commandPanelArrow"
         }
-    }, {
+/*    }, {
         "classname": "js.LGSearchFeatureLayer",
+        "config": {
+            "rootId": "featureSearcher",
+            "parentDiv": "contentFrame",
+            "dependencyId": "map",
+            "busyIndicator": "busyIndicator",
+            "publishPointsOnly": false,
+            "searchPattern": "%${1}%",
+            "caseInsensitiveSearch": true
+        }
+*/
+    }, {
+        "classname": "js.LGSearchFeatureLayerMultiplexer",
         "config": {
             "rootId": "featureSearcher",
             "parentDiv": "contentFrame",

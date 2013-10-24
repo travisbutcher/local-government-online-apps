@@ -1203,7 +1203,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             }
 
             // Failed to find the search layer; provide some feedback
-            message = "\"" + this.searchLayerName + "\"<br>";
+            message = "\"" + (this.searchLayerName ? this.searchLayerName : "") + "\"<br>";
             message += reason + "<br><hr><br>";
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
@@ -1522,6 +1522,54 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         publish: function (subject, data) {
             // Extract the searcher and the data packet and publish the data via the searcher
             this.searchers[data.iSearcher].publish(subject, data.itemData);
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGSearchFeatureLayerMultiplexer", js.LGSearch, {
+        /**
+         * Constructs an LGSearchFeatureLayerMultiplexer.
+         *
+         * @constructor
+         * @class
+         * @name js.LGSearchFeatureLayerMultiplexer
+         * @extends js.LGSearchMultiplexer
+         * @classdesc
+         * Provides a searcher that multiplexes the work of LGSearchFeatureLayer searchers,
+         * selecting them by feature layer name
+         */
+        constructor: function () {
+            var pThis = this, featureLayerNames = [];
+
+            // Construct the searchers
+            if (this.searchLayerName) {
+                featureLayerNames = this.searchLayerName.split(",");
+            }
+
+            this.searcherNames2 = [];
+            array.forEach(featureLayerNames, function (layerName) {
+                var searcherName = pThis.rootId + "_" + pThis.searcherNames2.length;
+                var searcher = new js.LGSearchFeatureLayer({
+                    app: pThis.app,
+                    commonConfig: pThis.commonConfig,
+                    i18n: pThis.i18n,
+                    webmap: pThis.webmap,
+                    rootId: searcherName,
+                    parentDiv: pThis.parentDiv,
+                    dependencyId: pThis.dependencyId,
+                    busyIndicator: pThis.busyIndicator,
+                    publishPointsOnly: pThis.publishPointsOnly,
+                    searchPattern: pThis.searchPattern,
+                    caseInsensitiveSearch: pThis.caseInsensitiveSearch,
+                    searchLayerName: layerName,
+                    searchFields: pThis.searchFields
+                });
+                pThis.searcherNames2.push(searcherName);
+            });
+
+            // Proceed with the superclass constructor
+            console.log("end of LGSearchFeatureLayerMultiplexer constructor");
         }
     });
 
