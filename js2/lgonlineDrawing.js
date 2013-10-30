@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDrawing", ["dojo/topic", "dojo/Deferred", "dojo/_base/Color", "js/lgonlineMap"], function (topic, Deferred, Color) {
+define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineMap"], function (Deferred, Color) {
 
     //========================================================================================================================//
 
@@ -58,7 +58,7 @@ define("js/lgonlineDrawing", ["dojo/topic", "dojo/Deferred", "dojo/_base/Color",
             this.intervalID = null;
 
             // Cache the URL to the print when triggered
-            topic.subscribe("highlightItem", function (focalItem) {
+            this.subscribeToMessage("highlightItem", function (focalItem) {
                 var geometry, attributes, infoTemplate, highlightGraphics;
 
                 // Normalize focal item into attributes, geometry, and infoTemplate components

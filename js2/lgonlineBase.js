@@ -108,6 +108,23 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         },
 
         /**
+         * Returns the LG object with the specified dom id.
+         * @param {string} id Dom id of item to find
+         * @return {object} LGObject or subclass, or null if the
+         *         dom id was not found or if it is not in the
+         *         LGObject class hierarchy
+         * @memberOf js.LGObject#
+         */
+        lgById: function (id) {
+            var lgItem = null,
+                domItem = dom.byId(id);
+            if (domItem && domItem.getLGObject) {
+                lgItem = domItem.getLGObject();
+            }
+            return lgItem;
+        },
+
+        /**
          * Deletes the item's associated div from the DOM.
          * @memberOf js.LGObject#
          */
@@ -137,7 +154,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          * @memberOf js.LGObject#
          */
         injectCSS: function (cssStr) {
-            var customStyles, cssText, firstScript;
+            var customStyles, cssText;
 
             // By Fredrik Johansson
             // http://www.quirksmode.org/bugreports/archives/2006/01/IE_wont_allow_documentcreateElementstyle.html#c4088
@@ -150,9 +167,8 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
                 customStyles.appendChild(cssText);
             }
 
-            // http://paulirish.com/2011/surefire-dom-element-insertion/
-            firstScript = document.getElementsByTagName("script")[0];
-            firstScript.parentNode.insertBefore(customStyles, firstScript);
+            // Add the style *after* existing styles so that it'll override them
+            document.body.appendChild(customStyles);
 
             return customStyles;
         },
@@ -204,7 +220,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
                 attributeChain = attributePath.split(".");
                 for (x = 0; x < attributeChain.length; x = x + 1) {
                     if (null === objAtEnd) {
-                        objAtEnd = dom.byId(attributeChain[x]).getLGObject();
+                        objAtEnd = this.lgById(attributeChain[x]);
                     } else {
                         objAtEnd = objAtEnd[attributeChain[x]];
                     }
@@ -274,7 +290,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
             }
 
             // Handle a non-number
-            numValue = new Number(numValue);
+            numValue = parseFloat(numValue);
             if (!isNaN(numValue)) {
                 return numValue;
             }
@@ -300,11 +316,24 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
                 console.log(message);
             }
             if (publishError) {
-                topic.publish("error", message);
+                this.publishMessage("error", message);
             }
             if (window.gLogMessageBox) {
                 window.gLogMessageBox.append(message);
             }
+        },
+
+        publishMessage: function (tag, data) {
+            topic.publish("publish", {id: this.rootId, tag: tag, data: data});
+            topic.publish(tag, data);
+        },
+
+        subscribeToMessage: function (tag, handlingFunction) {
+            var pThis = this;
+            topic.subscribe(tag, function (data) {
+                topic.publish("receive", {id: pThis.rootId, tag: tag, data: data});
+            });
+            topic.subscribe(tag, handlingFunction);
         }
     });
 
@@ -581,7 +610,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
             var dependsOn, pThis = this;
 
             if (this.dependencyId) {
-                dependsOn = dom.byId(this.dependencyId).getLGObject();
+                dependsOn = this.lgById(this.dependencyId);
                 this.onDependencyPrep(dependsOn);
                 dependsOn.ready.then(function () {
                     pThis.onDependencyReady();
@@ -607,6 +636,67 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          */
         onDependencyReady: function () {
             return null;
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGDefaults", null, {
+        /**
+         * Constructs an LGDefaults.
+         *
+         * @constructor
+         * @class
+         * @name js.LGDefaults
+         * @classdesc
+         * Provides a mixin for handling the sharing of default values.
+         */
+        constructor: function () {
+            this.defaultValues = {};
+
+            // If we're mixed into a class that wants to listen for updates, set up the listener
+            if (this.listenForDefaultsTrigger) {
+                this.listenForDefaultsUpdate();
+            }
+        },
+
+        /**
+         * Subscribe to the defaults message.
+         * @memberOf js.LGDefaults#
+         */
+        listenForDefaultsUpdate: function () {
+            var pThis = this;
+            this.subscribeToMessage(this.listenForDefaultsTrigger, function (defaultValues) {
+                // Cache the defaults and give subclass(es) an opportunity to work with them
+                pThis.defaultValues = defaultValues;
+                pThis.onDefaultsUpdate();
+            });
+        },
+
+        /**
+         * Performs class-specific behavior after a defaults message has been received.
+         * @memberOf js.LGDefaults#
+         */
+        onDefaultsUpdate: function () {
+            return null;
+        },
+
+        /**
+         * Performs class-specific behavior to change and broadcast defaults.
+         * @memberOf js.LGDefaults#
+         */
+        changeDefaults: function () {
+            this.broadcastDefaultsUpdate();
+        },
+
+        /**
+         * Broadcasts the current defaults.
+         * @memberOf js.LGDefaults#
+         */
+        broadcastDefaultsUpdate: function () {
+            if (this.broadcastDefaultsPublish) {
+                this.publishMessage(this.broadcastDefaultsPublish, this.defaultValues);
+            }
         }
     });
 

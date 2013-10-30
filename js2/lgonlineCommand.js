@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, domStyle, domClass, array, topic, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate) {
+define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate) {
 
     //========================================================================================================================//
 
@@ -37,16 +37,30 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             this.applyTheme(false);
 
+            this.isShowable = true;
+
             // Start listening for activation/deactivation call
             if (this.trigger) {
-                topic.subscribe("command", function (sendingTrigger) {
+                this.subscribeToMessage("command", function (sendingTrigger) {
                     if (sendingTrigger !== pThis.trigger) {
                         pThis.setIsVisible(false);
                     }
                 });
-                topic.subscribe(this.trigger, function (data) {
+                this.subscribeToMessage(this.trigger, function (data) {
                     pThis.handleTrigger(data);
                 });
+            }
+        },
+
+        /**
+         * Sets whether or not this dropdown will be shown with future triggerings.
+         * @param {boolean} makeShowable Indicates if dropdown may be shown
+         * @memberOf js.LGDropdownBox#
+         */
+        setShowable: function (makeShowable) {
+            this.isShowable = makeShowable;
+            if (!this.isShowable && this.getIsVisible()) {
+                this.toggleVisibility();
             }
         },
 
@@ -56,7 +70,9 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * @memberOf js.LGDropdownBox#
          */
         handleTrigger: function () {
-            this.toggleVisibility();
+            if (this.isShowable) {
+                this.toggleVisibility();
+            }
         }
     });
 
@@ -477,8 +493,8 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
         handleClick: function (evt) {
             var obj = evt.currentTarget.getLGObject();
-            topic.publish("command", obj.publish);
-            topic.publish(obj.publish, obj.publishArg);
+            obj.publishMessage("command", obj.publish);
+            obj.publishMessage(obj.publish, obj.publishArg);
         }
     });
 
@@ -509,13 +525,13 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             // Handle enable/disable triggers
             if (this.triggerEnable) {
-                topic.subscribe(this.triggerEnable, function () {
+                this.subscribeToMessage(this.triggerEnable, function () {
                     pThis.isEnabled = true;
                     pThis.setIsEnabled(pThis.isEnabled);
                 });
             }
             if (this.triggerDisable) {
-                topic.subscribe(this.triggerDisable, function () {
+                this.subscribeToMessage(this.triggerDisable, function () {
                     pThis.isEnabled = false;
                     pThis.setIsEnabled(pThis.isEnabled);
                 });
@@ -523,13 +539,13 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             // Handle visible/invisible triggers
             if (this.triggerVisible) {
-                topic.subscribe(this.triggerVisible, function () {
+                this.subscribeToMessage(this.triggerVisible, function () {
                     pThis.isVisible = true;
                     pThis.setIsVisible(pThis.isVisible);
                 });
             }
             if (this.triggerInvisible) {
-                topic.subscribe(this.triggerInvisible, function () {
+                this.subscribeToMessage(this.triggerInvisible, function () {
                     pThis.isVisible = false;
                     pThis.setIsVisible(pThis.isVisible);
                 });
@@ -584,12 +600,12 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * Opens a URL in response to a message.
          */
         constructor: function () {
-            topic.subscribe(this.sameWinTrigger, function (url) {
+            this.subscribeToMessage(this.sameWinTrigger, function (url) {
                 if (url) {
                     window.open(url, "_parent");
                 }
             });
-            topic.subscribe(this.newWinTrigger, function (url) {
+            this.subscribeToMessage(this.newWinTrigger, function (url) {
                 if (url) {
                     window.open(url, "_blank");
                 }
@@ -678,7 +694,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 var selectedLayout, printParams;
 
                 // Broadcast status; our LGDropdownBox ancestor has already made our dialog box visible
-                topic.publish(pThis.publishWorking);
+                pThis.publishMessage(pThis.publishWorking);
 
                 // Hide the dialog box; we don't need to have it take up space while
                 // the server is off doing the print job
@@ -707,12 +723,12 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                     function (result) {
                         /* success */
                         // Broadcast status
-                        topic.publish(pThis.publishReady);
-                        topic.publish(pThis.publishPrintUrl, result.url);
+                        pThis.publishMessage(pThis.publishReady);
+                        pThis.publishMessage(pThis.publishPrintUrl, result.url);
                     }, function (error) {
                         /* failure */
                         // Broadcast status
-                        topic.publish(pThis.publishReady);
+                        pThis.publishMessage(pThis.publishReady);
                         pThis.log("Print failed: " + error.message, true);
                     }
                     );
@@ -775,26 +791,26 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             // Now that the map (our dependency) is ready, finish setup
 
             // Cache the URL to the print when triggered
-            topic.subscribe(this.triggerPrintUrl, function (url) {
+            this.subscribeToMessage(this.triggerPrintUrl, function (url) {
                 // Cancel any timeout we've got going
                 clearTimeout(pThis.printTimeouter);
 
                 // Make the URL available
                 pThis.fetchPrintUrl = url;
-                topic.publish(pThis.publishPrintAvailable);
+                pThis.publishMessage(pThis.publishPrintAvailable);
 
                 // Set up an expiration for this URL
                 if (pThis.printAvailabilityTimeoutMinutes > 0) {
                     pThis.printTimeouter = setTimeout(function () {
-                        topic.publish(pThis.publishPrintNotAvailable);
+                        pThis.publishMessage(pThis.publishPrintNotAvailable);
                     }, pThis.printAvailabilityTimeoutMinutes * 60000);
                 }
             });
 
             // Fetch the print when triggered
-            topic.subscribe(this.trigger, function () {
+            this.subscribeToMessage(this.trigger, function () {
                 if (pThis.fetchPrintUrl !== null) {
-                    topic.publish(pThis.publish, pThis.fetchPrintUrl);
+                    pThis.publishMessage(pThis.publish, pThis.fetchPrintUrl);
                 }
             });
         }
@@ -830,7 +846,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             } else {
                 // Start listening for a position request
-                topic.subscribe(this.trigger, function () {
+                this.subscribeToMessage(this.trigger, function () {
 
                     // Set a backup timeout because if one chooses "not now" for providing
                     // the position, the geolocation call does not return or time out
@@ -843,7 +859,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                         clearTimeout(backupTimeoutTimer);
 
                         pThis.log("go to " + position.coords.latitude + " " + position.coords.longitude);
-                        topic.publish(pThis.publish, new esri.geometry.Point(
+                        pThis.publishMessage(pThis.publish, new esri.geometry.Point(
                             position.coords.longitude,
                             position.coords.latitude,
                             new esri.SpatialReference({ wkid: 4326 })
@@ -889,7 +905,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          */
         constructor: function () {
             if (this.busyIndicator) {
-                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = this.lgById(this.busyIndicator);
             }
         },
 
@@ -933,7 +949,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          *       process before publishing.
          */
         publish: function (subject, data) {
-            topic.publish(subject, data);
+            this.publishMessage(subject, data);
         },
 
         /**
@@ -983,14 +999,14 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGSearchAddress", js.LGSearch, {
+    dojo.declare("js.LGSearchAddress", [js.LGSearch, js.LGMapDependency], {
         /**
          * Constructs an LGSearchAddress.
          *
          * @constructor
          * @class
          * @name js.LGSearchAddress
-         * @extends js.LGSearch
+         * @extends js.LGSearch, js.LGMapDependency
          * @classdesc
          * Provides a searcher for addresses.
          */
@@ -1000,7 +1016,18 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             this.params = {};
             this.params.outFields = this.outFields;
             this.ready = new Deferred();
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGSearchAddress#
+         * @override
+         */
+        onDependencyReady: function () {
+            this.params.searchExtent = this.mapObj.mapInfo.map.extent;
             this.ready.resolve(this);
+            this.inherited(arguments);
         },
 
         /**
@@ -1075,116 +1102,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * @override
          */
         publish: function (subject, data) {
-            topic.publish(subject, data);
-        }
-    });
-
-    //========================================================================================================================//
-
-    dojo.declare("js.LGSearchBoxByText", js.LGDropdownBox, {
-        /**
-         * Constructs an LGSearchBoxByText.
-         *
-         * @constructor
-         * @class
-         * @name js.LGSearchBoxByText
-         * @extends js.LGDropdownBox
-         * @classdesc
-         * Provides a UI display of a prompted text box followed by a
-         * list of results.
-         */
-        constructor: function () {
-            var pThis = this, textBoxId, searchEntryTextBox, resultsListBox, table, tableBody,
-                searcher, lastSearchString, lastSearchTime, stagedSearch;
-
-            textBoxId = this.rootId + "_entry";
-
-            domConstruct.create("label",
-                {"for": textBoxId, innerHTML: this.checkForSubstitution(this.showPrompt)}, this.rootId);
-            searchEntryTextBox = new TextBox({
-                id: textBoxId,
-                value: "",
-                trim: true,
-                placeHolder: this.hint,
-                intermediateChanges: true
-            }).placeAt(this.rootId);
-            domStyle.set(searchEntryTextBox.domNode, "width", "99%");
-
-            resultsListBox = domConstruct.create("div",
-                {className: this.resultsListBoxClass}, this.rootId);
-            table = domConstruct.create("table",
-                {className: this.resultsListTableClass}, resultsListBox);
-            tableBody = domConstruct.create("tbody",
-                {className: this.resultsListBodyClass}, table);
-            touchScroll(resultsListBox);
-
-            searcher = dom.byId(this.searcher).getLGObject();
-            lastSearchString = "";
-            lastSearchTime = 0;
-            stagedSearch = null;
-
-            // Run a search when the entry text changes
-            on(searchEntryTextBox, "change", function () {
-                var searchText = searchEntryTextBox.get("value");
-                if (lastSearchString !== searchText) {
-                    lastSearchString = searchText;
-                    domConstruct.empty(tableBody);
-
-                    // Clear any staged search
-                    clearTimeout(stagedSearch);
-
-                    if (searchText.length > 0) {
-                        // Stage a new search, which will launch if no new searches show up
-                        // before the timeout
-                        stagedSearch = setTimeout(function () {
-                            var searchingPlaceholder, thisSearchTime, now;
-
-                            searchingPlaceholder = domConstruct.create("tr", null, tableBody);
-                            domConstruct.create("td",
-                                {className: pThis.resultsListSearchingClass}, searchingPlaceholder);
-
-                            thisSearchTime = lastSearchTime = (new Date()).getTime();
-                            searcher.search(searchText, function (results) {
-                                var resultsList;
-
-                                // Discard searches made obsolete by new typing from user
-                                if (thisSearchTime < lastSearchTime) {
-                                    return;
-                                }
-
-                                // Show results
-                                domConstruct.empty(tableBody);  // to get rid of searching indicator
-                                resultsList = searcher.toList(results, searchText);
-
-                                now = (new Date()).getTime();
-                                pThis.log("retd " + resultsList.length + " items in "
-                                    + (now - thisSearchTime) / 1000 + " secs");
-
-                                if (resultsList.length > 0) {
-                                    array.forEach(resultsList, function (item) {
-                                        var tableRow, tableCell;
-
-                                        tableRow = domConstruct.create("tr",
-                                            null, tableBody);
-                                        tableCell = domConstruct.create("td",
-                                            {className: pThis.resultsListEntryClass, innerHTML: item.label}, tableRow);
-                                        pThis.applyTheme(true, tableCell);
-                                        on(tableCell, "click", function () {
-                                            searcher.publish(pThis.publish, item.data);
-                                        });
-                                    });
-                                }
-                            }, function (error) {
-                                // Query failure
-                                pThis.log("LGSearchBoxByText_1: " + error.message);
-
-                                lastSearchString = "";  // so that we can quickly repeat this search
-                                domConstruct.empty(tableBody);  // to get rid of searching indicator
-                            });
-                        }, 1000);
-                    }
-                }
-            });
+            this.publishMessage(subject, data);
         }
     });
 
@@ -1445,7 +1363,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                         representativeData = item;
                     }
 
-                    topic.publish(subject, representativeData);
+                    pThis.publishMessage(subject, representativeData);
                 } else {
                     // No-results failure
                     pThis.log("LGSearchFeatureLayer_1: no results");
@@ -1467,6 +1385,258 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
     //========================================================================================================================//
 
+    dojo.declare("js.LGSearchMultiplexer", js.LGSearch, {
+        /**
+         * Constructs an LGSearchMultiplexer.
+         *
+         * @constructor
+         * @class
+         * @name js.LGSearchMultiplexer
+         * @extends js.LGSearch
+         * @classdesc
+         * Provides a searcher that multiplexes the work of other searchers.
+         */
+        constructor: function () {
+            var pThis = this, deferralWaitList = [];
+            this.ready = new Deferred();
+
+            // Get our searchers and build a list of their ready state deferrals
+            this.searchers = [];
+            if (this.searcherNames) {
+                array.forEach(this.searcherNames, function (searcherName) {
+                    var searcher = pThis.lgById(searcherName);
+                    if (searcher) {
+                        pThis.searchers.push(searcher);
+                        deferralWaitList.push(searcher.ready);
+                    }
+                });
+            }
+
+            // We're ready once all of our searchers are ready
+            (new DeferredList(deferralWaitList)).then(
+                function (results) {
+                    // Did both succeed?
+                    if (!results[0] || !results[1]) {
+                        pThis.ready.reject(pThis);
+                        return;
+                    }
+                    pThis.ready.resolve(pThis);
+                }
+            );
+        },
+
+        /**
+         * Launches a search of the instance's search type.
+         * @param {string|geometry} searchText Text or geometry to search
+         * @param {function} callback Function to call when search
+         *        results arrive; function takes the results as its sole
+         *        argument
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        search: function (searchText, callback, errback) {
+            var mergedResultsList = [],
+                searchersDoneWaitList = [];
+
+            // Send the search text to each of our searchers
+            array.forEach(this.searchers, function (searcher, i) {
+                var searcherIsDone = new Deferred();
+                searchersDoneWaitList.push(searcherIsDone);
+                searcher.search(searchText, function (results) {
+                    // Add the index of the searcher to the results so that we're
+                    // able to do searcher-specific post-processing upon publishing
+                    var searcherResultsList = searcher.toList(results, searchText);
+                    searcherResultsList = array.map(searcherResultsList, function (item) {
+                        var newItem,
+                            supplementedData = {
+                                iSearcher: i,
+                                itemData: item.data
+                            };
+                        newItem = {
+                            data: supplementedData,
+                            label: item.label
+                        };
+                        return newItem;
+                    });
+                    mergedResultsList = mergedResultsList.concat(searcherResultsList);
+                    searcherIsDone.resolve();
+
+                }, function (error) {
+                    searcherIsDone.reject(error);
+                });
+
+            });
+
+            // Call the callback when all of our searchers are done
+            (new DeferredList(searchersDoneWaitList)).then(
+                function (results) {
+                    var ok = true;
+
+                    // If at least one searcher failed, call the errback
+                    if (errback) {
+                        ok = !array.some(results, function (result) {
+                            if (!result[0]) {
+                                errback(result[1]);
+                                return true;
+                            }
+                            return false;
+                        });
+                    }
+                    // If all searchers succeeded, call the callback
+                    if (ok && callback) {
+                        callback(mergedResultsList);
+                    }
+                }
+            );
+        },
+
+        /**
+         * Formats results into a list of structures; each structure
+         * contains a label and an optional data structure.
+         * @param {object} results Search-specific results
+         * @param {string} [searchText] Search text
+         * @return {array} List of structures; label is tagged with
+         *         "label" and data is tagged with "data"
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        toList: function (results) {
+            // Results have already been converted into a list in the search function,
+            // so we can simply send them back
+            return results;
+        },
+
+        /**
+         * Publishes the specified data after performing any post
+         * processing.
+         * @param {string} subject Publishing topic name
+         * @param {object} data Object to publish under topic
+         * @see Interface stub. The data are those set up by the toList
+         *       function and could be final or intermediate results.
+         *       For intermediate results, the publish function is the
+         *       place for the searcher to complete the data-retrieval
+         *       process before publishing.
+         * @memberOf js.LGSearchMultiplexer#
+         * @override
+         */
+        publish: function (subject, data) {
+            // Extract the searcher and the data packet and publish the data via the searcher
+            this.searchers[data.iSearcher].publish(subject, data.itemData);
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGSearchBoxByText", js.LGDropdownBox, {
+        /**
+         * Constructs an LGSearchBoxByText.
+         *
+         * @constructor
+         * @class
+         * @name js.LGSearchBoxByText
+         * @extends js.LGDropdownBox
+         * @classdesc
+         * Provides a UI display of a prompted text box followed by a
+         * list of results. Works with subclass of LGSearch, which provides
+         * the searching and results formatting for this display.
+         */
+        constructor: function () {
+            var pThis = this, textBoxId, searchEntryTextBox, resultsListBox, table, tableBody,
+                searcher, lastSearchString, lastSearchTime, stagedSearch;
+
+            textBoxId = this.rootId + "_entry";
+
+            domConstruct.create("label",
+                {"for": textBoxId, innerHTML: this.checkForSubstitution(this.showPrompt)}, this.rootId);
+            searchEntryTextBox = new TextBox({
+                id: textBoxId,
+                value: "",
+                trim: true,
+                placeHolder: this.hint,
+                intermediateChanges: true
+            }).placeAt(this.rootId);
+            domStyle.set(searchEntryTextBox.domNode, "width", "99%");
+
+            resultsListBox = domConstruct.create("div",
+                {className: this.resultsListBoxClass}, this.rootId);
+            table = domConstruct.create("table",
+                {className: this.resultsListTableClass}, resultsListBox);
+            tableBody = domConstruct.create("tbody",
+                {className: this.resultsListBodyClass}, table);
+            touchScroll(resultsListBox);
+
+            searcher = this.lgById(this.searcher);
+            lastSearchString = "";
+            lastSearchTime = 0;
+            stagedSearch = null;
+
+            // Run a search when the entry text changes
+            on(searchEntryTextBox, "change", function () {
+                var searchText = searchEntryTextBox.get("value");
+                if (lastSearchString !== searchText) {
+                    lastSearchString = searchText;
+                    domConstruct.empty(tableBody);
+
+                    // Clear any staged search
+                    clearTimeout(stagedSearch);
+
+                    if (searchText.length > 0) {
+                        // Stage a new search, which will launch if no new searches show up
+                        // before the timeout
+                        stagedSearch = setTimeout(function () {
+                            var searchingPlaceholder, thisSearchTime, now;
+
+                            searchingPlaceholder = domConstruct.create("tr", null, tableBody);
+                            domConstruct.create("td",
+                                {className: pThis.resultsListSearchingClass}, searchingPlaceholder);
+
+                            thisSearchTime = lastSearchTime = (new Date()).getTime();
+                            searcher.search(searchText, function (results) {
+                                var resultsList;
+
+                                // Discard searches made obsolete by new typing from user
+                                if (thisSearchTime < lastSearchTime) {
+                                    return;
+                                }
+
+                                // Show results
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
+                                resultsList = searcher.toList(results, searchText);
+
+                                now = (new Date()).getTime();
+                                pThis.log("retd " + resultsList.length + " items in "
+                                    + (now - thisSearchTime) / 1000 + " secs");
+
+                                if (resultsList.length > 0) {
+                                    array.forEach(resultsList, function (item) {
+                                        var tableRow, tableCell;
+
+                                        tableRow = domConstruct.create("tr",
+                                            null, tableBody);
+                                        tableCell = domConstruct.create("td",
+                                            {className: pThis.resultsListEntryClass, innerHTML: item.label}, tableRow);
+                                        pThis.applyTheme(true, tableCell);
+                                        on(tableCell, "click", function () {
+                                            searcher.publish(pThis.publish, item.data);
+                                        });
+                                    });
+                                }
+                            }, function (error) {
+                                // Query failure
+                                pThis.log("LGSearchBoxByText_1: " + error.message);
+
+                                lastSearchString = "";  // so that we can quickly repeat this search
+                                domConstruct.empty(tableBody);  // to get rid of searching indicator
+                            });
+                        }, 1000);
+                    }
+                }
+            });
+        }
+    });
+
+    //========================================================================================================================//
+
     dojo.declare("js.LGShare", js.LGObject, {
         /**
          * Constructs an LGShare.
@@ -1481,9 +1651,9 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         constructor: function () {
             var pThis = this;
             if (this.busyIndicator) {
-                this.busyIndicator = dom.byId(this.busyIndicator).getLGObject();
+                this.busyIndicator = this.lgById(this.busyIndicator);
             }
-            topic.subscribe(this.trigger, function () {
+            this.subscribeToMessage(this.trigger, function () {
                 pThis.share();
             });
         },
@@ -1519,7 +1689,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                         if (tinyUrl) {
                             // Put the tiny URL into the sharing method's URL & launch the sharing method
                             shareUrl = esri.substitute({subject: subjectLine, url: tinyUrl}, pThis.shareUrl);
-                            topic.publish(pThis.publish, shareUrl);
+                            pThis.publishMessage(pThis.publish, shareUrl);
                         }
                     } catch (error) {
                         pThis.log("LGShare_1: " + error.toString());
@@ -1539,7 +1709,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             } else {
                 // Share the uncompressed URL
                 urlToShare = esri.substitute({subject: subjectLine, url: urlToShare}, this.shareUrl);
-                topic.publish(this.publish, urlToShare);
+                this.publishMessage(this.publish, urlToShare);
             }
         },
 
@@ -1613,11 +1783,185 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         /**
          * Gets the app's map's extents.
          * @return {string} Extents as supplied by LGMap's
-         *         getExtentsString()
+         *         getMapExtentsAsString()
          * @memberOf js.LGShareAppExtents
          */
         getMapExtentsArg: function () {
-            return "ex=" + this.mapObj.getExtentsString();
+            return "ex=" + this.mapObj.getMapExtentsAsString();
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGFilterLayers1", js.LGMapBasedMenuBox, {
+        /**
+         * Constructs an LGFilterLayers1.
+         *
+         * @constructor
+         * @class
+         * @name js.LGFilterLayers1
+         * @extends LGMapBasedMenuBox
+         * @classdesc
+         * Filters layers that have a specified field by setting definition expressions using that field.
+         */
+        constructor: function () {
+            this.layers = [];
+        },
+
+        /**
+        * Performs class-specific setup when the dependency is
+        * satisfied.
+        * @memberOf js.LGFilterLayers1#
+        * @override
+        */
+        onDependencyReady: function () {
+            var field1EntryTextBox;
+
+            if (this.fieldname1) {
+                // Build a list of layers that contain the managed field.
+                // Loop through all the operation layers added to the map. If layer type is Feature layer, find if layer has
+                // the managed field.  If so, push the field type and layer object to an array of objects.
+                array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                    var field, layerAndDefExpObject;
+
+                    if (mapLayer.layerObject) {
+                        if (mapLayer.layerObject.type === "Feature Layer") {
+                            for (field = 0; field < mapLayer.layerObject.fields.length; field += 1) {
+                                if (mapLayer.layerObject.fields[field].name === this.fieldname1) {
+
+                                    // Found a layer with the configured field; save the layer
+                                    layerAndDefExpObject = {
+                                        "layerObject": mapLayer.layerObject,
+                                        "fieldType": mapLayer.layerObject.fields[field].type
+                                    };
+                                    this.layers.push(layerAndDefExpObject);
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }));
+
+                // Set the initial definitions for the layers containing the managed field
+                this.applyFilter();
+
+                // Provide a UI to change the filter
+                domConstruct.create("label", {innerHTML: this.hint1},
+                    domConstruct.create("div", {}, this.rootId));
+
+                field1EntryTextBox = new TextBox({
+                    id: this.rootId + "_field1",
+                    value: this.value1,
+                    trim: true,
+                    placeHolder: this.hint1,
+                    intermediateChanges: true
+                }).placeAt(this.rootId);
+                domStyle.set(field1EntryTextBox.domNode, "width", "99%");
+                if (this.tooltip) {
+                    field1EntryTextBox.set("title", this.checkForSubstitution(this.tooltip));
+                }
+
+                // Handle future changes to the filter; we accept intermediate changes so that the user doesn't have
+                // to click away from the text box to apply the filter, but this means that we have to ignore the case
+                // where the user has erased all content from the text box
+                on(field1EntryTextBox, "change", lang.hitch(this, function () {
+                    this.value1 = field1EntryTextBox.value.trim();
+                    this.onValueChanged();
+                }));
+            }
+        },
+
+        /**
+        * Loops through the layers array on which definition expression is applied and calls
+        * setLayerDefinitionExpression with the new value.
+        * @memberOf js.LGFilterLayers1#
+        */
+        onValueChanged: function () {
+            // Set the definitions for the layers containing the managed field
+            this.applyFilter();
+        },
+
+        /**
+        * Loops through the layers array on which definition expression is applied and calls
+        * setLayerDefinitionExpression with the new value.
+        * @memberOf js.LGFilterLayers1#
+        */
+        applyFilter: function () {
+            array.forEach(this.layers, lang.hitch(this, function (layer) {
+                this.setLayerDefinitionExpression(layer.layerObject, layer.fieldType);
+                layer.layerObject.clearSelection();
+            }));
+        },
+
+        /**
+        * Filters the layer based on the definition expression
+        * @param {object} layer Layer to be filtered
+        * @param {string|integer} fieldType Type of the floor field
+        * @memberOf js.LGFilterLayers1#
+        */
+        setLayerDefinitionExpression: function (layer, fieldType) {
+            var defExpression = layer.defaultDefinitionExpression;
+            try {
+                if (this.value1 && this.value1 !== "") {
+                    if (fieldType === "esriFieldTypeString") {
+                        defExpression = string.substitute(this.defnExpression, {
+                            "fieldname1": this.fieldname1,
+                            "value1": "'" + this.value1 + "'"
+                        });
+                    } else if (fieldType === "esriFieldTypeInteger") {
+                        defExpression = string.substitute(this.defnExpression, {
+                            "fieldname1": this.fieldname1,
+                            "value1": this.value1
+                        });
+                    }
+                }
+                layer.setDefinitionExpression(defExpression);
+            } catch (ignore) {
+            }
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGFilterLayers1WithDefaults", [js.LGFilterLayers1, js.LGDefaults], {
+        /**
+         * Constructs an LGFilterLayers1WithDefaults.
+         *
+         * @constructor
+         * @class
+         * @name js.LGFilterLayers1WithDefaults
+         * @extends js.LGFilterLayers1, js.LGDefaults
+         * @classdesc
+         * Filters layers that have a specified field by setting definition expressions using that field and also
+         * broadcasts changes to the field as a default.
+         */
+        constructor: function () {
+            this.changeDefaults();
+        },
+
+        /**
+        * Loops through the layers array on which definition expression is applied and calls
+        * setLayerDefinitionExpression with the new value.
+        * @memberOf js.LGFilterLayers1WithDefaults#
+        * @override
+        */
+        onValueChanged: function () {
+            this.inherited(arguments);
+
+            this.changeDefaults();
+        },
+
+        /**
+         * Performs class-specific behavior to change and broadcast defaults.
+         * @memberOf js.LGFilterLayers1WithDefaults#
+         * @override
+         */
+        changeDefaults: function () {
+            this.defaultValues.value1 = this.value1;
+            this.defaultValues.fieldname1 = this.fieldname1;
+
+            this.inherited(arguments);
         }
     });
 

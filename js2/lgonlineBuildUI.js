@@ -1,7 +1,7 @@
 /*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,console */
 /*jslint sloppy:true,evil:true,regexp:true,unparam:true */
 /** @license
- | ArcGIS for Local Government
+ | ArcGIS Solutions
  | Version 10.2
  | Copyright 2012 Esri
  |
@@ -35,8 +35,8 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
          * @class
          * @name js.LGArcGISAccess
          * @classdesc
-         * Supplements the ArcGIS Portal REST interface for Local
-         * Government applications.
+         * Supplements the ArcGIS Portal REST interface for Solutions
+         * applications.
          */
         constructor: function (args) {
             var timerId,
@@ -589,7 +589,7 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
          * @memberOf js.LGUIBuilder#
          */
         injectCSS: function (cssStr) {
-            var customStyles, cssText, firstScript;
+            var customStyles, cssText;
 
             // By Fredrik Johansson
             // http://www.quirksmode.org/bugreports/archives/2006/01/IE_wont_allow_documentcreateElementstyle.html#c4088
@@ -602,9 +602,8 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                 customStyles.appendChild(cssText);
             }
 
-            // http://paulirish.com/2011/surefire-dom-element-insertion/
-            firstScript = document.getElementsByTagName("script")[0];
-            firstScript.parentNode.insertBefore(customStyles, firstScript);
+            // Add the style *after* existing styles so that it'll override them
+            document.body.appendChild(customStyles);
 
             return customStyles;
         },

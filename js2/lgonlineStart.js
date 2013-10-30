@@ -1,7 +1,7 @@
-/*global require,dojo,window,Modernizr,console,js,location,esri */
+/*global require,dojo,window,Modernizr,console,js,location,esri,defaultAppUI:true */
 /*jslint sloppy:true */
 /** @license
- | ArcGIS for Local Government
+ | ArcGIS Solutions
  | Version 10.2
  | Copyright 2012 Esri
  |
@@ -26,7 +26,7 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
         // By Pradeep Kumar Mishra
         // http://stackoverflow.com/a/498995
         if (!String.prototype.trim) {
-            String.prototype.trim = function() {
+            String.prototype.trim = function () {
                 return this.replace(/^\s+|\s+$/g, '');
             };
         }
@@ -39,56 +39,48 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
         // Bring in language files
         dojo.requireLocalization("esriTemplate", "template");
 
-        // Normalize the browser features
-        Modernizr.load([{
-            test: window.JSON,
-            nope: 'js/json2.js',
-            complete: function () {
+        // Load the UI loader
+        require(["dojo/ready", "js/lgonlineBuildUI"], function (ready) {
+            ready(function () {
 
-                // Load the UI loader
-                require(["dojo/ready", "js/lgonlineBuildUI"], function (ready) {
+                // Load the UI elements
+                var uiElementsReady = new Deferred();
+                require(["dojo/ready", "js/lgonlineApp"], function (ready) {
                     ready(function () {
-
-                        // Load the UI elements
-                        var uiElementsReady = new Deferred();
-                        require(["dojo/ready", "js/lgonlineApp"], function (ready) {
-                            ready(function () {
-                                uiElementsReady.resolve();
-                            });
-                        });
-
-                        // Read the UI spec
-                        (new js.LGUIBuilder(window.location.search, null, defaultAppUI)).ready.then(
-                            function (theBuilder) {
-                                uiElementsReady.then(function () {
-                                    // Build the UI
-                                    theBuilder.launch().then(
-                                        function () {
-                                            // Reveal the content and hide the loading indicator
-                                            dojo.fadeIn({
-                                                node: "contentDiv",
-                                                duration: 500,
-                                                onEnd: function () {
-                                                    dojo.removeClass("contentDiv", "transparent");
-                                                    dojo.removeClass("pageBody", "startupBkgd");
-                                                }
-                                            }).play();
-                                            console.log("Application is ready");//???
-                                        },
-                                        function () {
-                                            console.error("Unable to launch application");//???
-                                        }
-                                    );
-                                });
-                            },
-                            function () {
-                                console.error("Unable to find configuration");//???
-                            }
-                        );
-
+                        uiElementsReady.resolve();
                     });
                 });
-            }
-        }]);
+
+                // Read the UI spec
+                (new js.LGUIBuilder(window.location.search, null, defaultAppUI)).ready.then(
+                    function (theBuilder) {
+                        uiElementsReady.then(function () {
+                            // Build the UI
+                            theBuilder.launch().then(
+                                function () {
+                                    // Reveal the content and hide the loading indicator
+                                    dojo.fadeIn({
+                                        node: "contentDiv",
+                                        duration: 500,
+                                        onEnd: function () {
+                                            dojo.removeClass("contentDiv", "transparent");
+                                            dojo.removeClass("pageBody", "startupBkgd");
+                                        }
+                                    }).play();
+                                    console.log("Application is ready");//???
+                                },
+                                function () {
+                                    console.error("Unable to launch application");//???
+                                }
+                            );
+                        });
+                    },
+                    function () {
+                        console.error("Unable to find configuration");//???
+                    }
+                );
+
+            });
+        });
     });
 });
