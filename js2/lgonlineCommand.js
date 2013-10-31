@@ -1541,21 +1541,21 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * the searching and results formatting for this display.
          */
         constructor: function () {
-            var pThis = this, textBoxId, searchEntryTextBox, resultsListBox, table, tableBody,
+            var pThis = this, textBoxId, resultsListBox, table, tableBody,
                 searcher, lastSearchString, lastSearchTime, stagedSearch;
 
             textBoxId = this.rootId + "_entry";
 
             domConstruct.create("label",
                 {"for": textBoxId, innerHTML: this.checkForSubstitution(this.showPrompt)}, this.rootId);
-            searchEntryTextBox = new TextBox({
+            this.searchEntryTextBox = new TextBox({
                 id: textBoxId,
                 value: "",
                 trim: true,
                 placeHolder: this.hint,
                 intermediateChanges: true
             }).placeAt(this.rootId);
-            domStyle.set(searchEntryTextBox.domNode, "width", "99%");
+            domStyle.set(this.searchEntryTextBox.domNode, "width", "99%");
 
             resultsListBox = domConstruct.create("div",
                 {className: this.resultsListBoxClass}, this.rootId);
@@ -1571,8 +1571,8 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             stagedSearch = null;
 
             // Run a search when the entry text changes
-            on(searchEntryTextBox, "change", function () {
-                var searchText = searchEntryTextBox.get("value");
+            on(this.searchEntryTextBox, "change", function () {
+                var searchText = pThis.searchEntryTextBox.get("value");
                 if (lastSearchString !== searchText) {
                     lastSearchString = searchText;
                     domConstruct.empty(tableBody);
@@ -1632,6 +1632,18 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                     }
                 }
             });
+        },
+
+        /**
+         * Toggles the graphic's visibility
+         * @memberOf js.LGSearchBoxByText#
+        * @override
+         */
+        toggleVisibility: function () {
+            this.inherited(arguments);
+            if (this.getIsVisible()) {
+                this.searchEntryTextBox.focus();
+            }
         }
     });
 
