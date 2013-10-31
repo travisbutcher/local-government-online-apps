@@ -120,7 +120,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/on", "dojo/_base/array
                     grouping: true
                 }, templatePickerDiv);
                 templatePicker.startup();
-                touchScroll(templatePicker);
+                touchScroll(templatePickerHolder);
 
                 // For compatibility with the dropdown mechanism, we'll switch to hiding the
                 // divs without substance (i.e., "display" is "none" and "visibility" is "visible")
