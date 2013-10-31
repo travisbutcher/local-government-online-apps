@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, BasemapGallery, PrintTask, PrintParameters, PrintTemplate) {
+define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, PopupTemplate) {
 
     //========================================================================================================================//
 
@@ -131,7 +131,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
 
             galleryId = this.rootId + "_gallery";
 
-            galleryHolder = new dijit.layout.ContentPane({
+            galleryHolder = new ContentPane({
                 id: galleryId,
                 className: this.galleryClass
             }).placeAt(this.rootDiv);
@@ -1186,7 +1186,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                     opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
                     array.some(opLayers, function (layer) {
                         if (layer.title === pThis.searchLayerName) {
-                            popupTemplate = new esri.dijit.PopupTemplate(layer.popupInfo);
+                            popupTemplate = new PopupTemplate(layer.popupInfo);
                             return true;
                         }
                         return false;

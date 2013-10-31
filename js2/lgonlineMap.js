@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "esri/arcgis/utils", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, utils) {
+define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "esri/arcgis/utils", "esri/dijit/Popup", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, utils, Popup) {
 
     //========================================================================================================================//
 
@@ -129,7 +129,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             options.mapOptions = this.mapOptions || {};
             options.mapOptions.showAttribution = true;
 
-            this.popup = new esri.dijit.Popup(null, domConstruct.create("div"));
+            this.popup = new Popup(null, domConstruct.create("div"));
             options.mapOptions.infoWindow = this.popup;
 
             // Set up configured extents
