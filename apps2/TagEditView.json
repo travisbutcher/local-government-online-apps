@@ -123,12 +123,6 @@
     }],
 
     "ui": [{
-        "classname": "js.LGMessageWatch",
-        "config": {
-            "rootId": "messageWatch",
-            "parentDiv": "contentFrame"
-        }
-    }, {
         "classname": "js.LGColorizer",
         "config": {
             "rootId": "colorizer",
