@@ -67,7 +67,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/on", "dojo/_base/array
          */
         onDependencyReady: function () {
             var pThis = this, mapInfo, map, templatePickerHolder, templatePickerDiv,
-                templatePicker, editorSettings, editor;
+                templatePicker, editorSettings, editorDiv, editor;
 
             // Build a list of editable layers in this map
             mapInfo = this.mapObj.mapInfo;
@@ -134,7 +134,11 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/on", "dojo/_base/array
                     toolbarVisible: false,
                     layerInfos: this.layerInfos
                 };
-                editor = new Editor({ settings: editorSettings }, templatePickerDiv);
+
+                editorDiv = domConstruct.create("div");
+                domConstruct.place(editorDiv, templatePickerHolder);
+
+                editor = new Editor({ settings: editorSettings }, editorDiv);
                 editor.startup();
 
                 // Provide a hook for preprocessing the edit before it is committed
