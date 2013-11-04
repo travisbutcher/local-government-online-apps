@@ -307,6 +307,7 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                                                 arcgisUI = item.itemData.ui;
                                                 arcgisDefaults = item.itemData.values;
                                                 readArcGIS.resolve(pThis);
+                                                console.log("Using template " + item.item.id);
                                             },
                                             function () {
                                                 readArcGIS.reject(null);

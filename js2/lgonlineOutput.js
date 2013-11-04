@@ -16,7 +16,29 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "dojo/topic", "js/lgonlineBase"], function (domConstruct, domClass, topic) {
+define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "js/lgonlineBase"], function (domConstruct, domClass, array, topic) {
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGNotes", js.LGObject, {
+        /**
+         * Constructs an LGNotes.
+         *
+         * @constructor
+         * @class
+         * @name js.LGNotes
+         * @extends js.LGObject
+         * @classdesc
+         * Displays a list of notes to the console.
+         */
+        constructor: function () {
+            if (console && this.notes) {
+                array.forEach(this.notes, function (note) {
+                    console.log(note);
+                });
+            }
+        }
+    });
 
     //========================================================================================================================//
 
