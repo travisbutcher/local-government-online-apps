@@ -723,34 +723,38 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
             }
             console.log("proxyUrl: " + config.proxyUrl);
 
-            // Query for portal definition
-            req = esri.request({
-                url: config.sharingUrl + "/sharing/rest/portals/self",
-                content: {
-                    "f": "json"
-                },
-                callbackParamName: "callback"
-            });
-            req.then(function (response) {
-                config.self = response;
+            // Query for portal definition if we've an organization
+            if (appLocation !== -1) {
+                req = esri.request({
+                    url: config.sharingUrl + "/sharing/rest/portals/self",
+                    content: {
+                        "f": "json"
+                    },
+                    callbackParamName: "callback"
+                });
+                req.then(function (response) {
+                    config.self = response;
 
-                // Replace the sharing URL for single-tenant portals
-                if (response.isPortal && response.portalMode === "single tenant") {
-                    config.sharingUrl = response.portalHostname;
-                }
+                    // Replace the sharing URL for single-tenant portals
+                    if (response.isPortal && response.portalMode === "single tenant") {
+                        config.sharingUrl = response.portalHostname;
+                    }
 
-                // Save the portal's services
-                lang.mixin(config.helperServices, response.helperServices);
+                    // Save the portal's services
+                    lang.mixin(config.helperServices, response.helperServices);
 
-                esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
+                    esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
 
-                // Setup any helper services (geometry, print, routing, geocoding)
-                if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {
-                    esri.config.defaults.geometryService = new esri.tasks.GeometryService(config.helperServices.geometry.url);
-                }
+                    // Setup any helper services (geometry, print, routing, geocoding)
+                    if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {
+                        esri.config.defaults.geometryService = new esri.tasks.GeometryService(config.helperServices.geometry.url);
+                    }
 
+                    deferred.resolve(true);
+                });
+            } else {
                 deferred.resolve(true);
-            });
+            }
 
             // Set the proxy
             if (config.proxyUrl) {
