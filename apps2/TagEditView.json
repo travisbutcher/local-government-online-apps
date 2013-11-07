@@ -277,9 +277,7 @@
         }
     }, {
         "classname": "js.LGFilterLayers1WithDefaults",
-        "styles":
-        ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}"+
-        ".okIE .filter{border-radius:8px}",
+        "styles": ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .filter{border-radius:8px}",
         "config": {
             "rootId": "filter",
             "tooltip": "@tooltips.filter",
