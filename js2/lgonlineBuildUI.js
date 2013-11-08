@@ -743,9 +743,8 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                     // Save the portal's services
                     lang.mixin(config.helperServices, response.helperServices);
 
-                    esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
-
                     // Setup any helper services (geometry, print, routing, geocoding)
+                    esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
                     if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {
                         esri.config.defaults.geometryService = new esri.tasks.GeometryService(config.helperServices.geometry.url);
                     }
@@ -753,6 +752,12 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                     deferred.resolve(true);
                 });
             } else {
+                // Setup any helper services (geometry, print, routing, geocoding)
+                esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
+                if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {
+                    esri.config.defaults.geometryService = new esri.tasks.GeometryService(config.helperServices.geometry.url);
+                }
+
                 deferred.resolve(true);
             }
 
