@@ -82,15 +82,15 @@
             "type": "string",
             "tooltip": "Prompt for filter value field"
         }, {
-            "label": "Value format hint",
+            "label": "Initial value",
             "fieldName": "filter.value1",
             "type": "string",
-            "tooltip": "Text to display in the value field as a format hint"
+            "tooltip": "Text to display in the value field as the initial value"
         }, {
             "label": "Value field",
             "fieldName": "filter.fieldname1",
             "type": "string",
-            "tooltip": "Field in the layer that is to be used as a filter"
+            "tooltip": "Field in the layer(s) that is to be used as a filter"
         }]
     }, {
         "category": "Map",
