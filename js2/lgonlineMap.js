@@ -178,7 +178,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                     // For some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
                     // This is a bit of a hack to set it manually
                     if (!response.map.spatialReference) {
-                        pThis.mapInfo.map.spatialReference = new esri.SpatialReference({wkid: 102100});
+                        pThis.mapInfo.map.spatialReference = new esri.SpatialReference(102100);
                     }
 
                     //pThis.listeners.push(
@@ -367,17 +367,26 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * Creates a string from extents.
          * @param {object} extents Extents structure
          * @return {string} Comma-separated extents in the order xmin,
-         *         ymin, xmax, ymax, spatial reference's wkid
+         *         ymin, xmax, ymax, spatial reference's wkid or wkt
          * @see getExtentsFromString
          * @memberOf js.LGMap#
          */
         getStringFromExtents: function (extents) {
-            var extentsString =
-                extents.xmin.toFixed().toString() + "," +
-                extents.ymin.toFixed().toString() + "," +
-                extents.xmax.toFixed().toString() + "," +
-                extents.ymax.toFixed().toString() + "," +
-                extents.spatialReference.wkid.toString();
+            var projectionParams,
+                extentsString =
+                    extents.xmin.toFixed().toString() + "," +
+                    extents.ymin.toFixed().toString() + "," +
+                    extents.xmax.toFixed().toString() + "," +
+                    extents.ymax.toFixed().toString(),
+                sr = extents.spatialReference;
+
+            if (sr) {
+                if (sr.wkid) {
+                    extentsString = extentsString + "," + sr.wkid.toString();
+                } else if (sr.wkt) {
+                    extentsString = extentsString + "," + encodeURIComponent(sr.wkt);
+                }
+            }
             return extentsString;
         },
 
@@ -385,23 +394,40 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * Creates extents from a string.
          * @param {string} extentsString String containing comma-
          *         separated xmin, ymin, xmax, ymax, and (optionally)
-         *         the spatial reference's wkid; comma separator
+         *         the spatial reference's wkid or wkt; comma separator
          *         may take the escaped form "%2C"
          * @return {object} Extents object containing xmin,
          *         ymin, xmax, ymax set to the first four numbers
          *         in the string; if the string contains a fifth
          *         number, it is used as the wkid of the extents'
-         *         spatial reference, otherwise 102100 is used
+         *         spatial reference; if it contains a fifth element,
+         *         it is used as the wkt of the spatial reference;
+         *         otherwise 102100 is used
          * @see getStringFromExtents
          * @memberOf js.LGMap#
          */
         getExtentsFromString: function (extentsString) {
-            var minmax, extents = null;
+            var minmax, extents = null, wkid;
 
+            // Get the four to five comma-separated parts
             minmax = extentsString.split(",");
+
+            // If there are no commas, then they're escaped.
             if (minmax.length === 1) {
-                minmax = extentsString.split("%2C");
+                // Split the string on "PROJCS" if it exists
+                var iPROJCS = extentsString.indexOf("PROJCS");
+                if (iPROJCS > 0) {
+                    // Split the numbers on the escaped commas
+                    minmax = extentsString.substr(0, iPROJCS).split("%2C");
+
+                    // And put the wkt in the list's last slot
+                    minmax[4] = (extentsString.substr(iPROJCS));
+                } else {
+                    // Split the whole string on the escaped commas
+                    minmax = extentsString.split("%2C");
+                }
             }
+
             try {
                 extents = {
                     xmin: Number(minmax[0]),
@@ -412,7 +438,12 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                 extents.spatialReference = {};
                 if (minmax.length > 4) {
-                    extents.spatialReference.wkid = Number(minmax[4]);
+                    wkid = Number(minmax[4]);
+                    if (!isNaN(wkid)) {
+                        extents.spatialReference.wkid = wkid;
+                    } else {
+                        extents.spatialReference.wkt = decodeURIComponent(minmax[4]);
+                    }
                 } else {
                     extents.spatialReference.wkid = 102100;
                 }
