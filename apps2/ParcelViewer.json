@@ -84,7 +84,7 @@
             "label": "Search layer name",
             "fieldName": "featureSearcher.searchLayerName",
             "type": "string",
-            "tooltip": "Layer name of the feature layer to use for search"
+            "tooltip": "Comma-separated list of the feature layer(s) to use for a search"
         }, {
             "label": "Search layer field(s)",
             "fieldName": "featureSearcher.searchFields",
@@ -226,18 +226,6 @@
             "itemClass": "commandPanelItem",
             "arrowClass": "commandPanelArrow"
         }
-/*    }, {
-        "classname": "js.LGSearchFeatureLayer",
-        "config": {
-            "rootId": "featureSearcher",
-            "parentDiv": "contentFrame",
-            "dependencyId": "map",
-            "busyIndicator": "busyIndicator",
-            "publishPointsOnly": false,
-            "searchPattern": "%${1}%",
-            "caseInsensitiveSearch": true
-        }
-*/
     }, {
         "classname": "js.LGSearchFeatureLayerMultiplexer",
         "config": {
