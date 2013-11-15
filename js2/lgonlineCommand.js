@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (dijit, domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, PopupTemplate) {
+define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, PopupTemplate) {
 
     //========================================================================================================================//
 
@@ -1203,7 +1203,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
             }
 
             // Failed to find the search layer; provide some feedback
-            message = "\"" + this.searchLayerName + "\"<br>";
+            message = "\"" + (this.searchLayerName || "") + "\"<br>";
             message += reason + "<br><hr><br>";
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
@@ -1397,8 +1397,38 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
          * Provides a searcher that multiplexes the work of other searchers.
          */
         constructor: function () {
-            var pThis = this, deferralWaitList = [];
+            var pThis = this, deferralWaitList;
             this.ready = new Deferred();
+
+            // Create list of searchers
+            deferralWaitList = this.createSearchersList();
+
+            // We're ready once all of our searchers are ready
+            (new DeferredList(deferralWaitList)).then(
+                function (results) {
+                    // Did all succeed?
+                    var ok = array.every(results, function (result) {
+                        return result[0];
+                    });
+
+                    if (ok) {
+                        pThis.ready.resolve(pThis);
+                    } else {
+                        pThis.ready.reject(pThis);
+                    }
+                }
+            );
+        },
+
+        /**
+         * Launches a search of the instance's search type.
+         * Initializes the object's list of searchers.
+         * @return {object} List of deferrals, with one per searcher
+         * @memberOf js.LGSearchMultiplexer#
+         */
+        createSearchersList: function () {
+            var pThis = this, deferralWaitList = [];
+            this.searchers = [];
 
             // Get our searchers and build a list of their ready state deferrals
             this.searchers = [];
@@ -1412,17 +1442,7 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
                 });
             }
 
-            // We're ready once all of our searchers are ready
-            (new DeferredList(deferralWaitList)).then(
-                function (results) {
-                    // Did both succeed?
-                    if (!results[0] || !results[1]) {
-                        pThis.ready.reject(pThis);
-                        return;
-                    }
-                    pThis.ready.resolve(pThis);
-                }
-            );
+            return deferralWaitList;
         },
 
         /**
@@ -1522,6 +1542,60 @@ define("js/lgonlineCommand", ["dijit", "dojo/dom-construct", "dojo/dom", "dojo/o
         publish: function (subject, data) {
             // Extract the searcher and the data packet and publish the data via the searcher
             this.searchers[data.iSearcher].publish(subject, data.itemData);
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGSearchFeatureLayerMultiplexer", js.LGSearchMultiplexer, {
+        /**
+         * Constructs an LGSearchFeatureLayerMultiplexer.
+         *
+         * @class
+         * @name js.LGSearchFeatureLayerMultiplexer
+         * @extends js.LGSearchMultiplexer
+         * @classdesc
+         * Provides a searcher that multiplexes the work of LGSearchFeatureLayer searchers,
+         * selecting them by feature layer name
+         */
+
+        /**
+         * Initializes the object's list of searchers.
+         * @return {object} List of deferrals, with one per searcher
+         * @memberOf js.LGSearchFeatureLayerMultiplexer#
+         * @override
+         */
+        createSearchersList: function () {
+            var pThis = this, deferralWaitList = [], featureLayerNames = [];
+            this.searchers = [];
+
+            // Construct the searchers and build a list of their ready state deferrals
+            if (this.searchLayerName) {
+                featureLayerNames = this.searchLayerName.split(",");
+            }
+
+            array.forEach(featureLayerNames, function (layerName) {
+                var searcher, searcherName = pThis.rootId + "_" + pThis.searchers.length;
+                searcher = new js.LGSearchFeatureLayer({
+                    app: pThis.app,
+                    commonConfig: pThis.commonConfig,
+                    i18n: pThis.i18n,
+                    webmap: pThis.webmap,
+                    rootId: searcherName,
+                    parentDiv: pThis.parentDiv,
+                    dependencyId: pThis.dependencyId,
+                    busyIndicator: pThis.busyIndicator,
+                    publishPointsOnly: pThis.publishPointsOnly,
+                    searchPattern: pThis.searchPattern,
+                    caseInsensitiveSearch: pThis.caseInsensitiveSearch,
+                    searchLayerName: layerName.trim(),
+                    searchFields: pThis.searchFields
+                });
+                pThis.searchers.push(searcher);
+                deferralWaitList.push(searcher.ready);
+            });
+
+            return deferralWaitList;
         }
     });
 
