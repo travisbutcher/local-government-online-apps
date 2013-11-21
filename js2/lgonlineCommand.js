@@ -1157,10 +1157,11 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                         // Failed to find the field in the search layer; provide some feedback
                         message = "\"" + reason + "\"<br>";
                         message += this.checkForSubstitution("@messages.searchFieldMissing") + "<br><hr><br>";
-                        message += this.checkForSubstitution("@prompts.layerFields") + "<br>";
-                        if (availableFields.length > 1) {
-                            message += availableFields.substring(1, availableFields.length - 1);
-                        }
+                        message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
+                        array.forEach(searchLayer.fields, function (layerField) {
+                            message += "<li>\"" + layerField.name + "\"</li>";
+                        });
+                        message += "</ul>";
                         this.log(message, true);
                     }
 
