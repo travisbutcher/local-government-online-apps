@@ -76,6 +76,11 @@
     }, {
         "category": "Map",
         "fields": [{
+            "label": "Select a map",
+            "fieldName": "webmap",
+            "type": "webmap",
+            "tooltip": "Select a webmap to use"
+        }, {
             "label": "Hint in search field",
             "fieldName": "searchBox.hint",
             "type": "string",
