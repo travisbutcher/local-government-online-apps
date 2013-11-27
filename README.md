@@ -44,7 +44,7 @@ Additional documentation about the online apps:
 * [Advanced configuration](https://github.com/Esri/local-government-online-apps/blob/master/doc/AdvancedConfiguration.md)
 * [Modifying the code](https://github.com/Esri/local-government-online-apps/blob/master/doc/ModifyingTheCode.md)
 
-Learn more about Esri's [ArcGIS for Local Government maps and apps](http://resources.arcgis.com/en/communities/local-government/).
+Learn more about Esri's [ArcGIS for Local Government maps and apps](http://solutions.arcgis.com/local-government/).
 
 Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local-Government).
 
