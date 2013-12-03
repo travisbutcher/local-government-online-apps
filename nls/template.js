@@ -38,7 +38,9 @@ define({
         labels: {
             email: "email",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
             Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
-            Twitter: "Twitter"  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            Twitter: "Twitter",  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            title: "title",  // Shown as title hint in print specification box if a title hint is not configured
+            author: "author"  // Shown as author hint in print specification box if an author hint is not configured
         },
         prompts: {
             search: "Search:",  // Appears before a search text field in dialog box for searching for a feature

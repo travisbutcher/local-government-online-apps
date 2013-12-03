@@ -662,7 +662,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 id: this.rootId + "_titleEntry",
                 value: this.title,
                 trim: true,
-                placeHolder: this.titleHint
+                placeHolder: this.titleHint || this.checkForSubstitution(this.titleHintDefault) || ""
             }).placeAt(this.rootId);
             domStyle.set(this.titleEntryTextBox.domNode, "width", "97%");
             domClass.add(this.titleEntryTextBox.domNode, this.titleClass);
@@ -671,7 +671,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 id: this.rootId + "_authorEntry",
                 value: this.author,
                 trim: true,
-                placeHolder: this.authorHint
+                placeHolder: this.authorHint || this.checkForSubstitution(this.authorHintDefault) || ""
             }).placeAt(this.rootId);
             domStyle.set(this.authorEntryTextBox.domNode, "width", "97%");
             domClass.add(this.authorEntryTextBox.domNode, this.authorClass);
