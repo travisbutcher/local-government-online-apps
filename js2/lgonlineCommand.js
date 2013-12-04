@@ -1136,7 +1136,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         onDependencyReady: function () {
             // Now that the map (our dependency) is ready, get the URL of the search layer from it
             var searchLayer, reason, message, availableFields = ",", opLayers,
-                popupTemplate = null, pThis = this;
+                popupTemplate = null, pThis = this, actualFieldList = [];
 
             try {
                 searchLayer = this.mapObj.getLayer(this.searchLayerName);
@@ -1145,25 +1145,49 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 } else {
                     this.searchURL = searchLayer.url;
 
-                    // Check for existence of fields
+                    // Check for existence of fields; start with a list of fields in the search layer
                     array.forEach(searchLayer.fields, function (layerField) {
                         availableFields += layerField.name + ",";
                     });
-                    if (!array.every(this.searchFields, function (searchField) {
-                            reason = searchField;
-                            return availableFields.indexOf("," + searchField + ",") >= 0;
-                        })) {
+
+                    // Only keep search fields that the layer has
+                    array.forEach(this.searchFields, function (searchField) {
+                        if (availableFields.indexOf("," + searchField + ",") >= 0) {
+                            actualFieldList.push(searchField);
+                        }
+                    });
+
+                    // Can we search for anything in this layer?
+                    if (actualFieldList.length === 0) {
+                        reason = "";
+                        array.forEach(this.searchFields, function (searchField) {
+                            if (reason.length > 0) {
+                                reason += ",";
+                            }
+                            reason += searchField;
+                        });
 
                         // Failed to find the field in the search layer; provide some feedback
                         message = "\"" + reason + "\"<br>";
-                        message += this.checkForSubstitution("@messages.searchFieldMissing") + "<br><hr><br>";
+                        if (this.searchFields.length > 1) {
+                            message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
+                        } else {
+                            message += this.checkForSubstitution("@messages.searchFieldMissing");
+                        }
+                        message += "<br><hr>\"" + this.searchLayerName + "\"<br>";
                         message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
                         array.forEach(searchLayer.fields, function (layerField) {
                             message += "<li>\"" + layerField.name + "\"</li>";
                         });
                         message += "</ul>";
                         this.log(message, true);
+                        this.ready.reject(this);
+                        this.inherited(arguments);
+                        return;
                     }
+
+                    // Otherwise, replace the requested search fields list with the available search fields list
+                    this.searchFields = actualFieldList;
 
                     // Set up our query task now that we have the URL to the layer
                     this.objectIdField = searchLayer.objectIdField;
@@ -1205,14 +1229,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
             // Failed to find the search layer; provide some feedback
             message = "\"" + (this.searchLayerName || "") + "\"<br>";
-            message += reason + "<br><hr><br>";
+            message += reason + "<br><hr>";
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
                 message += "<li>\"" + layerName + "\"</li>";
             });
             message += "</ul>";
             this.log(message, true);
-
             this.ready.reject(this);
             this.inherited(arguments);
         },
