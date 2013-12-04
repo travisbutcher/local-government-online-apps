@@ -53,7 +53,8 @@ define({
             geolocationUnavailable: "The browser was not able to get the current location",  // Shown when the browser returns an error instead of the current geographical position
             geolocationTimeout: "The browser was not able to get the current location in a timely fashion",  // Shown when the browser does not return within a configured time limit when asked for the current geographical position
             searchLayerMissing: "This search layer was not found in the map",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the mapLayers prompt
-            searchFieldMissing: "This field was not found in the map search layer"  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
+            searchFieldMissing: "This field was not found in the map search layer",  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
+            allSearchFieldsMissing: "None of these fields was found in the map search layer"  // Appears before a list of fields in the configured map search layer; shown when the app cannot find any of the fields that were configured for the search command; works with the layerFields prompt
         }
     }),
     "ar": 1,
