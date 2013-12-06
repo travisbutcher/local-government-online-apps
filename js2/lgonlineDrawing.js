@@ -221,7 +221,7 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
 
                             // If we have attributes and a desire to complement the highlight with
                             // a popup, prep & display the popup
-                            if (showFeaturePopup) {
+                            if (pThis.toBoolean(showFeaturePopup, true)) {
                                 //??? centerAt/setZoom conflict workaround
                                 //???(new DeferredList([focusFinished, zoomFinished])).then(
                                 //???    function (results) {
