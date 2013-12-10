@@ -1,0 +1,11 @@
+change report #2 at 12/10/2013  8:19:33.48
+-
+for git branch
+develop
+in repository local-government-online-apps
+-
+changes in this branch since its last commit
+M  nls/pl/template.js
+M  s1.html
+M  s2.html
+?? CHANGES.txt
