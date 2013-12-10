@@ -81,14 +81,16 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                 highlightGraphics = pThis.createHighlightGraphics(geometry, attributes, infoTemplate);
 
                 // Pan & zoom to highlight graphic(s)
-                extent = geometry.getExtent();
-                if (extent) {
-                    newMapCenter = extent.getCenter();
-                } else {
-                    newMapCenter = geometry;
+                if (highlightGraphics.length > 0) {
+                    extent = geometry.getExtent();
+                    if (extent) {
+                        newMapCenter = extent.getCenter();
+                    } else {
+                        newMapCenter = geometry;
+                    }
+                    pThis.showHighlight(highlightGraphics, newMapCenter, pThis.highlightZoomLevel,
+                        attributes && pThis.showFeaturePopup);
                 }
-                pThis.showHighlight(highlightGraphics, newMapCenter, pThis.highlightZoomLevel,
-                    attributes && pThis.showFeaturePopup);
             });
         },
 
@@ -114,6 +116,11 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
 
             } else {
                 if (geometry.type === "point") {
+                    // JSAPI does not want NaN coordinates
+                    if (!geometry.x || !geometry.y || isNaN(geometry.x) || isNaN(geometry.y)) {
+                        return highlightGraphics;
+                    }
+
                     // Create a series of concentric circle symbols using the configured line highlight color
                     for (i = 0; i <= 4; ++i) {
                         highlightGraphics.push(new esri.Graphic(geometry,
@@ -127,7 +134,7 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                             attributes, infoTemplate));
                     }
 
-                } else {
+                } else if (geometry.type) {
                     // Create a polygon symbol using the configured line & fill highlight colors
                     highlightGraphics.push(new esri.Graphic(geometry,
                         new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
@@ -214,7 +221,7 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
 
                             // If we have attributes and a desire to complement the highlight with
                             // a popup, prep & display the popup
-                            if (showFeaturePopup) {
+                            if (pThis.toBoolean(showFeaturePopup, true)) {
                                 //??? centerAt/setZoom conflict workaround
                                 //???(new DeferredList([focusFinished, zoomFinished])).then(
                                 //???    function (results) {
