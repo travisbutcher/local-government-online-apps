@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, PopupTemplate) {
+define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
 
     //========================================================================================================================//
 
@@ -691,7 +691,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
             // Await the OK from our dialog before launching print job
             on(okBtn.rootDiv, "click", function () {
-                var selectedLayout, printParams;
+                var opLayers, legendLayer, legendLayers = [], selectedLayout, printParams;
 
                 // Broadcast status; our LGDropdownBox ancestor has already made our dialog box visible
                 pThis.publishMessage(pThis.publishWorking);
@@ -700,6 +700,14 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // the server is off doing the print job
                 pThis.setIsVisible(false);
 
+                // Specify the map's operational layers for the legend
+                opLayers = pThis.mapObj.getOperationalLayers();
+                array.forEach(opLayers, function (opLayer) {
+                    legendLayer = new LegendLayer();
+                    legendLayer.layerId = opLayer.id;
+                    legendLayers.push(legendLayer);
+                });
+
                 // Create print parameters with full template
                 selectedLayout = pThis.radioButtonController.getCurrentMember();
                 selectedLayout = selectedLayout ? selectedLayout.value : null;
@@ -707,13 +715,15 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 printParams = new PrintParameters();
                 printParams.map = pThis.mapObj.mapInfo.map;
                 printParams.outSpatialReference = pThis.mapObj.mapInfo.map.spatialReference;
+
                 printParams.template = new PrintTemplate();
                 printParams.template.format = pThis.format || "PDF";
                 printParams.template.layout = selectedLayout || pThis.layout || "Letter ANSI A Landscape";
                 printParams.template.layoutOptions = {
                     titleText: pThis.titleEntryTextBox.value,
                     authorText: pThis.authorEntryTextBox.value,
-                    copyrightText: pThis.copyrightText
+                    copyrightText: pThis.copyrightText,
+                    legendLayers: legendLayers
                 };
                 printParams.template.preserveScale = pThis.toBoolean(pThis.preserveScale, false);
                 printParams.template.showAttribution = true;
