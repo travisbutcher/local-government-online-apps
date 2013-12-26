@@ -69,6 +69,8 @@ is the name of an arcgis.com group that contains the set of basemaps that you wa
 app; the group owner is the arcgis.com login name of the owner of that group. If these fields are left
 blank, then a default set of basemaps is supplied by Esri.
 
+*Important note: The status of the group used to supply basemaps must be 'public'*
+
 ### How an app's configuration is stored
 
 The online app is designed to be a generic, shared, and reusable set of software that is transformed
