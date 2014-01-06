@@ -263,10 +263,6 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                     // Start listening for feature highlights
                     pThis.showFeatureHandle = pThis.subscribeToMessage("showFeature", function (feature) {
-                        if (pThis.popupTemplate) {
-                            // Assign the popup template to the highlight item
-                            feature.infoTemplate = pThis.popupTemplate;
-                        }
                         pThis.publishMessage("highlightItem", feature);
                     });
 
@@ -291,17 +287,6 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          */
         mapInfo: function () {
             return this.mapInfo;
-        },
-
-        /**
-         * Sets the popup template to be used by graphics that the map
-         * creates.
-         * @param {object} popupTemplate esri.dijit.PopupTemplate for
-         *        map's infoWindow
-         * @memberOf js.LGMap#
-         */
-        setPopup: function (popupTemplate) {
-            this.popupTemplate = popupTemplate;
         },
 
         /**
