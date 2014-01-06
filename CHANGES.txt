@@ -1,11 +1,10 @@
-change report #2 at 12/10/2013  8:19:33.48
+change report #4 at 01/06/2014 14:36:52.27
 -
 for git branch
-develop
+store_layer_specific_popup_template
 in repository local-government-online-apps
 -
 changes in this branch since its last commit
-M  nls/pl/template.js
-M  s1.html
-M  s2.html
-?? CHANGES.txt
+ M CHANGES.txt
+ M js2/lgonlineCommand.js
+ M js2/lgonlineMap.js

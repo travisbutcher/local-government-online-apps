@@ -1217,16 +1217,15 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
                     this.objectSearchParams.outFields = ["*"];
 
-                    // Get the popup for this layer & send it to the map
+                    // Get the popup for this layer & save it with the layer
                     opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
                     array.some(opLayers, function (layer) {
                         if (layer.title === pThis.searchLayerName) {
-                            popupTemplate = new PopupTemplate(layer.popupInfo);
+                            pThis.popupTemplate = new PopupTemplate(layer.popupInfo);
                             return true;
                         }
                         return false;
                     });
-                    this.mapObj.setPopup(popupTemplate);
 
                     this.log("Search layer " + this.searchLayerName + " set up for queries");
                     this.ready.resolve(this);
@@ -1389,6 +1388,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             this.searcher.execute(this.objectSearchParams, function (results) {
                 if (results && results.features && 0 < results.features.length) {
                     item = results.features[0];
+
+                    // Assign the layer's popup (if any) to the item
+                    item.infoTemplate = pThis.popupTemplate;
 
                     if (pThis.publishPointsOnly) {
                         // Find a point that can be used to represent this item
