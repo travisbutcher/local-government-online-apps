@@ -364,8 +364,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         getStringFromExtents: function (extents) {
-            var projectionParams,
-                extentsString =
+            var extentsString =
                     extents.xmin.toFixed().toString() + "," +
                     extents.ymin.toFixed().toString() + "," +
                     extents.xmax.toFixed().toString() + "," +
@@ -399,7 +398,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         getExtentsFromString: function (extentsString) {
-            var minmax, extents = null, wkid;
+            var minmax, extents = null, wkid, iPROJCS;
 
             // Get the four to five comma-separated parts
             minmax = extentsString.split(",");
@@ -407,7 +406,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             // If there are no commas, then they're escaped.
             if (minmax.length === 1) {
                 // Split the string on "PROJCS" if it exists
-                var iPROJCS = extentsString.indexOf("PROJCS");
+                iPROJCS = extentsString.indexOf("PROJCS");
                 if (iPROJCS > 0) {
                     // Split the numbers on the escaped commas
                     minmax = extentsString.substr(0, iPROJCS).split("%2C");

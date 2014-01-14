@@ -60,8 +60,8 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
             this.highlighterLayer = pThis.mapObj.createGraphicsLayer("highlighterLayer");
 
             // Convert the color definitions to Dojo Colors--required for AGOL printing
-            this.lineHiliteColor = new Color(this.lineHiliteColor ? this.lineHiliteColor : "#0000ff"),
-            this.fillHiliteColor = new Color(this.fillHiliteColor ? this.fillHiliteColor : [0, 0, 255, 0.1]),
+            this.lineHiliteColor = new Color(this.lineHiliteColor || "#0000ff");
+            this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 0, 255, 0.1]);
 
             // Hold on to the current animating timeout ID and interval ID so that we can
             // clear an active animating highlight before creating a new one
