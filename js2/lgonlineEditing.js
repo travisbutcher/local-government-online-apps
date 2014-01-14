@@ -1,4 +1,4 @@
-﻿/*global define,dojo,js,touchScroll */
+﻿/*global define,dojo,js,console,esri,touchScroll */
 /*jslint sloppy:true */
 /*
  | Copyright 2013 Esri
@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/on", "dojo/_base/array", "dojo/_base/lang", "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, on, array, lang, aspect, TemplatePicker, Editor) {
+define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, aspect, TemplatePicker, Editor) {
 
     //========================================================================================================================//
 
@@ -75,10 +75,10 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/on", "dojo/_base/array
             this.layers = [];
             array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                 var eLayer = mapLayer.layerObject;
-                if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()){
-                    if (mapLayer.capabilities && mapLayer.capabilities === "Query"){
-                        // capabilities set to Query, so editing was disabled in the web map
-                    } else {
+                if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
+                    if (mapLayer.capabilities && mapLayer.capabilities !== "Query") {
+                        // If "capabilities" is set to Query, editing is disabled in the web map
+
                         // Layers list for esri.dijit.editing.Editor
                         this.layerInfos.push({
                             "featureLayer": eLayer

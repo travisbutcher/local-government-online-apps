@@ -1146,7 +1146,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         onDependencyReady: function () {
             // Now that the map (our dependency) is ready, get the URL of the search layer from it
             var searchLayer, reason, message, availableFields = ",", opLayers,
-                popupTemplate = null, pThis = this, actualFieldList = [];
+                pThis = this, actualFieldList = [];
 
             try {
                 searchLayer = this.mapObj.getLayer(this.searchLayerName);
