@@ -58,20 +58,33 @@ parameter.  To illustrate this, copy `apps2\ParcelViewer.json` into `apps2\Color
 * foreground color:  #fff
 * background color:  #333333
 * highlight color:  #5d5d5d
+* alternate background color:  #5d5d5d
 
 to
 
 * foreground color:  #fff
 * background color:  #555
 * highlight color:  #888
+* alternate background color:  #888
 
-We do this by changing the JSON configuration file’s line 105 from
+We do this by changing the JSON configuration file's line 146 from
 
-    "colors": ["#fff", "#333333", "#5d5d5d"]
+    "colors": ["#fff", "#333333", "#5d5d5d", "#5d5d5d"]
 
 to
 
-    "colors": ["#fff", "#555", "#888"]
+    "colors": ["#fff", "#555", "#888", "#888"]
+
+The background color appears in the title bar and behind the various dropdown boxes such as search, basemaps, share, help.
+The foreground color is used for the text atop this background.  The highlight color is what the background is changed to
+when the cursor hovers over the content, such as when you move the cursor over the command buttons in the top-right corner
+of the app. The alternate background color provides a way for you to configure a background that complements the normal
+background color but is different; we would use this for subheadings in a results list, e.g.
+
+Colors may be defined using the normal CSS styles:  text (case-insensitive, e.g., "white") or  hexadecimal form
+(e.g., "#9400d3"). The hexadecimal form may be shortened to three digits (e.g., "#f80"), which is automatically
+extended to six digits ("#ff8800"). Some color names are listed [here](http://w3schools.com/cssref/css_colornames.asp),
+with background about how the hexadecimal digits define a color provided [here](http://w3schools.com/cssref/css_colors.asp).
 
 (This change gives us a way to verify that we're not using the default configuration file).  Now try
 `http://<yourServer>/<yourSite>/ParcelViewer.html?app=apps2/Color` (if you're starting with the Parcel Viewer template
