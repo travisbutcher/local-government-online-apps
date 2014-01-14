@@ -299,6 +299,13 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
         },
 
         /**
+         * Hides the map's popup.
+         */
+        hidePopup: function () {
+            this.mapInfo.map.infoWindow.hide();
+        },
+
+        /**
          * Sets the map's extent.
          * @param {extent} extent The desired map display extent
          * @memberOf js.LGMap#

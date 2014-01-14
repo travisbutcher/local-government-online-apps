@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineMap"], function (Deferred, Color) {
+define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", "js/lgonlineMap"], function (Deferred, Color, esriLang) {
 
     //========================================================================================================================//
 
@@ -33,7 +33,18 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
          * @extends js.LGObject, js.LGMapDependency
          * @classdesc
          * Manages the app's highlighter.
+         *
+         * @constructor
+         * @class
+         * @name js.LGMap
+         * @extends js.LGGraphic
+         * @classdesc
+         * Provides a UI web map display.
          */
+        constructor: function () {
+            // Correct for stringized boolean
+            this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -89,7 +100,7 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                         newMapCenter = geometry;
                     }
                     pThis.showHighlight(highlightGraphics, newMapCenter, pThis.highlightZoomLevel,
-                        attributes && pThis.showFeaturePopup);
+                        esriLang.isDefined(attributes) && esriLang.isDefined(infoTemplate) && pThis.showFeaturePopup);
                 }
             });
         },
@@ -178,13 +189,16 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                     zoomFinished.then(  //??? centerAt/setZoom conflict workaround
                         function () {   //??? centerAt/setZoom conflict workaround
 
+                            // Clear extant animated highlight and any existing highlight graphics & popup
+                            if (pThis.intervalTerminator) {
+                                clearTimeout(pThis.intervalTerminator);
+                                clearInterval(pThis.intervalID);
+                            }
+                            pThis.highlighterLayer.clear();
+                            pThis.mapObj.hidePopup();
+
                             // Display the highlight graphic
                             if (highlightGraphics.length > 1) {
-                                // Clear extant animated highlight
-                                if (pThis.intervalTerminator) {
-                                    clearTimeout(pThis.intervalTerminator);
-                                    clearInterval(pThis.intervalID);
-                                }
 
                                 // Create a highlight
                                 i = 0;
@@ -215,13 +229,12 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                                     pThis.highlighterLayer.clear();
                                 }, 5000);  // ms
                             } else {
-                                pThis.highlighterLayer.clear();
                                 pThis.highlighterLayer.add(highlightGraphics[0]);
                             }
 
                             // If we have attributes and a desire to complement the highlight with
                             // a popup, prep & display the popup
-                            if (pThis.toBoolean(showFeaturePopup, true)) {
+                            if (showFeaturePopup) {
                                 //??? centerAt/setZoom conflict workaround
                                 //???(new DeferredList([focusFinished, zoomFinished])).then(
                                 //???    function (results) {
