@@ -234,7 +234,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
          * @name js.LGEditAttributes
          * @extends js.LGObject, js.LGMapDependency
          * @classdesc
-         * Displays an info window that permits the entry or editing of a graphics attributes.
+         * Converts a map click into a feature.
          */
         constructor: function () {
             this.drawingPrompt = this.checkForSubstitution("@tooltips.collect");
@@ -256,9 +256,12 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
             });
         },
 
+        /**
+         * Handles a click event by
+         * @param {object} evt MouseEvent
+         * @memberOf js.LGEditAttributes#
+         */
         handleClick: function (evt) {
-            // Event is of the form:
-            // {"type":"point","x":-9812146.796478976,"y":5126074.462209778,"spatialReference":{"wkid":102100}}
             var pThis = this;
 
             if (this.drawingTool === null) {
@@ -266,20 +269,9 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                 esri.bundle.toolbars.draw.addPoint = pThis.drawingPrompt;
                 this.drawingTool = new Draw(pThis.mapObj.mapInfo.map, {});
                 this.drawingTool.activate(Draw.POINT);
+                this.drawingTool._updateTooltip(evt);
 
-                // Workaround to show tooltip as soon as tool is activated
-                // http://stackoverflow.com/a/3808837
-                if (document.querySelectorAll) {
-                    var nodeList = document.querySelectorAll(".tooltip");
-                    var location = pThis.mapObj.mapInfo.map.toScreen(evt);
-                    array.forEach(nodeList, function (node) {
-                        domStyle.set(node, "display", "block");
-                        domStyle.set(node, "position", "fixed");
-                        domStyle.set(node, "left", location.x + 15 + "px");
-                        domStyle.set(node, "top", location.y + 64 + "px");
-                    });
-                }
-
+                // Upon conclusion of drawing, deactivate tool, echo the click with a point, and submit the info
                 this.drawingTool.on("draw-end", function (evt) {
                     // Event is of the form:
                     // {"geometry":{"type":"point","x":-9812146.796478976,"y":5126074.462209778,
@@ -307,13 +299,16 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
                     // Remove the placeholder graphics
                     setTimeout(function () {  //???
-                        pThis.mapObj.mapInfo.map.graphics.remove(graphic);
                         alert(pThis.checkForSubstitution("@messages.yourContentSubmitted"));
+                        pThis.mapObj.mapInfo.map.graphics.remove(graphic);
                     }, 2000);
                 });
             }
         }
     });
+
+
+//  Displays an info window that permits the entry or editing of a graphics attributes.
 
     //========================================================================================================================//
 

@@ -268,7 +268,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                     // Start broadcasting map clicks
                     pThis.clickHandle = on(pThis.mapInfo.map, "click", function (evt) {
-                        pThis.publishMessage("mapClick", evt.mapPoint);
+                        pThis.publishMessage("mapClick", evt);
                     });
 
                     pThis.ready.resolve(pThis);
