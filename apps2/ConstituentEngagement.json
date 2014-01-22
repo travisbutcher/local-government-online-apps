@@ -249,9 +249,9 @@
             "caseInsensitiveSearch": true
         }
     }, {
-        "classname": "js.LGEditAttributes",
+        "classname": "js.LGAddFeatureByClick",
         "config": {
-            "rootId": "editAttr",
+            "rootId": "addFeature",
             "parentDiv": "contentFrame",
             "dependencyId": "map"
         }
