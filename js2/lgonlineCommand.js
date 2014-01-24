@@ -1135,6 +1135,15 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             }
             this.caseInsensitiveSearch = this.toBoolean(this.caseInsensitiveSearch, true);
             this.ready = new Deferred();
+
+            // Normalize display field--it could be a string with a field, an empty string, or undefined
+            if (this.displayField) {
+                // In case a list of display fields is provided because of a mixup with LGFeatureLayer
+                // vs. LGSearchFeatureLayerMultiplexer, just take the first field
+                this.displayField = this.displayField.split(",")[0].trim();
+            } else {
+                this.displayField = "";
+            }
         },
 
         /**
@@ -1196,7 +1205,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                         return;
                     }
 
-                    // Otherwise, replace the requested search fields list with the available search fields list
+                    // If there are searchable fields, replace the requested search fields list with
+                    // the available search fields list
                     this.searchFields = actualFieldList;
 
                     // Set up our query task now that we have the URL to the layer
@@ -1331,19 +1341,24 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // Create the results list
                 array.forEach(results.features, function (item) {
 
-                    // Test each non-null search field result and pick the first one
-                    // that contains the search string as our label
+                    // Use the display field for representing the results if possible
                     representativeLabel = "";
-                    array.some(pThis.searchFields, function (searchField) {
-                        if (item.attributes[searchField]) {
-                            possibleLabel = item.attributes[searchField].toString();
-                            if (possibleLabel.toUpperCase().indexOf(processedSearchText) >= 0) {
-                                representativeLabel = possibleLabel;
-                                return true;
+                    if (item.attributes[pThis.displayField]) {
+                        representativeLabel = item.attributes[pThis.displayField].toString();
+                    } else {
+                        // Test each non-null search field result and pick the first one
+                        // that contains the search string as our label
+                        array.some(pThis.searchFields, function (searchField) {
+                            if (item.attributes[searchField]) {
+                                possibleLabel = item.attributes[searchField].toString();
+                                if (possibleLabel.toUpperCase().indexOf(processedSearchText) >= 0) {
+                                    representativeLabel = possibleLabel;
+                                    return true;
+                                }
                             }
-                        }
-                        return false;
-                    });
+                            return false;
+                        });
+                    }
 
                     if (representativeLabel === "") {
                         representativeLabel = "result";
@@ -1602,34 +1617,40 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         createSearchersList: function () {
-            var pThis = this, deferralWaitList = [], featureLayerNames = [];
+            var pThis = this, deferralWaitList = [], featureLayerNames = [],
+                featureDisplayFields = [], i;
             this.searchers = [];
 
-            // Construct the searchers and build a list of their ready state deferrals
+            // Get the list of layers & the list of display fields
             if (this.searchLayerName) {
                 featureLayerNames = this.searchLayerName.split(",");
             }
+            if (this.displayFields) {
+                featureDisplayFields = this.displayFields.split(",");
+            }
 
-            array.forEach(featureLayerNames, function (layerName) {
-                var searcher, searcherName = pThis.rootId + "_" + pThis.searchers.length;
-                searcher = new js.LGSearchFeatureLayer({
-                    app: pThis.app,
-                    commonConfig: pThis.commonConfig,
-                    i18n: pThis.i18n,
-                    webmap: pThis.webmap,
-                    rootId: searcherName,
-                    parentDiv: pThis.parentDiv,
-                    dependencyId: pThis.dependencyId,
-                    busyIndicator: pThis.busyIndicator,
-                    publishPointsOnly: pThis.publishPointsOnly,
-                    searchPattern: pThis.searchPattern,
-                    caseInsensitiveSearch: pThis.caseInsensitiveSearch,
-                    searchLayerName: layerName.trim(),
-                    searchFields: pThis.searchFields
-                });
-                pThis.searchers.push(searcher);
-                deferralWaitList.push(searcher.ready);
-            });
+            // Construct the searchers and build a list of their ready state deferrals
+            for (i = 0; i < featureLayerNames.length; i = i + 1) {
+                    var searcher, searcherName = pThis.rootId + "_" + pThis.searchers.length;
+                    searcher = new js.LGSearchFeatureLayer({
+                        app: pThis.app,
+                        commonConfig: pThis.commonConfig,
+                        i18n: pThis.i18n,
+                        webmap: pThis.webmap,
+                        rootId: searcherName,
+                        parentDiv: pThis.parentDiv,
+                        dependencyId: pThis.dependencyId,
+                        busyIndicator: pThis.busyIndicator,
+                        publishPointsOnly: pThis.publishPointsOnly,
+                        searchPattern: pThis.searchPattern,
+                        caseInsensitiveSearch: pThis.caseInsensitiveSearch,
+                        searchLayerName: featureLayerNames[i].trim(),
+                        searchFields: pThis.searchFields,
+                        displayField: featureDisplayFields[i]
+                    });
+                    pThis.searchers.push(searcher);
+                    deferralWaitList.push(searcher.ready);
+            }
 
             return deferralWaitList;
         }
