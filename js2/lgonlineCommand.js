@@ -1956,6 +1956,11 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         constructor: function () {
             this.layers = [];
+            this.switchDelayTimer = null;
+            if (this.busyIndicator) {
+                this.busyIndicator = this.lgById(this.busyIndicator);
+            }
+            this.ieSwitchDelayMs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 2);
         },
 
         /**
@@ -2038,6 +2043,39 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         * @memberOf js.LGFilterLayers1#
         */
         applyFilter: function () {
+            var pThis = this;
+
+            // IE needs a delay with the current version of the JSAPI
+            /*@cc_on
+                if (pThis.busyIndicator) {
+                    pThis.busyIndicator.setIsVisible(true);
+                }
+                if (this.switchDelayTimer !== null) {
+                    clearTimeout(this.switchDelayTimer);
+                }
+                this.switchDelayTimer = setTimeout(
+                    function () {
+                        pThis.switchDelayTimer = null;
+                        pThis.applyFilterCore();
+                        if (pThis.busyIndicator) {
+                            pThis.busyIndicator.setIsVisible(false);
+                        }
+                    },
+                    pThis.ieSwitchDelayMs
+                );
+                return;
+            @*/
+
+            // All but IE
+            pThis.applyFilterCore();
+        },
+
+        /**
+        * Loops through the layers array on which definition expression is applied and calls
+        * setLayerDefinitionExpression with the new value.
+        * @memberOf js.LGFilterLayers1#
+        */
+        applyFilterCore: function () {
             array.forEach(this.layers, lang.hitch(this, function (layer) {
                 this.setLayerDefinitionExpression(layer.layerObject, layer.fieldType);
                 layer.layerObject.clearSelection();

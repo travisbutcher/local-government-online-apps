@@ -307,7 +307,9 @@
             "defnExpression": "${fieldname1}=${value1}",
             "trigger": "markup",
             "dependencyId": "map",
-            "broadcastDefaultsPublish": "floor"
+            "broadcastDefaultsPublish": "floor",
+            "busyIndicator": "busyIndicator",
+            "ieSwitchDelaySecs": "2.2"
         }
     }, {
         "classname": "js.LGLocate",
