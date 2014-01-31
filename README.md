@@ -4,7 +4,7 @@ This subset of our open source software helps local governments provide web appl
 via Esri's ArcGIS.com ecosystem, a place where individuals and organizations can create maps and applications
 to share on the Internet.
 
-![Image of Local Government Online App using the 'Parcel Viewer' configuration](https://raw.github.com/Esri/local-government-online-apps/master/local-government-online-apps.png "Local Government Online App using the 'Parcel Viewer' configuration")
+![Image of Local Government Online App using the 'Parcel Viewer' configuration](local-government-online-apps.png "Local Government Online App using the 'Parcel Viewer' configuration")
 
 ## Features
 
@@ -81,7 +81,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 A copy of the license is available in the repository's
-[LICENSE.txt](https://raw.github.com/Esri/local-government-online-apps/master/LICENSE.txt) file.
+[LICENSE.txt](LICENSE.txt) file.
 
 [](Esri Tags: Local-Government Local Government Online Apps Parcel Viewer)
 [](Esri Language: JavaScript)
