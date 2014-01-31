@@ -346,7 +346,8 @@
             "horizOffset": -2,
             "vertOffset": [2, -2],
             "trigger": "basemap",
-            "dependencyId": "map"
+            "dependencyId": "map",
+            "webmapThumbnail": "images/webmap.png"
         }
     }, {
         "classname": "js.LGMapBasedMenuBox",
