@@ -309,16 +309,22 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                                                 readArcGIS.resolve(pThis);
                                                 console.log("Using template " + item.item.id);
                                             },
-                                            function () {
-                                                readArcGIS.reject(null);
+                                            function (err) {
+                                                // A possible error is that the JSAPI won't support logins
+                                                // to restricted content in IE <9
+                                                if (err.message !== "ABORTED") alert(err.message);
+                                                readArcGIS.reject(err.message);
                                             }
                                         );
                                     } else {
                                         readArcGIS.reject(null);
                                     }
                                 },
-                                function () {
-                                    readArcGIS.reject(null);
+                                function (err) {
+                                    // A possible error is that the JSAPI won't support logins
+                                    // to restricted content in IE <9
+                                    if (err.message !== "ABORTED") alert(err.message);
+                                    readArcGIS.reject(err.message);
                                 }
                             );
                         },
@@ -362,7 +368,7 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                 (new DeferredList([readArcGIS, readFile])).then(
                     function (results) {
                         // Did both succeed?
-                        if (!results[0] || !results[1]) {
+                        if (!results[0][0] || !results[1][0]) {
                             pThis.ready.reject(pThis);
                             return;
                         }

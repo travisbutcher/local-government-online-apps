@@ -1,9 +1,33 @@
-change report #5 at 01/13/2014 19:21:03.37
+change report #8 at 02/03/2014 15:17:48.38
 -
 for git branch
-develop
+template_free_feature_adding
 in repository local-government-online-apps
 -
 changes in this branch since its last commit
  M CHANGES.txt
- M nls/template.js
+ M nls/ar/template.js
+ M nls/cs/template.js
+ M nls/da/template.js
+ M nls/de/template.js
+ M nls/es/template.js
+ M nls/et/template.js
+ M nls/fi/template.js
+ M nls/fr/template.js
+ M nls/he/template.js
+ M nls/it/template.js
+ M nls/ja/template.js
+ M nls/ko/template.js
+ M nls/lt/template.js
+ M nls/lv/template.js
+ M nls/nb/template.js
+ M nls/nl/template.js
+ M nls/pl/template.js
+ M nls/pt-br/template.js
+ M nls/pt-pt/template.js
+ M nls/ro/template.js
+ M nls/ru/template.js
+ M nls/sv/template.js
+ M nls/th/template.js
+ M nls/tr/template.js
+ M nls/zh-cn/template.js

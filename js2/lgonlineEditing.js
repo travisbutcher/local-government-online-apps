@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, aspect, TemplatePicker, Editor) {
+define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "esri/toolbars/draw", "esri/graphic", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, aspect, domStyle, TemplatePicker, Editor, Draw, Graphic) {
 
     //========================================================================================================================//
 
@@ -76,7 +76,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
             array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                 var eLayer = mapLayer.layerObject;
                 if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
-                    if (mapLayer.capabilities && mapLayer.capabilities !== "Query") {
+                    if (eLayer.capabilities && eLayer.capabilities !== "Query") {
                         // If "capabilities" is set to Query, editing is disabled in the web map
 
                         // Layers list for esri.dijit.editing.Editor
@@ -225,35 +225,130 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGEditAttributes", [js.LGObject, js.LGMapDependency], {
+    dojo.declare("js.LGFeatureByClick", [js.LGObject, js.LGMapDependency], {
         /**
-         * Constructs an LGEditAttributes.
+         * Constructs an LGFeatureByClick.
          *
          * @class
-         * @name js.LGEditAttributes
+         * @name js.LGFeatureByClick
          * @extends js.LGObject, js.LGMapDependency
          * @classdesc
-         * Displays an info window that permits the entry or editing of a graphics attributes.
+         * Connects a map click with a feature.
          */
 
         /**
          * Performs class-specific setup when the dependency is
          * satisfied.
-         * @memberOf js.LGEditAttributes#
+         * @memberOf js.LGFeatureByClick#
+         * @override
+         */
+        onDependencyReady: function () {
+            var pThis = this;
+            this.inherited(arguments);
+
+            // We're interested in map clicks
+            this.clickHandle = this.subscribeToMessage("mapClick", function (evt) {
+                pThis.handleClick(evt);
+            });
+        },
+
+        /**
+         * Handles a click event.
+         * @param {object} evt MouseEvent
+         * @memberOf js.LGFeatureByClick#
+         */
+        handleClick: function (evt) {
+        }
+    });
+
+
+//  Displays an info window that permits the entry or editing of a graphics attributes.
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGAddFeatureByClick", js.LGFeatureByClick, {
+        /**
+         * Constructs an LGAddFeatureByClick.
+         *
+         * @class
+         * @name js.LGAddFeatureByClick
+         * @extends js.LGFeatureByClick
+         * @classdesc
+         * Converts a map click into a feature.
+         */
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGAddFeatureByClick#
          * @override
          */
         onDependencyReady: function () {
             this.inherited(arguments);
 
-            this.clickHandle = this.subscribeToMessage("mapClick", function (evt) {
-                // Event is of the form:
-                // {"type":"point","x":-9812146.796478976,"y":5126074.462209778,"spatialReference":{"wkid":102100}}
+            // Prepare a drawing toolbar
+            esri.bundle.toolbars.draw.addPoint = this.checkForSubstitution("@tooltips.collect");
+            this.drawingToolbar = new Draw(this.mapObj.mapInfo.map, {});
+            this.drawingToolbarActive = false;
+            this.drawingToolbar.on("draw-end", lang.hitch(this, this.handleDrawEnd));
+        },
 
-                console.log(evt.type);
+        /**
+         * Handles a click event by activating the drawing toolbar.
+         * @param {object} evt MouseEvent
+         * @memberOf js.LGAddFeatureByClick#
+         * @override
+         */
+        handleClick: function (evt) {
+            var pThis = this;
 
-            });
+            if (!this.drawingToolbarActive) {
+                // Activate the point drawing tool
+                this.drawingToolbarActive = true;
+                this.drawingToolbar.activate(Draw.POINT);
+                this.drawingToolbar._updateTooltip(evt);
+            }
+        },
+
+        /**
+         * Handles a drawing toolbar's "draw-end" event by deactivating the toolbar,
+         * showing a graphic, collecting attributes, and submitting a new feature.
+         * @param {object} evt Drawing toolbar's "draw-end" event
+         * @memberOf js.LGAddFeatureByClick#
+         */
+        handleDrawEnd: function (evt) {
+            var pThis = this;
+
+            // Event is of the form:
+            // {"geometry":{"type":"point","x":-9812146.796478976,"y":5126074.462209778,
+            // "spatialReference":{"wkid":102100}}, "target":{...}}
+
+            // Upon conclusion of drawing, deactivate tool
+            this.drawingToolbarActive = false;
+            this.drawingToolbar.deactivate();
+
+            // Show a placeholder graphic
+            var graphic = new Graphic(evt.geometry,
+                new esri.symbol.SimpleMarkerSymbol(
+                    esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE, 10,
+                    new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                        new dojo.Color([255,0,0]), 1), new dojo.Color([0,255,0,0.25]) ));
+            this.mapObj.mapInfo.map.graphics.add(graphic);
+
+            // Displays an info window that permits the entry or editing of a graphics attributes.
+            // Get the attributes from the user via a form defined in the webmap
 
 
+
+            // Submit the geometry and attributes to the layer
+
+
+
+            // Remove the placeholder graphics
+            setTimeout(function () {  //???
+                alert(pThis.checkForSubstitution("@messages.yourContentSubmitted"));
+                pThis.mapObj.mapInfo.map.graphics.remove(graphic);
+            }, 2000);
         }
     });
 

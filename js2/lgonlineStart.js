@@ -51,6 +51,28 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
                     });
                 });
 
+                /**
+                 * Reports a launch error via an alert.
+                 * @param {number} messageNum The message to display; if this
+                 *        does not correspond to an existing message, message
+                 *        #0 (unable to launch app) is used
+                 * @param {boolean} [overwrite=false] Duplicate key-value pairs
+                 *        replace earlier ones (true) or values get appended to
+                 *        original key (false)
+                 */
+                function launchError (messageNum) {
+                    var i18n = dojo.i18n.getLocalization("esriTemplate", "template"),
+                        message;
+
+                    if (messageNum === 1) {
+                        message = i18n.messages.noConfiguration;
+                    } else {
+                        message = i18n.messages.unableToLaunchApp;
+                    }
+
+                    alert(message);
+                }
+
                 // Read the UI spec
                 (new js.LGUIBuilder(window.location.search, null, defaultAppUI)).ready.then(
                     function (theBuilder) {
@@ -70,13 +92,13 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
                                     console.log("Application is ready");//???
                                 },
                                 function () {
-                                    console.error("Unable to launch application");//???
+                                    launchError(0);
                                 }
                             );
                         });
                     },
                     function () {
-                        console.error("Unable to find configuration");//???
+                        launchError(1);
                     }
                 );
 

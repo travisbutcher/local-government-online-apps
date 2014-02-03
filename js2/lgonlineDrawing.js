@@ -28,18 +28,12 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
          * the extents of the feature; highlights a point by drawing
          * a pulsating marker over it and centers the map on the point.
          *
+         * @constructor
          * @class
          * @name js.LGHighlighter
          * @extends js.LGObject, js.LGMapDependency
          * @classdesc
          * Manages the app's highlighter.
-         *
-         * @constructor
-         * @class
-         * @name js.LGMap
-         * @extends js.LGGraphic
-         * @classdesc
-         * Provides a UI web map display.
          */
         constructor: function () {
             // Correct for stringized boolean
