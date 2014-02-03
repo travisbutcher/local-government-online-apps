@@ -55,7 +55,9 @@ define(
             searchLayerMissing: "This search layer was not found in the map",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the mapLayers prompt
             searchFieldMissing: "This field was not found in the map search layer",  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
             allSearchFieldsMissing: "None of these fields was found in the map search layer",  // Appears before a list of fields in the configured map search layer; shown when the app cannot find any of the fields that were configured for the search command; works with the layerFields prompt
-            yourContentSubmitted: "Your content has been submitted. Thank you."  // Appears after content has been added to the map and successfully submitted to the server
+            yourContentSubmitted: "Your content has been submitted. Thank you.",  // Appears after content has been added to the map and successfully submitted to the server
+            noConfiguration: "Unable to access application's configuration",
+            unableToLaunchApp: "Unable to launch application"
         }
     })
 );
