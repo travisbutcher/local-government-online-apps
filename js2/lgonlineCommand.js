@@ -1162,7 +1162,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         onDependencyReady: function () {
             // Now that the map (our dependency) is ready, get the URL of the search layer from it
             var searchLayer, reason, message, availableFields = ",", opLayers,
-                pThis = this, actualFieldList = [];
+                pThis = this, actualFieldList = [], generalOutFields;
 
             try {
                 searchLayer = this.mapObj.getLayer(this.searchLayerName);
@@ -1185,31 +1185,19 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
                     // Can we search for anything in this layer?
                     if (actualFieldList.length === 0) {
-                        reason = "";
-                        array.forEach(this.searchFields, function (searchField) {
-                            if (reason.length > 0) {
-                                reason += ",";
-                            }
-                            reason += searchField;
-                        });
+                        this.showSearchLayerFieldError(this.searchFields, this.searchLayerName, searchLayer);
 
-                        // Failed to find the field in the search layer; provide some feedback
-                        message = "\"" + reason + "\"<br>";
-                        if (this.searchFields.length > 1) {
-                            message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
-                        } else {
-                            message += this.checkForSubstitution("@messages.searchFieldMissing");
-                        }
-                        message += "<br><hr>\"" + this.searchLayerName + "\"<br>";
-                        message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
-                        array.forEach(searchLayer.fields, function (layerField) {
-                            message += "<li>\"" + layerField.name + "\"</li>";
-                        });
-                        message += "</ul>";
-                        this.log(message, true);
                         this.ready.reject(this);
                         this.inherited(arguments);
                         return;
+                    }
+
+                    // Does the layer contain the requested display field?
+                    if (this.displayField !== "" && availableFields.indexOf("," + this.displayField + ",") < 0) {
+                        // Requested display field not found
+                        this.showSearchLayerFieldError([this.displayField], this.searchLayerName, searchLayer);
+
+                        this.displayField = "";
                     }
 
                     // If there are searchable fields, replace the requested search fields list with
@@ -1226,7 +1214,12 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     this.generalSearchParams = new esri.tasks.Query();
                     this.generalSearchParams.returnGeometry = false;
                     this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
-                    this.generalSearchParams.outFields = [searchLayer.objectIdField].concat(this.searchFields);
+
+                    generalOutFields = [searchLayer.objectIdField];
+                    if (this.displayField !== "") {
+                        generalOutFields = generalOutFields.concat(this.displayField);
+                    }
+                    this.generalSearchParams.outFields = generalOutFields.concat(this.searchFields);
 
                     // Set up the specific layer query task: object id
                     this.objectSearchParams = new esri.tasks.Query();
@@ -1289,11 +1282,50 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         },
 
         /**
+         * Reports fields that don't appear in the search layer.
+         * @param {array} candidateFields List of fields requested for search or for display
+         * @param {string} searchLayerName Name to report for search layer
+         * @param {object} searchLayer Details of search layer as returned from map;
+         *        function uses searchLayer.fields
+         * @memberOf js.LGSearchFeatureLayer#
+         */
+        showSearchLayerFieldError: function (candidateFields, searchLayerName, searchLayer) {
+            var reason = "", message;
+
+            // List the requested fields
+            array.forEach(candidateFields, function (field) {
+                if (reason.length > 0) {
+                    reason += ",";
+                }
+                reason += field;
+            });
+
+            // Add a message to the field list
+            message = "\"" + reason + "\"<br>";
+            if (candidateFields.length > 1) {
+                message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
+            } else {
+                message += this.checkForSubstitution("@messages.searchFieldMissing");
+            }
+
+            // Add the search layer name and a list of available fields in that layer
+            message += "<br><hr>\"" + searchLayerName + "\"<br>";
+            message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
+            array.forEach(searchLayer.fields, function (layerField) {
+                message += "<li>\"" + layerField.name + "\"</li>";
+            });
+            message += "</ul>";
+
+            // Log it
+            this.log(message, true);
+        },
+
+        /**
          * Launches a search.
          * @param {string|geometry} searchText Text to search
          * @param {function} callback Function to call when search
          *        results arrive; function takes the results as its sole
-         *        argumentsss
+         *        argument
          * @memberOf js.LGSearchFeatureLayer#
          * @override
          */
@@ -1624,8 +1656,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         createSearchersList: function () {
-            var pThis = this, deferralWaitList = [], featureLayerNames = [],
-                featureDisplayFields = [], i;
+            var deferralWaitList = [], featureLayerNames = [],
+                featureDisplayFields = [], i, searcherName, searcher;
             this.searchers = [];
 
             // Get the list of layers & the list of display fields
@@ -1638,25 +1670,25 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
             // Construct the searchers and build a list of their ready state deferrals
             for (i = 0; i < featureLayerNames.length; i = i + 1) {
-                    var searcher, searcherName = pThis.rootId + "_" + pThis.searchers.length;
-                    searcher = new js.LGSearchFeatureLayer({
-                        app: pThis.app,
-                        commonConfig: pThis.commonConfig,
-                        i18n: pThis.i18n,
-                        webmap: pThis.webmap,
-                        rootId: searcherName,
-                        parentDiv: pThis.parentDiv,
-                        dependencyId: pThis.dependencyId,
-                        busyIndicator: pThis.busyIndicator,
-                        publishPointsOnly: pThis.publishPointsOnly,
-                        searchPattern: pThis.searchPattern,
-                        caseInsensitiveSearch: pThis.caseInsensitiveSearch,
-                        searchLayerName: featureLayerNames[i].trim(),
-                        searchFields: pThis.searchFields,
-                        displayField: featureDisplayFields[i]
-                    });
-                    pThis.searchers.push(searcher);
-                    deferralWaitList.push(searcher.ready);
+                searcherName = this.rootId + "_" + this.searchers.length;
+                searcher = new js.LGSearchFeatureLayer({
+                    app: this.app,
+                    commonConfig: this.commonConfig,
+                    i18n: this.i18n,
+                    webmap: this.webmap,
+                    rootId: searcherName,
+                    parentDiv: this.parentDiv,
+                    dependencyId: this.dependencyId,
+                    busyIndicator: this.busyIndicator,
+                    publishPointsOnly: this.publishPointsOnly,
+                    searchPattern: this.searchPattern,
+                    caseInsensitiveSearch: this.caseInsensitiveSearch,
+                    searchLayerName: featureLayerNames[i].trim(),
+                    searchFields: this.searchFields,
+                    displayField: featureDisplayFields[i]
+                });
+                this.searchers.push(searcher);
+                deferralWaitList.push(searcher.ready);
             }
 
             return deferralWaitList;
