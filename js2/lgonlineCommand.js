@@ -1992,7 +1992,14 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             if (this.busyIndicator) {
                 this.busyIndicator = this.lgById(this.busyIndicator);
             }
-            this.ieSwitchDelayMs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 2);
+
+            // A delay between switches is needed with the current version of the JSAPI;
+            // IE requires a potentially larger delay
+            this.switchDelayTimer = null;
+            this.switchDelaySecs = 1000 * this.toNumber(this.nonieSwitchDelaySecs, 1);
+            /*@cc_on
+                this.switchDelaySecs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 2);
+            @*/
         },
 
         /**
@@ -2053,7 +2060,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // to click away from the text box to apply the filter, but this means that we have to ignore the case
                 // where the user has erased all content from the text box
                 on(field1EntryTextBox, "change", lang.hitch(this, function () {
-                    this.value1 = field1EntryTextBox.value.trim();
+                    this.value1 = field1EntryTextBox.value;
                     this.onValueChanged();
                 }));
             }
@@ -2077,29 +2084,24 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         applyFilter: function () {
             var pThis = this;
 
-            // IE needs a delay with the current version of the JSAPI
-            /*@cc_on
-                if (pThis.busyIndicator) {
-                    pThis.busyIndicator.setIsVisible(true);
-                }
-                if (this.switchDelayTimer !== null) {
-                    clearTimeout(this.switchDelayTimer);
-                }
-                this.switchDelayTimer = setTimeout(
-                    function () {
-                        pThis.switchDelayTimer = null;
-                        pThis.applyFilterCore();
-                        if (pThis.busyIndicator) {
-                            pThis.busyIndicator.setIsVisible(false);
-                        }
-                    },
-                    pThis.ieSwitchDelayMs
-                );
-                return;
-            @*/
-
-            // All but IE
-            pThis.applyFilterCore();
+            // A delay between switches is needed with the current version of the JSAPI;
+            // IE requires a potentially larger delay
+            if (this.busyIndicator) {
+                this.busyIndicator.setIsVisible(true);
+            }
+            if (this.switchDelayTimer !== null) {
+                clearTimeout(this.switchDelayTimer);
+            }
+            this.switchDelayTimer = setTimeout(
+                function () {
+                    pThis.switchDelayTimer = null;
+                    pThis.applyFilterCore();
+                    if (pThis.busyIndicator) {
+                        pThis.busyIndicator.setIsVisible(false);
+                    }
+                },
+                this.switchDelaySecs
+            );
         },
 
         /**

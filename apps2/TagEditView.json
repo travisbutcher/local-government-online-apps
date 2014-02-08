@@ -309,6 +309,7 @@
             "dependencyId": "map",
             "broadcastDefaultsPublish": "floor",
             "busyIndicator": "busyIndicator",
+            "nonieSwitchDelaySecs": "0.5",
             "ieSwitchDelaySecs": "2.2"
         }
     }, {
