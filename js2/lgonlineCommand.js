@@ -1994,11 +1994,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             }
 
             // A delay between switches is needed with the current version of the JSAPI;
-            // IE requires a potentially larger delay
+            // IE requires a potentially larger delay, especially initially
             this.switchDelayTimer = null;
-            this.switchDelaySecs = 1000 * this.toNumber(this.nonieSwitchDelaySecs, 1);
+            this.switchDelaySecs = 1000 * this.toNumber(this.nonieSwitchDelaySecs, 0.5);
+            this.switchDelayMultiplier = 1;
             /*@cc_on
-                this.switchDelaySecs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 2);
+                this.switchDelaySecs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 2.2);
+                this.switchDelayMultiplier = 3;  // we'll reset this to 1 after the first use
             @*/
         },
 
@@ -2100,8 +2102,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                         pThis.busyIndicator.setIsVisible(false);
                     }
                 },
-                this.switchDelaySecs
+                this.switchDelaySecs * this.switchDelayMultiplier
             );
+            this.switchDelayMultiplier = 1;
         },
 
         /**
