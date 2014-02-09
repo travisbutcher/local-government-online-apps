@@ -1,4 +1,4 @@
-/*global require,dojo,window,Modernizr,console,js,location,esri,defaultAppUI:true */
+/*global require,dojo,window,Modernizr,console,js,location,esri,defaultAppUI:true,alert */
 /*jslint sloppy:true */
 /** @license
  | ArcGIS Solutions
@@ -60,7 +60,7 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
                  *        replace earlier ones (true) or values get appended to
                  *        original key (false)
                  */
-                function launchError (messageNum) {
+                function launchError(messageNum) {
                     var i18n = dojo.i18n.getLocalization("esriTemplate", "template"),
                         message;
 

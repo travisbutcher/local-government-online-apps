@@ -1,4 +1,4 @@
-/*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,console */
+/*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,console,alert */
 /*jslint sloppy:true,evil:true,regexp:true,unparam:true */
 /** @license
  | ArcGIS Solutions
@@ -312,7 +312,9 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                                             function (err) {
                                                 // A possible error is that the JSAPI won't support logins
                                                 // to restricted content in IE <9
-                                                if (err.message !== "ABORTED") alert(err.message);
+                                                if (err.message !== "ABORTED") {
+                                                    alert(err.message);
+                                                }
                                                 readArcGIS.reject(err.message);
                                             }
                                         );
@@ -323,7 +325,9 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                                 function (err) {
                                     // A possible error is that the JSAPI won't support logins
                                     // to restricted content in IE <9
-                                    if (err.message !== "ABORTED") alert(err.message);
+                                    if (err.message !== "ABORTED") {
+                                        alert(err.message);
+                                    }
                                     readArcGIS.reject(err.message);
                                 }
                             );

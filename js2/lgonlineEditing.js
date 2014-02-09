@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js,console,esri,touchScroll */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js,console,esri,touchScroll,setTimeout,alert */
+/*jslint sloppy:true,nomen:true */
 /*
  | Copyright 2013 Esri
  |
@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "esri/toolbars/draw", "esri/graphic", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, aspect, domStyle, TemplatePicker, Editor, Draw, Graphic) {
+define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "esri/toolbars/draw", "esri/graphic", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, aspect, TemplatePicker, Editor, Draw, Graphic) {
 
     //========================================================================================================================//
 
@@ -254,10 +254,11 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
         /**
          * Handles a click event.
-         * @param {object} evt MouseEvent
+         * @param {object} evt MouseEvent (not used)
          * @memberOf js.LGFeatureByClick#
          */
-        handleClick: function (evt) {
+        handleClick: function () {
+            return null;
         }
     });
 
@@ -300,8 +301,6 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
          * @override
          */
         handleClick: function (evt) {
-            var pThis = this;
-
             if (!this.drawingToolbarActive) {
                 // Activate the point drawing tool
                 this.drawingToolbarActive = true;
@@ -317,7 +316,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
          * @memberOf js.LGAddFeatureByClick#
          */
         handleDrawEnd: function (evt) {
-            var pThis = this;
+            var pThis = this, graphic;
 
             // Event is of the form:
             // {"geometry":{"type":"point","x":-9812146.796478976,"y":5126074.462209778,
@@ -328,11 +327,14 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
             this.drawingToolbar.deactivate();
 
             // Show a placeholder graphic
-            var graphic = new Graphic(evt.geometry,
+            graphic = new Graphic(evt.geometry,
                 new esri.symbol.SimpleMarkerSymbol(
-                    esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE, 10,
+                    esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE,
+                    10,
                     new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                        new dojo.Color([255,0,0]), 1), new dojo.Color([0,255,0,0.25]) ));
+                        new dojo.Color([255, 0, 0]), 1),
+                    new dojo.Color([0, 255, 0, 0.25])
+                ));
             this.mapObj.mapInfo.map.graphics.add(graphic);
 
             // Displays an info window that permits the entry or editing of a graphics attributes.
