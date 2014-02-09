@@ -1,11 +1,9 @@
-change report #10 at 02/08/2014 20:54:42.11
+change report #11 at 02/09/2014 16:36:53.60
 -
 for git branch
-develop
+add_initial_ie_time_delay
 in repository local-government-online-apps
 -
 changes in this branch since its last commit
  M CHANGES.txt
-M  js2/lgonlineBuildUI.js
-M  js2/lgonlineEditing.js
-M  js2/lgonlineStart.js
+ M js2/lgonlineCommand.js
