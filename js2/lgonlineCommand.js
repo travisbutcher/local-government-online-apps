@@ -2068,11 +2068,11 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
                 // Do we have any layers with the filter field? If not, warn because no filtering will occur
                 if (this.layers.length === 0) {
+                    this.setShowable(false);
+
                     message = "\"" + this.fieldname1 + "\"<br>";
                     message += this.checkForSubstitution("@messages.fieldNotFound");
                     this.log(message, true);
-                    field1EntryTextBox.set("value", "");
-                    domAttr.set(field1EntryTextBox, "disabled", "disabled");
                 }
             }
         },
