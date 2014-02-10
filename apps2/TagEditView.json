@@ -309,8 +309,8 @@
             "dependencyId": "map",
             "broadcastDefaultsPublish": "floor",
             "busyIndicator": "busyIndicator",
-            "nonieSwitchDelaySecs": "0.5",
-            "ieSwitchDelaySecs": "2.2"
+            "nonieSwitchDelaySecs": "1.5",
+            "ieSwitchDelaySecs": "3.0"
         }
     }, {
         "classname": "js.LGLocate",
