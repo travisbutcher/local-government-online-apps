@@ -76,7 +76,8 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
             array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                 var eLayer = mapLayer.layerObject;
                 if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
-                    if (eLayer.capabilities && eLayer.capabilities !== "Query") {
+                    if ((mapLayer.capabilities === null || mapLayer.capabilities !== "Query")
+                        && (eLayer.capabilities === null || eLayer.capabilities !== "Query")) {
                         // If "capabilities" is set to Query, editing is disabled in the web map
 
                         // Layers list for esri.dijit.editing.Editor
