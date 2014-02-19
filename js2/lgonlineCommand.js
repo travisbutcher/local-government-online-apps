@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domAttr, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
+define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
 
     //========================================================================================================================//
 
@@ -1161,124 +1161,133 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         onDependencyReady: function () {
             // Now that the map (our dependency) is ready, get the URL of the search layer from it
-            var searchLayer, reason, message, availableFields = ",", opLayers,
+            var searchLayer, reason, splitFields, availableFields = ",", opLayers,
                 pThis = this, actualFieldList = [], generalOutFields;
 
-            try {
-                searchLayer = this.mapObj.getLayer(this.searchLayerName);
-                if (!searchLayer || !searchLayer.url) {
-                    reason = this.checkForSubstitution("@messages.searchLayerMissing");
-                } else {
-                    this.searchURL = searchLayer.url;
+            // Check that the search layer and fields exist
+            if (this.searchLayerName) {
+                try {
+                    searchLayer = this.mapObj.getLayer(this.searchLayerName);
+                    if (searchLayer && searchLayer.url) {
+                        this.searchURL = searchLayer.url;
 
-                    // Check for existence of fields; start with a list of fields in the search layer
-                    array.forEach(searchLayer.fields, function (layerField) {
-                        availableFields += layerField.name + ",";
-                    });
+                        // Check for existence of fields; start with a list of fields in the search layer
+                        array.forEach(searchLayer.fields, function (layerField) {
+                            availableFields += layerField.name + ",";
+                        });
 
-                    // Only keep search fields that the layer has
-                    array.forEach(this.searchFields, function (searchField) {
-                        if (availableFields.indexOf("," + searchField + ",") >= 0) {
-                            actualFieldList.push(searchField);
+                        // Only keep search fields that the layer has
+                        if (this.searchFields && 0 < this.searchFields.length) {
+                            splitFields = this.searchFields.split(",");
+                            this.searchFields = [];
+                            array.forEach(splitFields, function (searchField) {
+                                pThis.searchFields.push(searchField.trim());
+                            });
+
+                            array.forEach(this.searchFields, function (searchField) {
+                                if (availableFields.indexOf("," + searchField + ",") >= 0) {
+                                    actualFieldList.push(searchField);
+                                }
+                            });
+                        } else {
+                            this.searchFields = [];
                         }
-                    });
 
-                    // Can we search for anything in this layer?
-                    if (actualFieldList.length === 0) {
-                        this.showSearchLayerFieldError(this.searchFields, this.searchLayerName, searchLayer);
+                        // Can we search for anything in this layer?
+                        if (actualFieldList.length === 0) {
+                            this.showSearchLayerFieldError(this.searchFields, this.searchLayerName, searchLayer);
 
-                        this.ready.reject(this);
+                            this.ready.reject(this);
+                            this.inherited(arguments);
+                            return;
+                        }
+
+                        // Does the layer contain the requested display field?
+                        if (this.displayField !== "" && availableFields.indexOf("," + this.displayField + ",") < 0) {
+                            // Requested display field not found
+                            this.showSearchLayerFieldError([this.displayField], this.searchLayerName, searchLayer);
+
+                            this.displayField = "";
+                        }
+
+                        // If there are searchable fields, replace the requested search fields list with
+                        // the available search fields list
+                        this.searchFields = actualFieldList;
+
+                        // Set up our query task now that we have the URL to the layer
+                        this.objectIdField = searchLayer.objectIdField;
+                        this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
+
+                        this.searcher = new esri.tasks.QueryTask(this.searchURL);
+
+                        // Set up the general layer query task: pattern match
+                        this.generalSearchParams = new esri.tasks.Query();
+                        this.generalSearchParams.returnGeometry = false;
+                        this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+
+                        generalOutFields = [searchLayer.objectIdField];
+                        if (this.displayField !== "") {
+                            generalOutFields = generalOutFields.concat(this.displayField);
+                        }
+                        this.generalSearchParams.outFields = generalOutFields.concat(this.searchFields);
+
+                        // Set up the specific layer query task: object id
+                        this.objectSearchParams = new esri.tasks.Query();
+                        this.objectSearchParams.returnGeometry = true;
+                        this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+                        this.objectSearchParams.outFields = ["*"];
+
+                        // Get the popup for this layer & save it with the layer
+                        opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
+                        array.some(opLayers, function (layer) {
+                            if (layer.title === pThis.searchLayerName) {
+                                pThis.popupTemplate = new PopupTemplate(layer.popupInfo);
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        this.log("Search layer " + this.searchLayerName + " set up for queries");
+                        this.ready.resolve(this);
                         this.inherited(arguments);
                         return;
                     }
-
-                    // Does the layer contain the requested display field?
-                    if (this.displayField !== "" && availableFields.indexOf("," + this.displayField + ",") < 0) {
-                        // Requested display field not found
-                        this.showSearchLayerFieldError([this.displayField], this.searchLayerName, searchLayer);
-
-                        this.displayField = "";
-                    }
-
-                    // If there are searchable fields, replace the requested search fields list with
-                    // the available search fields list
-                    this.searchFields = actualFieldList;
-
-                    // Set up our query task now that we have the URL to the layer
-                    this.objectIdField = searchLayer.objectIdField;
-                    this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
-
-                    this.searcher = new esri.tasks.QueryTask(this.searchURL);
-
-                    // Set up the general layer query task: pattern match
-                    this.generalSearchParams = new esri.tasks.Query();
-                    this.generalSearchParams.returnGeometry = false;
-                    this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
-
-                    generalOutFields = [searchLayer.objectIdField];
-                    if (this.displayField !== "") {
-                        generalOutFields = generalOutFields.concat(this.displayField);
-                    }
-                    this.generalSearchParams.outFields = generalOutFields.concat(this.searchFields);
-
-                    // Set up the specific layer query task: object id
-                    this.objectSearchParams = new esri.tasks.Query();
-                    this.objectSearchParams.returnGeometry = true;
-                    this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
-                    this.objectSearchParams.outFields = ["*"];
-
-                    // Get the popup for this layer & save it with the layer
-                    opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
-                    array.some(opLayers, function (layer) {
-                        if (layer.title === pThis.searchLayerName) {
-                            pThis.popupTemplate = new PopupTemplate(layer.popupInfo);
-                            return true;
-                        }
-                        return false;
-                    });
-
-                    this.log("Search layer " + this.searchLayerName + " set up for queries");
-                    this.ready.resolve(this);
-                    this.inherited(arguments);
-                    return;
+                } catch (error) {
+                    reason = error.toString();
                 }
-            } catch (error) {
-                reason = error.toString();
             }
 
             // Failed to find the search layer; provide some feedback
-            message = "\"" + (this.searchLayerName || "") + "\"<br>";
+            this.showSearchLayerError(this.searchLayerName, reason);
+
+            this.ready.reject(this);
+            this.inherited(arguments);
+        },
+
+        /**
+         * Reports layers that don't appear in the map.
+         * @param {string} searchLayerName Name to report for search layer
+         * @param {string} [reason] Error message; if omitted, "@messages.searchLayerMissing"
+         *        is used
+         * @memberOf js.LGSearchFeatureLayer#
+         */
+        showSearchLayerError: function (searchLayerName, reason) {
+            var message;
+
+            if (!reason) {
+                reason = this.checkForSubstitution("@messages.searchLayerMissing");
+            }
+
+            message = "\"" + (searchLayerName || "") + "\"<br>";
             message += reason + "<br><hr>";
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
                 message += "<li>\"" + layerName + "\"</li>";
             });
             message += "</ul>";
+
+            // Log it
             this.log(message, true);
-            this.ready.reject(this);
-            this.inherited(arguments);
-        },
-
-        /**
-         * Checks that the instance has its prerequisites.
-         * @throws {string} "missing search fields" if the search fields
-         *        parameter is omitted
-         * @memberOf js.LGSearchFeatureLayer#
-         * @override
-         */
-        checkPrerequisites: function () {
-            var splitFields, pThis = this;
-
-            if (this.searchFields && 0 < this.searchFields.length) {
-                splitFields = this.searchFields.split(",");
-                this.searchFields = [];
-                array.forEach(splitFields, function (searchField) {
-                    pThis.searchFields.push(searchField.trim());
-                });
-            } else {
-                this.log("missing search fields");
-                throw "missing search fields";
-            }
         },
 
         /**
@@ -1637,13 +1646,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGSearchFeatureLayerMultiplexer", js.LGSearchMultiplexer, {
+    dojo.declare("js.LGSearchFeatureLayerMultiplexer", [js.LGSearchMultiplexer, js.LGMapDependency], {
         /**
          * Constructs an LGSearchFeatureLayerMultiplexer.
          *
          * @class
          * @name js.LGSearchFeatureLayerMultiplexer
-         * @extends js.LGSearchMultiplexer
+         * @extends js.LGSearchMultiplexer, js.LGMapDependency
          * @classdesc
          * Provides a searcher that multiplexes the work of LGSearchFeatureLayer searchers,
          * selecting them by feature layer name
@@ -1692,6 +1701,45 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             }
 
             return deferralWaitList;
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGSearchFeatureLayerMultiplexer#
+         * @override
+         */
+        onDependencyReady: function () {
+            // If we don't have any searchers, report the problem now that the map is ready
+            if (this.searchers.length === 0) {
+                this.showSearchLayerError("");
+            }
+        },
+
+        /**
+         * Reports layers that don't appear in the map.
+         * @param {string} searchLayerName Name to report for search layer
+         * @param {string} [reason] Error message; if omitted, "@messages.searchLayerMissing"
+         *        is used
+         * @memberOf js.LGSearchFeatureLayerMultiplexer#
+         */
+        showSearchLayerError: function (searchLayerName, reason) {
+            var message;
+
+            if (!reason) {
+                reason = this.checkForSubstitution("@messages.searchLayerMissing");
+            }
+
+            message = "\"" + (searchLayerName || "") + "\"<br>";
+            message += reason + "<br><hr>";
+            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+            array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
+                message += "<li>\"" + layerName + "\"</li>";
+            });
+            message += "</ul>";
+
+            // Log it
+            this.log(message, true);
         }
     });
 
@@ -2065,15 +2113,15 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     this.value1 = field1EntryTextBox.value;
                     this.onValueChanged();
                 }));
+            }
 
-                // Do we have any layers with the filter field? If not, warn because no filtering will occur
-                if (this.layers.length === 0) {
-                    this.setShowable(false);
+            // Do we have any layers with the filter field? If not, warn because no filtering will occur
+            if (this.layers.length === 0) {
+                this.setShowable(false);
 
-                    message = "\"" + this.fieldname1 + "\"<br>";
-                    message += this.checkForSubstitution("@messages.fieldNotFound");
-                    this.log(message, true);
-                }
+                message = "\"" + this.fieldname1 + "\"<br>";
+                message += this.checkForSubstitution("@messages.fieldNotFound");
+                this.log(message, true);
             }
         },
 
