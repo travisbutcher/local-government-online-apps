@@ -373,7 +373,7 @@
             "horizOffset": -2,
             "vertOffset": [2, -2],
             "searcher": "featureSearcher",
-            "showPrompt": "@prompts.search",
+            "showPrompt": "@tooltips.search",
             "resultsListBoxClass": "resultsListBox",
             "resultsListTableClass": "resultsListTable",
             "resultsListBodyClass": "resultsListBody",
