@@ -53,7 +53,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         },
 
         /**
-         * Sets whether or not this dropdown will be shown with future triggerings.
+         * Sets whether or not this dropdown will be shown with future triggerings;
+         * if currently visible and it is not to be showable in the future, dropdown
+         * is hidden.
          * @param {boolean} makeShowable Indicates if dropdown may be shown
          * @memberOf js.LGDropdownBox#
          */

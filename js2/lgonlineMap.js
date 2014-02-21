@@ -291,6 +291,9 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
         /**
          * Shows the map's popup using content from the supplied feature.
+         * @param {object} popupLocation Map position to use for popup
+         * @param {object} feature Feature whose content is to be used in the popup
+         * @memberOf js.LGMap#
          */
         showPopupWithFeature: function (popupLocation, feature) {
             this.popup.clearFeatures();
@@ -300,6 +303,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
         /**
          * Hides the map's popup.
+         * @memberOf js.LGMap#
          */
         hidePopup: function () {
             this.mapInfo.map.infoWindow.hide();

@@ -66,8 +66,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
          * @override
          */
         onDependencyReady: function () {
-            var pThis = this, mapInfo, map, templatePickerHolder, templatePickerDiv,
-                templatePicker, editorSettings, editorDiv, editor;
+            var pThis = this, mapInfo, templatePickerHolder;
 
             // Build a list of editable layers in this map
             mapInfo = this.mapObj.mapInfo;
@@ -95,23 +94,37 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                 this.setShowable(false);
 
             } else {
-                // Create a template picker and its associated editor for this map
-                map = mapInfo.map;
+                this.map = mapInfo.map;
+
+                // Create a place for template picker and editor combination within the dropdown
+                this.templatePickerHolder = domConstruct.create("div",
+                    { className: this.templatePickerHolderClass });
+                domConstruct.place(this.templatePickerHolder, this.rootId);
+                touchScroll(this.templatePickerHolder);
+            }
+
+            this.inherited(arguments);
+        },
+
+        /**
+         * Creates a template picker and editor combination for this class.
+         * @memberOf js.LGEditTemplatePicker#
+         */
+        createEditor: function () {
+            var pThis = this, templatePickerDiv, editorDiv, templatePicker, editorSettings;
+
+            if (this.templatePickerHolder) {
 
                 //------------------------- Template Picker dijit -------------------------
+
                 // The template picker will not size properly if its containing divs have no
                 // substance, so we'll hide the divs but give them substance (i.e., "display" is
                 // "block" and "visibility" is "hidden")
                 this.setIsVisible(false, true);
 
-                // Create a frame to hold the picker within the dropdown
-                templatePickerHolder = domConstruct.create("div",
-                    { className: this.templatePickerHolderClass });
-                domConstruct.place(templatePickerHolder, this.rootId);
-
                 // Create a div that will become the picker
                 templatePickerDiv = domConstruct.create("div");
-                domConstruct.place(templatePickerDiv, templatePickerHolder);
+                domConstruct.place(templatePickerDiv, this.templatePickerHolder);
 
                 // Create a template picker using the editable layers
                 templatePicker = new TemplatePicker({
@@ -121,29 +134,29 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                     grouping: true
                 }, templatePickerDiv);
                 templatePicker.startup();
-                touchScroll(templatePickerHolder);
 
                 // For compatibility with the dropdown mechanism, we'll switch to hiding the
                 // divs without substance (i.e., "display" is "none" and "visibility" is "visible")
                 this.setIsVisible(false, false);
 
                 //------------------------- Editor dijit -------------------------
+                // Create a div that will become the editor
+                editorDiv = domConstruct.create("div");
+                domConstruct.place(editorDiv, this.templatePickerHolder);
+
                 // Create an editing tool linked to the template picker
                 editorSettings = {
-                    map: map,
+                    map: this.map,
                     templatePicker: templatePicker,
                     toolbarVisible: false,
                     layerInfos: this.layerInfos
                 };
 
-                editorDiv = domConstruct.create("div");
-                domConstruct.place(editorDiv, templatePickerHolder);
-
-                editor = new Editor({ settings: editorSettings }, editorDiv);
-                editor.startup();
+                this.editor = new Editor({ settings: editorSettings }, editorDiv);
+                this.editor.startup();
 
                 // Provide a hook for preprocessing the edit before it is committed
-                aspect.before(editor, "_applyEdits", function (edits) {
+                aspect.before(this.editor, "_applyEdits", function (edits) {
                     // "edits" is an array of edits; each edit contains the layer to be edited as well
                     // as optional arrays "adds", "updates", and "deletes"
                     array.forEach(edits, function (layerEdits) {
@@ -160,8 +173,44 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                 });
 
                 //--------------------------------------------------
-            }
 
+                // The editor controls popups, so we need to disable them in the map
+                this.mapObj.disablePopups();
+            }
+        },
+
+        /**
+         * Deletes this class' template picker and editor combination.
+         * @memberOf js.LGEditTemplatePicker#
+         */
+        destroyEditor: function () {
+            if (this.editor) {
+                // Discard the template picker and editor combination for this map
+                this.editor.destroy();
+                this.editor = null;
+
+                // The editor controls popups, so we can now enable them in the map
+                this.mapObj.enablePopups();
+            }
+        },
+
+        /**
+         * Makes the graphic visible and creates the class' editor.
+         * @memberOf js.LGGraphic#
+         * @override
+         */
+        show: function () {
+            this.createEditor();
+            this.inherited(arguments);
+        },
+
+        /**
+         * Makes the graphic invisible and deletes the class' editor.
+         * @memberOf js.LGGraphic#
+         * @override
+         */
+        hide: function () {
+            this.destroyEditor();
             this.inherited(arguments);
         },
 
