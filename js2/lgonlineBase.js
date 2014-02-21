@@ -398,7 +398,11 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          */
         setIsVisible: function (isVisible, hasSubstance) {
             if (!hasSubstance) {  // null or false
-                domStyle.set(this.getRootDiv(), "display", isVisible ? "block" : "none");
+                if (isVisible) {
+                    this.show();
+                } else {
+                    this.hide();
+                }
                 domStyle.set(this.getRootDiv(), "visibility", "visible");
             } else {
                 domStyle.set(this.getRootDiv(), "display", "block");
@@ -407,7 +411,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         },
 
         /**
-         * Reports the graphic's visibility
+         * Reports the graphic's visibility.
          * @return {boolean} True if graphic is visible
          * @memberOf js.LGGraphic#
          */
@@ -416,11 +420,31 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         },
 
         /**
-         * Toggles the graphic's visibility
+         * Toggles the graphic's visibility.
          * @memberOf js.LGGraphic#
          */
         toggleVisibility: function () {
-            domStyle.set(this.getRootDiv(), "display", this.getIsVisible() ? "none" : "block");
+            if (this.getIsVisible()) {
+                this.hide();
+            } else {
+                this.show();
+            }
+        },
+
+        /**
+         * Makes the graphic visible.
+         * @memberOf js.LGGraphic#
+         */
+        show: function () {
+            domStyle.set(this.getRootDiv(), "display", "block");
+        },
+
+        /**
+         * Makes the graphic invisible.
+         * @memberOf js.LGGraphic#
+         */
+        hide: function () {
+            domStyle.set(this.getRootDiv(), "display", "none");
         },
 
         /**
