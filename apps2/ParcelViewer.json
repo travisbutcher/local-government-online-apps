@@ -16,12 +16,12 @@
     ],
 
     "values": {
-        "webmap": "d3df161ab8204e848b359d5f352b5b65",
+        "webmap": "285f0380e9d04502b27f6469b6c8c8b3",
         "titleBar.title": "Parcel Viewer",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "DarkGray",
         "searchBox.hint": "42757 Woodward Ave",
-        "featureSearcher.searchLayerName": "Parcel Details",
+        "featureSearcher.searchLayerName": "Assessed Value % Change",
         "featureSearcher.searchFields": "SITEADDRESS,CNVYNAME,PARCELID",
         "featureSearcher.displayFields": "SITEADDRESS",
         "highlighter.showFeaturePopup": true,
@@ -350,6 +350,19 @@
             "webmapThumbnail": "images/webmap.png"
         }
     }, {
+        "classname": "js.LGDijitLegendBox",
+        "styles": ".dijitLegendBox{display:none;width:230px;max-height:255px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .dijitLegendBox{border-radius:8px}.dijitLegendGallery{width:96%;height:96%;padding:4px;overflow-y:auto;}.lt-ie9 .dijitLegendGallery{height:220px}",
+        "config": {
+            "rootId": "dijitLegendBox",
+            "parentDiv": "contentFrame",
+            "rootClass": "dijitLegendBox",
+            "dijitLegendClass": "dijitLegendGallery",
+            "horizOffset": -2,
+            "vertOffset": [2, -2],
+            "trigger": "dijitLegend",
+            "dependencyId": "map"
+        }
+    }, {
         "classname": "js.LGMapBasedMenuBox",
         "styles": ".shareBox{display:none;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .shareBox{border-radius:8px}",
         "config": {
@@ -415,6 +428,18 @@
             "iconClass": "commandIcon",
             "dependencyId": "basemapBox",
             "publish": "basemap"
+        }
+    }, {
+        "classname": "js.LGCommand",
+        "config": {
+            "rootId": "dijitLegend",
+            "tooltip": "@tooltips.dijitLegend",
+            "iconUrl": "images/Legend32.png",
+            "parentDiv": "commandPanel",
+            "rootClass": "commandButton",
+            "iconClass": "commandIcon",
+            "dependencyId": "dijitLegendBox",
+            "publish": "dijitLegend"
         }
     }, {
         "classname": "js.LGCommand",

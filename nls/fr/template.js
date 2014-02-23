@@ -23,6 +23,7 @@ define(
             locate: "Emplacement actuel",  // Command button to zoom and pan to the current geographical position reported by the browser
             markup: "Envoyer une correction",  // Command button to submit a correction to the app's host
             collect: "æ_Filter/Edit_Â",  // Command button to open a filter and template picker to add features to the map and to edit them afterwards
+            dijitLegend: "Afficher la légende",  //Permet d'afficher la legende dijit
             filter: "Filtrer les couches de carte",  // Explains purpose of type-in box affiliated with template picker
             basemap: "Changer de fond de carte",  // Command button to open a dialog box for switching basemaps
             share: "Partager",  // Command button to open a dropdown menu for picking a type of sharing
