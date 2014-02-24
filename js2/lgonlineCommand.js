@@ -1282,6 +1282,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
             message += reason + "<br><hr>";
+
+            // Add map layers to message
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
                 message += "<li>\"" + layerName + "\"</li>";
@@ -2061,7 +2063,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         * @override
         */
         onDependencyReady: function () {
-            var field1EntryTextBox, message;
+            var field1EntryTextBox;
 
             if (this.fieldname1) {
                 // Build a list of layers that contain the managed field.
@@ -2088,9 +2090,6 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                         }
                     }
                 }));
-
-                // Set the initial definitions for the layers containing the managed field
-                this.applyFilter();
 
                 // Provide a UI to change the filter
                 domConstruct.create("label", {innerHTML: this.hint1},
@@ -2120,11 +2119,45 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             // Do we have any layers with the filter field? If not, warn because no filtering will occur
             if (this.layers.length === 0) {
                 this.setShowable(false);
+                this.showFieldError(this.fieldname1);
 
-                message = "\"" + this.fieldname1 + "\"<br>";
-                message += this.checkForSubstitution("@messages.fieldNotFound");
-                this.log(message, true);
+            // Otherwise, set the initial definitions for the layers containing the managed field
+            } else {
+                this.applyFilter();
             }
+        },
+
+        /**
+         * Reports all fields for all feature layers.
+         * @param {string} fieldname A fieldname to report as missing
+         * @memberOf js.LGFilterLayers1#
+         */
+        showFieldError: function (fieldname) {
+            var message;
+
+            message = "\"" + fieldname + "\"<br>";
+            message += this.checkForSubstitution("@messages.fieldNotFound") + "<br><hr>";
+
+            // Add map layers to message
+            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+
+            array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                var field;
+
+                if (mapLayer.layerObject) {
+                    if (mapLayer.layerObject.type === "Feature Layer") {
+                        message += "<li>\"" + mapLayer.layerObject.name + "\"<ul>";
+                        for (field = 0; field < mapLayer.layerObject.fields.length; field += 1) {
+                            message += "<li>\"" + mapLayer.layerObject.fields[field].name + "\"</li>";
+                        }
+                        message += "</ul></li>";
+                    }
+                }
+            }));
+            message += "</ul>";
+
+            // Log it
+            this.log(message, true);
         },
 
         /**
