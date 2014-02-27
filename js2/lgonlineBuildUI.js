@@ -777,6 +777,11 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                 esri.config.defaults.io.alwaysUseProxy = false;
             }
 
+            // Does this user have editing rights?
+            config.rights = {
+                "canEdit": true
+            };
+
             return deferred;
         }
 

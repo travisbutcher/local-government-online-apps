@@ -68,61 +68,68 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
         onDependencyReady: function () {
             var mapInfo, allFieldsInfos, layerInfo;
 
-            // Build a list of editable layers in this map
-            mapInfo = this.mapObj.mapInfo;
-            this.layerInfos = [];
-            this.layers = [];
-            array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
-                var visibleFieldInfos, eLayer = mapLayer.layerObject;
-                if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
-                    if ((mapLayer.capabilities === null || mapLayer.capabilities !== "Query")
-                            && (eLayer.capabilities === null || eLayer.capabilities !== "Query")) {
-                        // If "capabilities" is set to "Query", editing is disabled in the web map
-                        // (the mapLayer check is for the webmap; the eLayer check is for the underlying feature service)
+            // Can this user edit?
+            if (this.commonConfig.rights.canEdit) {
 
-                        // Layer info list for esri.dijit.editing.Editor; we'll hide invisible fields before
-                        // adding the layer info
-                        layerInfo = {
-                            "featureLayer": eLayer
-                        };
+                // Build a list of editable layers in this map
+                mapInfo = this.mapObj.mapInfo;
+                this.layerInfos = [];
+                this.layers = [];
+                array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                    var visibleFieldInfos, eLayer = mapLayer.layerObject;
+                    if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
+                        if ((mapLayer.capabilities === null || mapLayer.capabilities !== "Query")
+                                && (eLayer.capabilities === null || eLayer.capabilities !== "Query")) {
+                            // If "capabilities" is set to "Query", editing is disabled in the web map
+                            // (the mapLayer check is for the webmap; the eLayer check is for the underlying feature service)
 
-                        allFieldsInfos = null;
-                        if (mapLayer.popupInfo && mapLayer.popupInfo.fieldInfos) {
-                            allFieldsInfos = mapLayer.popupInfo.fieldInfos;
-                        } else if (eLayer.infoTemplate && eLayer.infoTemplate.info && eLayer.infoTemplate.info.fieldInfos) {
-                            allFieldsInfos = eLayer.infoTemplate.info.fieldInfos;
+                            // Layer info list for esri.dijit.editing.Editor; we'll hide invisible fields before
+                            // adding the layer info
+                            layerInfo = {
+                                "featureLayer": eLayer
+                            };
+
+                            allFieldsInfos = null;
+                            if (mapLayer.popupInfo && mapLayer.popupInfo.fieldInfos) {
+                                allFieldsInfos = mapLayer.popupInfo.fieldInfos;
+                            } else if (eLayer.infoTemplate && eLayer.infoTemplate.info && eLayer.infoTemplate.info.fieldInfos) {
+                                allFieldsInfos = eLayer.infoTemplate.info.fieldInfos;
+                            }
+                            if (allFieldsInfos) {
+                                // We have field info, so we can remove the invisibles
+                                visibleFieldInfos = [];
+                                array.forEach(allFieldsInfos, function (fieldInfo) {
+                                    if (fieldInfo.visible) {
+                                        visibleFieldInfos.push(fieldInfo);
+                                    }
+                                });
+                                layerInfo.fieldInfos = visibleFieldInfos;
+                            }
+
+                            this.layerInfos.push(layerInfo);
+
+                            // Layers list for esri.dijit.editing.TemplatePicker
+                            this.layers.push(eLayer);
                         }
-                        if (allFieldsInfos) {
-                            // We have field info, so we can remove the invisibles
-                            visibleFieldInfos = [];
-                            array.forEach(allFieldsInfos, function (fieldInfo) {
-                                if (fieldInfo.visible) {
-                                    visibleFieldInfos.push(fieldInfo);
-                                }
-                            });
-                            layerInfo.fieldInfos = visibleFieldInfos;
-                        }
-
-                        this.layerInfos.push(layerInfo);
-
-                        // Layers list for esri.dijit.editing.TemplatePicker
-                        this.layers.push(eLayer);
                     }
+                }));
+
+                if (this.layers.length === 0) {
+                    // If there are no editable layers, we won't display the empty picker
+                    this.setShowable(false);
+
+                } else {
+                    this.map = mapInfo.map;
+
+                    // Create a place for template picker and editor combination within the dropdown
+                    this.templatePickerHolder = domConstruct.create("div",
+                        { className: this.templatePickerHolderClass });
+                    domConstruct.place(this.templatePickerHolder, this.rootId);
+                    touchScroll(this.templatePickerHolder);
                 }
-            }));
-
-            if (this.layers.length === 0) {
-                // If there are no editable layers, we won't display the empty picker
-                this.setShowable(false);
-
             } else {
-                this.map = mapInfo.map;
-
-                // Create a place for template picker and editor combination within the dropdown
-                this.templatePickerHolder = domConstruct.create("div",
-                    { className: this.templatePickerHolderClass });
-                domConstruct.place(this.templatePickerHolder, this.rootId);
-                touchScroll(this.templatePickerHolder);
+                // If editing is not an option, we won't display the empty picker
+                this.setShowable(false);
             }
 
             this.inherited(arguments);
