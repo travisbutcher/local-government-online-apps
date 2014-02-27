@@ -66,12 +66,22 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
          * @override
          */
         onDependencyReady: function () {
-            var mapInfo, allFieldsInfos, layerInfo;
+            var mapInfo, allFieldsInfos, layerInfo, canEdit = true;
 
-            // Can this user edit?
-            if (this.commonConfig.rights.canEdit) {
+            // Test for editing permission
+            if (this.commonConfig.userPrivileges) {
+                canEdit = false;
+                array.some(this.commonConfig.userPrivileges, function (privilege) {
+                    if (privilege === "features:user:edit") {
+                        canEdit = true;
+                        return true;
+                    }
+                    return false;
+                });
+            }
 
-                // Build a list of editable layers in this map
+            // Build a list of editable layers in this map if this user can edit
+            if (canEdit) {
                 mapInfo = this.mapObj.mapInfo;
                 this.layerInfos = [];
                 this.layers = [];

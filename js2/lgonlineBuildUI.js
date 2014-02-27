@@ -18,7 +18,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "esri/arcgis/Portal", "esri/IdentityManager", "dojo/require!esri/utils"], function (on, Deferred, DeferredList, utils, script, lang, commonConfig, esriPortal) {
+define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "esri/arcgis/utils", "dojo/io/script", "dojo/_base/lang", "config/commonConfig", "esri/lang", "esri/arcgis/Portal", "esri/IdentityManager", "dojo/require!esri/utils"], function (on, Deferred, DeferredList, arcgisUtils, script, lang, commonConfig, esriLang, esriPortal, IdentityManager) {
 
     //========================================================================================================================//
 
@@ -110,7 +110,7 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
          * @memberOf js.LGArcGISAccess#
          */
         getItemWithData: function (itemId) {
-            return utils.getItem(itemId);
+            return arcgisUtils.getItem(itemId);
         },
 
         /**
@@ -754,16 +754,23 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                     lang.mixin(config.helperServices, response.helperServices);
 
                     // Setup any helper services (geometry, print, routing, geocoding)
-                    esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
+                    arcgisUtils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
                     if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {
                         esri.config.defaults.geometryService = new esri.tasks.GeometryService(config.helperServices.geometry.url);
+                    }
+
+                    // Are any custom roles defined in the organization?
+                    if (response.user && esriLang.isDefined(response.user.roleId)) {
+                        if (response.user.privileges) {
+                            config.userPrivileges = response.user.privileges;
+                        }
                     }
 
                     deferred.resolve(true);
                 });
             } else {
                 // Setup any helper services (geometry, print, routing, geocoding)
-                esri.arcgis.utils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
+                arcgisUtils.arcgisUrl = config.sharingUrl + "/sharing/rest/content/items";
                 if (config.helperServices && config.helperServices.geometry && config.helperServices.geometry.url) {
                     esri.config.defaults.geometryService = new esri.tasks.GeometryService(config.helperServices.geometry.url);
                 }
@@ -776,11 +783,6 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                 esri.config.defaults.io.proxyUrl = config.proxyUrl;
                 esri.config.defaults.io.alwaysUseProxy = false;
             }
-
-            // Does this user have editing rights?
-            config.rights = {
-                "canEdit": true
-            };
 
             return deferred;
         }
