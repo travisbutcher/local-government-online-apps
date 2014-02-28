@@ -19,10 +19,10 @@
 define(
 ({
         tooltips: {
-            search: "Buscar",  // Command button to open a dialog box for searching for a feature or an address (depending on app)
+            search: "Buscar",  // Command button to open a dialog box for finding a feature or an address (depending on app)
             locate: "Ubicación actual",  // Command button to zoom and pan to the current geographical position reported by the browser
             markup: "Enviar corrección",  // Command button to submit a correction to the app's host
-            collect: "Agregar contenido al mapa",  // Command button to open a template picker to add features to the map
+            collect: "Filtrar/Editar",  // Command button to open a filter and template picker to add features to the map and to edit them afterwards
             filter: "Filtrar capas de mapa",  // Explains purpose of type-in box affiliated with template picker
             basemap: "Cambiar mapa base",  // Command button to open a dialog box for switching basemaps
             share: "Compartir",  // Command button to open a dropdown menu for picking a type of sharing
@@ -38,7 +38,9 @@ define(
         labels: {
             email: "correo electrónico",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
             Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
-            Twitter: "Twitter"  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            Twitter: "Twitter",  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            title: "título",  // Shown as title hint in print specification box if a title hint is not configured
+            author: "autor"  // Shown as author hint in print specification box if an author hint is not configured
         },
         prompts: {
             search: "Buscar:",  // Appears before a search text field in dialog box for searching for a feature
@@ -50,8 +52,13 @@ define(
             geolocationDenied: "Este sitio no tiene permiso para obtener la ubicación actual",  // Shown when the browser does not permit the app to get the current geographical position
             geolocationUnavailable: "El navegador no ha podido obtener la ubicación actual",  // Shown when the browser returns an error instead of the current geographical position
             geolocationTimeout: "El navegador no ha podido obtener la ubicación actual a su debido tiempo",  // Shown when the browser does not return within a configured time limit when asked for the current geographical position
-            searchLayerMissing: "Esta capa de búsqueda no se ha encontrado en el mapa",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the mapLayers prompt
-            searchFieldMissing: "Este campo no se ha encontrado en la capa de búsqueda del mapa"  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
+            searchLayerMissing: "Esta capa de búsqueda no se ha encontrado en el mapa",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the mapLayers prompt
+            searchFieldMissing: "Este campo no se ha encontrado en la capa de búsqueda del mapa",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the layerFields prompt
+            allSearchFieldsMissing: "Ninguno de estos campos se puede encontrar en la capa de búsqueda del mapa",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find any of the fields that were configured for the find command; works with the layerFields prompt
+            fieldNotFound: "Este campo no existe en ninguna de las capas de mapa",  // Appears when a field used in the configuration was not found in any map layer
+            yourContentSubmitted: "Tu contenido se ha enviado. Gracias.",  // Appears after content has been added to the map and successfully submitted to the server
+            noConfiguration: "No se puede acceder a la configuración de la aplicación",  // Appears if the app, during startup, cannot get access to or find the configuration information; without the information, it cannot build the UI
+            unableToLaunchApp: "No se puede iniciar la aplicación"  // Appears for any failure to build the user interface
         }
     })
 );

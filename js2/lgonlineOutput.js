@@ -1,4 +1,4 @@
-﻿/*global define,dojo,js,window,touchScroll */
+﻿/*global define,dojo,js,console,window,touchScroll */
 /*jslint sloppy:true */
 /*
  | Copyright 2012 Esri
@@ -180,7 +180,14 @@ define("js/lgonlineOutput", ["dojo/dom-construct", "dojo/dom-class", "dojo/_base
          * @memberOf js.LGMessageWatch#
          */
         showMessage: function (label, message) {
-            var dataString = JSON.stringify(message.data);
+            var dataString = "";
+            if (message.data) {
+                try {
+                    dataString = JSON.stringify(message.data);
+                } catch (error) {
+                    dataString = "<data>";
+                }
+            }
             this.log(label + " " + message.id + ": \"" + message.tag + "\" " + (dataString || ""));
         }
     });

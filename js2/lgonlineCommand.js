@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, PrintTask, PrintParameters, PrintTemplate, PopupTemplate) {
+define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
 
     //========================================================================================================================//
 
@@ -53,7 +53,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         },
 
         /**
-         * Sets whether or not this dropdown will be shown with future triggerings.
+         * Sets whether or not this dropdown will be shown with future triggerings;
+         * if currently visible and it is not to be showable in the future, dropdown
+         * is hidden.
          * @param {boolean} makeShowable Indicates if dropdown may be shown
          * @memberOf js.LGDropdownBox#
          */
@@ -137,7 +139,14 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             }).placeAt(this.rootDiv);
             touchScroll(galleryId);
 
+            // Create the gallery, adding in the basemap from the webmap (even if it is already represented
+            // via the ArcGIS basemaps or the custom basemap group
             basemapGallery = new BasemapGallery({
+                basemaps: [new Basemap({
+                    layers: this.mapObj.mapInfo.itemInfo.itemData.baseMap.baseMapLayers,
+                    title: this.mapObj.mapInfo.itemInfo.itemData.baseMap.title,
+                    thumbnailUrl: this.webmapThumbnail || "images/webmap.png"
+                })],
                 showArcGISBasemaps: true,  // ignored if a group is configured
                 basemapsGroup: basemapGroup,
                 bingMapsKey: this.mapObj.commonConfig.bingMapsKey,
@@ -662,7 +671,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 id: this.rootId + "_titleEntry",
                 value: this.title,
                 trim: true,
-                placeHolder: this.titleHint
+                placeHolder: this.titleHint || this.checkForSubstitution(this.titleHintDefault) || ""
             }).placeAt(this.rootId);
             domStyle.set(this.titleEntryTextBox.domNode, "width", "97%");
             domClass.add(this.titleEntryTextBox.domNode, this.titleClass);
@@ -671,7 +680,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 id: this.rootId + "_authorEntry",
                 value: this.author,
                 trim: true,
-                placeHolder: this.authorHint
+                placeHolder: this.authorHint || this.checkForSubstitution(this.authorHintDefault) || ""
             }).placeAt(this.rootId);
             domStyle.set(this.authorEntryTextBox.domNode, "width", "97%");
             domClass.add(this.authorEntryTextBox.domNode, this.authorClass);
@@ -691,7 +700,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
             // Await the OK from our dialog before launching print job
             on(okBtn.rootDiv, "click", function () {
-                var selectedLayout, printParams;
+                var opLayers, legendLayer, legendLayers = [], selectedLayout, printParams;
 
                 // Broadcast status; our LGDropdownBox ancestor has already made our dialog box visible
                 pThis.publishMessage(pThis.publishWorking);
@@ -700,6 +709,14 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // the server is off doing the print job
                 pThis.setIsVisible(false);
 
+                // Specify the map's operational layers for the legend
+                opLayers = pThis.mapObj.getOperationalLayers();
+                array.forEach(opLayers, function (opLayer) {
+                    legendLayer = new LegendLayer();
+                    legendLayer.layerId = opLayer.id;
+                    legendLayers.push(legendLayer);
+                });
+
                 // Create print parameters with full template
                 selectedLayout = pThis.radioButtonController.getCurrentMember();
                 selectedLayout = selectedLayout ? selectedLayout.value : null;
@@ -707,13 +724,15 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 printParams = new PrintParameters();
                 printParams.map = pThis.mapObj.mapInfo.map;
                 printParams.outSpatialReference = pThis.mapObj.mapInfo.map.spatialReference;
+
                 printParams.template = new PrintTemplate();
                 printParams.template.format = pThis.format || "PDF";
                 printParams.template.layout = selectedLayout || pThis.layout || "Letter ANSI A Landscape";
                 printParams.template.layoutOptions = {
                     titleText: pThis.titleEntryTextBox.value,
                     authorText: pThis.authorEntryTextBox.value,
-                    copyrightText: pThis.copyrightText
+                    copyrightText: pThis.copyrightText,
+                    legendLayers: legendLayers
                 };
                 printParams.template.preserveScale = pThis.toBoolean(pThis.preserveScale, false);
                 printParams.template.showAttribution = true;
@@ -1125,6 +1144,15 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             }
             this.caseInsensitiveSearch = this.toBoolean(this.caseInsensitiveSearch, true);
             this.ready = new Deferred();
+
+            // Normalize display field--it could be a string with a field, an empty string, or undefined
+            if (this.displayField) {
+                // In case a list of display fields is provided because of a mixup with LGFeatureLayer
+                // vs. LGSearchFeatureLayerMultiplexer, just take the first field
+                this.displayField = this.displayField.split(",")[0].trim();
+            } else {
+                this.displayField = "";
+            }
         },
 
         /**
@@ -1135,107 +1163,174 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         onDependencyReady: function () {
             // Now that the map (our dependency) is ready, get the URL of the search layer from it
-            var searchLayer, reason, message, availableFields = ",", opLayers,
-                popupTemplate = null, pThis = this;
+            var searchLayer, reason, splitFields, availableFields = ",", opLayers,
+                pThis = this, actualFieldList = [], generalOutFields;
 
-            try {
-                searchLayer = this.mapObj.getLayer(this.searchLayerName);
-                if (!searchLayer || !searchLayer.url) {
-                    reason = this.checkForSubstitution("@messages.searchLayerMissing");
-                } else {
-                    this.searchURL = searchLayer.url;
+            // Check that the search layer and fields exist
+            if (this.searchLayerName) {
+                try {
+                    searchLayer = this.mapObj.getLayer(this.searchLayerName);
+                    if (searchLayer && searchLayer.url) {
+                        this.searchURL = searchLayer.url;
 
-                    // Check for existence of fields
-                    array.forEach(searchLayer.fields, function (layerField) {
-                        availableFields += layerField.name + ",";
-                    });
-                    if (!array.every(this.searchFields, function (searchField) {
-                            reason = searchField;
-                            return availableFields.indexOf("," + searchField + ",") >= 0;
-                        })) {
+                        // Check for existence of fields; start with a list of fields in the search layer
+                        array.forEach(searchLayer.fields, function (layerField) {
+                            availableFields += layerField.name + ",";
+                        });
 
-                        // Failed to find the field in the search layer; provide some feedback
-                        message = "\"" + reason + "\"<br>";
-                        message += this.checkForSubstitution("@messages.searchFieldMissing") + "<br><hr><br>";
-                        message += this.checkForSubstitution("@prompts.layerFields") + "<br>";
-                        if (availableFields.length > 1) {
-                            message += availableFields.substring(1, availableFields.length - 1);
+                        // Only keep search fields that the layer has
+                        if (this.searchFields && 0 < this.searchFields.length) {
+                            splitFields = this.searchFields.split(",");
+                            this.searchFields = [];
+                            array.forEach(splitFields, function (searchField) {
+                                pThis.searchFields.push(searchField.trim());
+                            });
+
+                            array.forEach(this.searchFields, function (searchField) {
+                                if (availableFields.indexOf("," + searchField + ",") >= 0) {
+                                    actualFieldList.push(searchField);
+                                }
+                            });
+                        } else {
+                            this.searchFields = [];
                         }
-                        this.log(message, true);
+
+                        // Can we search for anything in this layer?
+                        if (actualFieldList.length === 0) {
+                            this.showSearchLayerFieldError(this.searchFields, this.searchLayerName, searchLayer);
+
+                            this.ready.reject(this);
+                            this.inherited(arguments);
+                            return;
+                        }
+
+                        // Does the layer contain the requested display field?
+                        if (this.displayField !== "" && availableFields.indexOf("," + this.displayField + ",") < 0) {
+                            // Requested display field not found
+                            this.showSearchLayerFieldError([this.displayField], this.searchLayerName, searchLayer);
+
+                            this.displayField = "";
+                        }
+
+                        // If there are searchable fields, replace the requested search fields list with
+                        // the available search fields list
+                        this.searchFields = actualFieldList;
+
+                        // Set up our query task now that we have the URL to the layer
+                        this.objectIdField = searchLayer.objectIdField;
+                        this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
+
+                        this.searcher = new esri.tasks.QueryTask(this.searchURL);
+
+                        // Set up the general layer query task: pattern match
+                        this.generalSearchParams = new esri.tasks.Query();
+                        this.generalSearchParams.returnGeometry = false;
+                        this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+
+                        generalOutFields = [searchLayer.objectIdField];
+                        if (this.displayField !== "") {
+                            generalOutFields = generalOutFields.concat(this.displayField);
+                        }
+                        this.generalSearchParams.outFields = generalOutFields.concat(this.searchFields);
+
+                        // Set up the specific layer query task: object id
+                        this.objectSearchParams = new esri.tasks.Query();
+                        this.objectSearchParams.returnGeometry = true;
+                        this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+                        this.objectSearchParams.outFields = ["*"];
+
+                        // Get the popup for this layer & save it with the layer
+                        opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
+                        array.some(opLayers, function (layer) {
+                            if (layer.title === pThis.searchLayerName) {
+                                pThis.popupTemplate = new PopupTemplate(layer.popupInfo);
+                                return true;
+                            }
+                            return false;
+                        });
+
+                        this.log("Search layer " + this.searchLayerName + " set up for queries");
+                        this.ready.resolve(this);
+                        this.inherited(arguments);
+                        return;
                     }
-
-                    // Set up our query task now that we have the URL to the layer
-                    this.objectIdField = searchLayer.objectIdField;
-                    this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
-
-                    this.searcher = new esri.tasks.QueryTask(this.searchURL);
-
-                    // Set up the general layer query task: pattern match
-                    this.generalSearchParams = new esri.tasks.Query();
-                    this.generalSearchParams.returnGeometry = false;
-                    this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
-                    this.generalSearchParams.outFields = [searchLayer.objectIdField].concat(this.searchFields);
-
-                    // Set up the specific layer query task: object id
-                    this.objectSearchParams = new esri.tasks.Query();
-                    this.objectSearchParams.returnGeometry = true;
-                    this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
-                    this.objectSearchParams.outFields = ["*"];
-
-                    // Get the popup for this layer & send it to the map
-                    opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
-                    array.some(opLayers, function (layer) {
-                        if (layer.title === pThis.searchLayerName) {
-                            popupTemplate = new PopupTemplate(layer.popupInfo);
-                            return true;
-                        }
-                        return false;
-                    });
-                    this.mapObj.setPopup(popupTemplate);
-
-                    this.log("Search layer " + this.searchLayerName + " set up for queries");
-                    this.ready.resolve(this);
-                    this.inherited(arguments);
-                    return;
+                } catch (error) {
+                    reason = error.toString();
                 }
-            } catch (error) {
-                reason = error.toString();
             }
 
             // Failed to find the search layer; provide some feedback
-            message = "\"" + (this.searchLayerName || "") + "\"<br>";
-            message += reason + "<br><hr><br>";
-            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
-            array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
-                message += "<li>\"" + layerName + "\"</li>";
-            });
-            message += "</ul>";
-            this.log(message, true);
+            this.showSearchLayerError(this.searchLayerName, reason);
 
             this.ready.reject(this);
             this.inherited(arguments);
         },
 
         /**
-         * Checks that the instance has its prerequisites.
-         * @throws {string} "missing search fields" if the search fields
-         *        parameter is omitted
+         * Reports layers that don't appear in the map.
+         * @param {string} searchLayerName Name to report for search layer
+         * @param {string} [reason] Error message; if omitted, "@messages.searchLayerMissing"
+         *        is used
          * @memberOf js.LGSearchFeatureLayer#
-         * @override
          */
-        checkPrerequisites: function () {
-            var splitFields, pThis = this;
+        showSearchLayerError: function (searchLayerName, reason) {
+            var message;
 
-            if (this.searchFields && 0 < this.searchFields.length) {
-                splitFields = this.searchFields.split(",");
-                this.searchFields = [];
-                array.forEach(splitFields, function (searchField) {
-                    pThis.searchFields.push(searchField.trim());
-                });
-            } else {
-                this.log("missing search fields");
-                throw "missing search fields";
+            if (!reason) {
+                reason = this.checkForSubstitution("@messages.searchLayerMissing");
             }
+
+            message = "\"" + (searchLayerName || "") + "\"<br>";
+            message += reason + "<br><hr>";
+
+            // Add map layers to message
+            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+            array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
+                message += "<li>\"" + layerName + "\"</li>";
+            });
+            message += "</ul>";
+
+            // Log it
+            this.log(message, true);
+        },
+
+        /**
+         * Reports fields that don't appear in the search layer.
+         * @param {array} candidateFields List of fields requested for search or for display
+         * @param {string} searchLayerName Name to report for search layer
+         * @param {object} searchLayer Details of search layer as returned from map;
+         *        function uses searchLayer.fields
+         * @memberOf js.LGSearchFeatureLayer#
+         */
+        showSearchLayerFieldError: function (candidateFields, searchLayerName, searchLayer) {
+            var reason = "", message;
+
+            // List the requested fields
+            array.forEach(candidateFields, function (field) {
+                if (reason.length > 0) {
+                    reason += ",";
+                }
+                reason += field;
+            });
+
+            // Add a message to the field list
+            message = "\"" + reason + "\"<br>";
+            if (candidateFields.length > 1) {
+                message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
+            } else {
+                message += this.checkForSubstitution("@messages.searchFieldMissing");
+            }
+
+            // Add the search layer name and a list of available fields in that layer
+            message += "<br><hr>\"" + searchLayerName + "\"<br>";
+            message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
+            array.forEach(searchLayer.fields, function (layerField) {
+                message += "<li>\"" + layerField.name + "\"</li>";
+            });
+            message += "</ul>";
+
+            // Log it
+            this.log(message, true);
         },
 
         /**
@@ -1243,7 +1338,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @param {string|geometry} searchText Text to search
          * @param {function} callback Function to call when search
          *        results arrive; function takes the results as its sole
-         *        argumentsss
+         *        argument
          * @memberOf js.LGSearchFeatureLayer#
          * @override
          */
@@ -1298,19 +1393,24 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // Create the results list
                 array.forEach(results.features, function (item) {
 
-                    // Test each non-null search field result and pick the first one
-                    // that contains the search string as our label
+                    // Use the display field for representing the results if possible
                     representativeLabel = "";
-                    array.some(pThis.searchFields, function (searchField) {
-                        if (item.attributes[searchField]) {
-                            possibleLabel = item.attributes[searchField].toString();
-                            if (possibleLabel.toUpperCase().indexOf(processedSearchText) >= 0) {
-                                representativeLabel = possibleLabel;
-                                return true;
+                    if (item.attributes[pThis.displayField]) {
+                        representativeLabel = item.attributes[pThis.displayField].toString();
+                    } else {
+                        // Test each non-null search field result and pick the first one
+                        // that contains the search string as our label
+                        array.some(pThis.searchFields, function (searchField) {
+                            if (item.attributes[searchField]) {
+                                possibleLabel = item.attributes[searchField].toString();
+                                if (possibleLabel.toUpperCase().indexOf(processedSearchText) >= 0) {
+                                    representativeLabel = possibleLabel;
+                                    return true;
+                                }
                             }
-                        }
-                        return false;
-                    });
+                            return false;
+                        });
+                    }
 
                     if (representativeLabel === "") {
                         representativeLabel = "result";
@@ -1355,6 +1455,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             this.searcher.execute(this.objectSearchParams, function (results) {
                 if (results && results.features && 0 < results.features.length) {
                     item = results.features[0];
+
+                    // Assign the layer's popup (if any) to the item
+                    item.infoTemplate = pThis.popupTemplate;
 
                     if (pThis.publishPointsOnly) {
                         // Find a point that can be used to represent this item
@@ -1547,13 +1650,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
     //========================================================================================================================//
 
-    dojo.declare("js.LGSearchFeatureLayerMultiplexer", js.LGSearchMultiplexer, {
+    dojo.declare("js.LGSearchFeatureLayerMultiplexer", [js.LGSearchMultiplexer, js.LGMapDependency], {
         /**
          * Constructs an LGSearchFeatureLayerMultiplexer.
          *
          * @class
          * @name js.LGSearchFeatureLayerMultiplexer
-         * @extends js.LGSearchMultiplexer
+         * @extends js.LGSearchMultiplexer, js.LGMapDependency
          * @classdesc
          * Provides a searcher that multiplexes the work of LGSearchFeatureLayer searchers,
          * selecting them by feature layer name
@@ -1566,36 +1669,81 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         createSearchersList: function () {
-            var pThis = this, deferralWaitList = [], featureLayerNames = [];
+            var deferralWaitList = [], featureLayerNames = [],
+                featureDisplayFields = [], i, searcherName, searcher;
             this.searchers = [];
 
-            // Construct the searchers and build a list of their ready state deferrals
+            // Get the list of layers & the list of display fields
             if (this.searchLayerName) {
                 featureLayerNames = this.searchLayerName.split(",");
             }
+            if (this.displayFields) {
+                featureDisplayFields = this.displayFields.split(",");
+            }
 
-            array.forEach(featureLayerNames, function (layerName) {
-                var searcher, searcherName = pThis.rootId + "_" + pThis.searchers.length;
+            // Construct the searchers and build a list of their ready state deferrals
+            for (i = 0; i < featureLayerNames.length; i = i + 1) {
+                searcherName = this.rootId + "_" + this.searchers.length;
                 searcher = new js.LGSearchFeatureLayer({
-                    app: pThis.app,
-                    commonConfig: pThis.commonConfig,
-                    i18n: pThis.i18n,
-                    webmap: pThis.webmap,
+                    app: this.app,
+                    commonConfig: this.commonConfig,
+                    i18n: this.i18n,
+                    webmap: this.webmap,
                     rootId: searcherName,
-                    parentDiv: pThis.parentDiv,
-                    dependencyId: pThis.dependencyId,
-                    busyIndicator: pThis.busyIndicator,
-                    publishPointsOnly: pThis.publishPointsOnly,
-                    searchPattern: pThis.searchPattern,
-                    caseInsensitiveSearch: pThis.caseInsensitiveSearch,
-                    searchLayerName: layerName.trim(),
-                    searchFields: pThis.searchFields
+                    parentDiv: this.parentDiv,
+                    dependencyId: this.dependencyId,
+                    busyIndicator: this.busyIndicator,
+                    publishPointsOnly: this.publishPointsOnly,
+                    searchPattern: this.searchPattern,
+                    caseInsensitiveSearch: this.caseInsensitiveSearch,
+                    searchLayerName: featureLayerNames[i].trim(),
+                    searchFields: this.searchFields,
+                    displayField: featureDisplayFields[i]
                 });
-                pThis.searchers.push(searcher);
+                this.searchers.push(searcher);
                 deferralWaitList.push(searcher.ready);
-            });
+            }
 
             return deferralWaitList;
+        },
+
+        /**
+         * Performs class-specific setup when the dependency is
+         * satisfied.
+         * @memberOf js.LGSearchFeatureLayerMultiplexer#
+         * @override
+         */
+        onDependencyReady: function () {
+            // If we don't have any searchers, report the problem now that the map is ready
+            if (this.searchers.length === 0) {
+                this.showSearchLayerError("");
+            }
+        },
+
+        /**
+         * Reports layers that don't appear in the map.
+         * @param {string} searchLayerName Name to report for search layer
+         * @param {string} [reason] Error message; if omitted, "@messages.searchLayerMissing"
+         *        is used
+         * @memberOf js.LGSearchFeatureLayerMultiplexer#
+         */
+        showSearchLayerError: function (searchLayerName, reason) {
+            var message;
+
+            if (!reason) {
+                reason = this.checkForSubstitution("@messages.searchLayerMissing");
+            }
+
+            message = "\"" + (searchLayerName || "") + "\"<br>";
+            message += reason + "<br><hr>";
+            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+            array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
+                message += "<li>\"" + layerName + "\"</li>";
+            });
+            message += "</ul>";
+
+            // Log it
+            this.log(message, true);
         }
     });
 
@@ -1892,6 +2040,20 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         constructor: function () {
             this.layers = [];
+            this.switchDelayTimer = null;
+            if (this.busyIndicator) {
+                this.busyIndicator = this.lgById(this.busyIndicator);
+            }
+
+            // A delay between switches is needed with the current version of the JSAPI;
+            // IE requires a potentially larger delay, especially initially
+            this.switchDelayTimer = null;
+            this.switchDelaySecs = 1000 * this.toNumber(this.nonieSwitchDelaySecs, 1.5);
+            this.switchDelayMultiplier = 1;
+            /*@cc_on
+                this.switchDelaySecs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 3.0);
+                this.switchDelayMultiplier = 3;  // we'll reset this to 1 after the first use
+            @*/
         },
 
         /**
@@ -1929,9 +2091,6 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     }
                 }));
 
-                // Set the initial definitions for the layers containing the managed field
-                this.applyFilter();
-
                 // Provide a UI to change the filter
                 domConstruct.create("label", {innerHTML: this.hint1},
                     domConstruct.create("div", {}, this.rootId));
@@ -1952,10 +2111,53 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // to click away from the text box to apply the filter, but this means that we have to ignore the case
                 // where the user has erased all content from the text box
                 on(field1EntryTextBox, "change", lang.hitch(this, function () {
-                    this.value1 = field1EntryTextBox.value.trim();
+                    this.value1 = field1EntryTextBox.value;
                     this.onValueChanged();
                 }));
             }
+
+            // Do we have any layers with the filter field? If not, warn because no filtering will occur
+            if (this.layers.length === 0) {
+                this.setShowable(false);
+                this.showFieldError(this.fieldname1);
+
+            // Otherwise, set the initial definitions for the layers containing the managed field
+            } else {
+                this.applyFilter();
+            }
+        },
+
+        /**
+         * Reports all fields for all feature layers.
+         * @param {string} fieldname A fieldname to report as missing
+         * @memberOf js.LGFilterLayers1#
+         */
+        showFieldError: function (fieldname) {
+            var message;
+
+            message = "\"" + fieldname + "\"<br>";
+            message += this.checkForSubstitution("@messages.fieldNotFound") + "<br><hr>";
+
+            // Add map layers to message
+            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+
+            array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                var field;
+
+                if (mapLayer.layerObject) {
+                    if (mapLayer.layerObject.type === "Feature Layer") {
+                        message += "<li>\"" + mapLayer.layerObject.name + "\"<ul>";
+                        for (field = 0; field < mapLayer.layerObject.fields.length; field += 1) {
+                            message += "<li>\"" + mapLayer.layerObject.fields[field].name + "\"</li>";
+                        }
+                        message += "</ul></li>";
+                    }
+                }
+            }));
+            message += "</ul>";
+
+            // Log it
+            this.log(message, true);
         },
 
         /**
@@ -1974,6 +2176,35 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         * @memberOf js.LGFilterLayers1#
         */
         applyFilter: function () {
+            var pThis = this;
+
+            // A delay between switches is needed with the current version of the JSAPI;
+            // IE requires a potentially larger delay
+            if (this.busyIndicator) {
+                this.busyIndicator.setIsVisible(true);
+            }
+            if (this.switchDelayTimer !== null) {
+                clearTimeout(this.switchDelayTimer);
+            }
+            this.switchDelayTimer = setTimeout(
+                function () {
+                    pThis.switchDelayTimer = null;
+                    pThis.applyFilterCore();
+                    if (pThis.busyIndicator) {
+                        pThis.busyIndicator.setIsVisible(false);
+                    }
+                },
+                this.switchDelaySecs * this.switchDelayMultiplier
+            );
+            this.switchDelayMultiplier = 1;
+        },
+
+        /**
+        * Loops through the layers array on which definition expression is applied and calls
+        * setLayerDefinitionExpression with the new value.
+        * @memberOf js.LGFilterLayers1#
+        */
+        applyFilterCore: function () {
             array.forEach(this.layers, lang.hitch(this, function (layer) {
                 this.setLayerDefinitionExpression(layer.layerObject, layer.fieldType);
                 layer.layerObject.clearSelection();

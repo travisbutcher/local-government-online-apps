@@ -9,7 +9,7 @@ JavaScript and with the Dojo Toolkit.
 * Virtually all of the JavaScript is stored in files rather than in the launching HTML; this is done to maximize browser caching
 and thus speed.
 * jsonlineStart.js contains the code to launch the app.
-* jsonlineBuildUI.js contains two classes--LGUIBuilder and LGArcGISAccess--for building the user interface.
+* jsonlineBuildUI.js contains two classes -- LGUIBuilder and LGArcGISAccess -- for building the user interface.
 * jsonlineApp.js contains (directly for online or through references in the download) the classes that LGUIBuilder uses in the
 user interface.
 
@@ -18,14 +18,13 @@ user interface.
 * All JavaScript is documented using the [JSDoc](https://github.com/jsdoc3/jsdoc) tags so that code documentation may be
 automatically generated.
 
-### Testing
+### Validation
 
-* All JavaScript is run through a JavaScript validator such as [JSLint](http://www.jslint.com/) as a rough check for errors.
-(If you use JSLint, a JavaScript formatter such as [JSBeautifier](http://jsbeautifier.org/) helps to format your JavaScript
-because JSLint also contains formatting rules that must be met in order to see any code errors.)
-* We used Dojo's [D.O.H. (Dojo Objective Harness)](http://dojotoolkit.org/reference-guide/1.8/util/doh.html) for testing during
-the initial development of the JavaScript classes. These tests are out-of-date, but will be brought back for helping with custom
-development.
+* All JavaScript & JSON are run through a validator such as [JSLint](http://www.jslint.com/) as a rough
+check for errors. (If you use JSLint, a JavaScript formatter such as [JSBeautifier](http://jsbeautifier.org/) helps
+to format your JavaScript because JSLint also contains formatting rules that must be met in additon to code errors.)
+The only exception to an error-free lint is the language-specific phrase files in the nls/ subdirectory. They are
+computer-generated and can trigger a linter to list column indentation as an "error".
 
 ### Compression
 

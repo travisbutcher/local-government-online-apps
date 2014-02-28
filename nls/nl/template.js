@@ -19,10 +19,10 @@
 define(
 ({
         tooltips: {
-            search: "Zoeken",  // Command button to open a dialog box for searching for a feature or an address (depending on app)
+            search: "Ĳ_Find_ä",  // Command button to open a dialog box for finding a feature or an address (depending on app)
             locate: "Huidige locatie",  // Command button to zoom and pan to the current geographical position reported by the browser
             markup: "Correctie verzenden",  // Command button to submit a correction to the app's host
-            collect: "Content toevoegen aan kaart",  // Command button to open a template picker to add features to the map
+            collect: "Ĳ_Filter/Edit_ä",  // Command button to open a filter and template picker to add features to the map and to edit them afterwards
             filter: "Kaartlagen filteren",  // Explains purpose of type-in box affiliated with template picker
             basemap: "Basiskaart wijzigen",  // Command button to open a dialog box for switching basemaps
             share: "Delen",  // Command button to open a dropdown menu for picking a type of sharing
@@ -38,7 +38,9 @@ define(
         labels: {
             email: "e-mail",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
             Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
-            Twitter: "Twitter"  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            Twitter: "Twitter",  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            title: "titel",  // Shown as title hint in print specification box if a title hint is not configured
+            author: "auteur"  // Shown as author hint in print specification box if an author hint is not configured
         },
         prompts: {
             search: "Zoeken:",  // Appears before a search text field in dialog box for searching for a feature
@@ -50,8 +52,13 @@ define(
             geolocationDenied: "Deze site heeft geen toestemming om de huidige locatie op te halen",  // Shown when the browser does not permit the app to get the current geographical position
             geolocationUnavailable: "De browser kon de huidige locatie niet ophalen",  // Shown when the browser returns an error instead of the current geographical position
             geolocationTimeout: "De browser kon de huidige locatie niet tijdig ophalen",  // Shown when the browser does not return within a configured time limit when asked for the current geographical position
-            searchLayerMissing: "Deze zoeklaag is niet gevonden op de kaart",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the mapLayers prompt
-            searchFieldMissing: "Dit veld is niet gevonden in de zoeklaag van de kaart"  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
+            searchLayerMissing: "Ĳ_This find layer was not found in the map_ä",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the mapLayers prompt
+            searchFieldMissing: "Ĳ_This field was not found in the map find layer_ä",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the layerFields prompt
+            allSearchFieldsMissing: "Ĳ_None of these fields was found in the map find layer_ä",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find any of the fields that were configured for the find command; works with the layerFields prompt
+            fieldNotFound: "Dit veld bestaat in geen enkele van de kaartlagen",  // Appears when a field used in the configuration was not found in any map layer
+            yourContentSubmitted: "Uw content is verzonden. Dank u.",  // Appears after content has been added to the map and successfully submitted to the server
+            noConfiguration: "Geen toegang tot de configuratie van de applicatie",  // Appears if the app, during startup, cannot get access to or find the configuration information; without the information, it cannot build the UI
+            unableToLaunchApp: "Kan de applicatie niet starten"  // Appears for any failure to build the user interface
         }
     })
 );

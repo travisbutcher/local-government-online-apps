@@ -17,32 +17,34 @@
 
     "values": {
         "webmap": "796c572e6dcb4c88b77c024ae003bd88",
-        "titleBar.title": "Tag, Edit, and View",
+        "titleBar.title": "Find, Edit, and Filter",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "Brick",
-        "searchBox.hint": "",
-        "filter.hint1": "Floor number",
-        "filter.value1": 1,
-        "filter.fieldname1": "FLOOR",
-        "featureSearcher.searchLayerName": "Fire Suppression Systems",
-        "featureSearcher.searchFields": "COMPLEXID,PLANID,LOCDESC,COMMENTS",
+        "filter.hint1": "Filter",
+        "filter.fieldname1": "",
+        "filter.value1": "",
+        "searchBox.hint": "Find",
+        "featureSearcher.searchLayerName": "",
+        "featureSearcher.searchFields": "",
+        "featureSearcher.displayFields": "",
+        "highlighter.highlightZoomLevel": 16,
         "basemapBox.basemapgroupTitle": "",
         "basemapBox.basemapgroupOwner": "",
-        "helpMessageBox.content": "Tag, Edit, and View provides decisions makers and data custodians the ability to edit geographic content, automatically set attribute values, and filter content in a webmap when viewing."
+        "helpMessageBox.content": "Find, Edit, and Filter provides you with the ability to locate features, edit new and existing features, and filter the visible features based on an attribute. The filter also will define the default value in the filter field of newly created features."
     },
 
     "configurationSettings": [{
-        "category": "Title",
+        "category": "<b>Header</b>",
         "fields": [{
-            "label": "Application title",
+            "label": "Title",
             "fieldName": "titleBar.title",
             "type": "string",
-            "tooltip": "Title to display in application's title bar"
+            "tooltip": "Application title displayed in header"
         }, {
-            "label": "Application icon URL",
+            "label": "Icon URL",
             "fieldName": "titleBar.iconUrl",
             "type": "string",
-            "tooltip": "URL to icon to display in application's title bar"
+            "tooltip": "Icon in top left corner of application. Icon should be 48px high."
         }, {
             "label": "Color Scheme:",
             "fieldName": "colorizer.theme",
@@ -72,72 +74,90 @@
                 "label": "Orange",
                 "value": "Orange"
             }],
-            "tooltip": "Color theme to use"
+            "tooltip": "Color of header bar and widget windows"
         }]
     }, {
-        "category": "Editing Filter",
+        "category": "<b>Map Settings</b>",
         "fields": [{
-            "label": "Value hint",
-            "fieldName": "filter.hint1",
-            "type": "string",
-            "tooltip": "Prompt for filter value field"
+            "label": "Select a map",
+            "fieldName": "webmap",
+            "type": "webmap",
+            "tooltip": "Web map displayed in the application"
         }, {
-            "label": "Initial value",
-            "fieldName": "filter.value1",
+            "label": "Alternate Basemap Group",
+            "fieldName": "basemapBox.basemapgroupTitle",
             "type": "string",
-            "tooltip": "Text to display in the value field as the initial value"
+            "tooltip": "Name of basemap group, or leave blank to use default organization basemap group",
+            "placeholder": "Organization basemaps"
         }, {
-            "label": "Value field",
-            "fieldName": "filter.fieldname1",
+            "label": "Basemap Group Owner",
+            "fieldName": "basemapBox.basemapgroupOwner",
             "type": "string",
-            "tooltip": "Field in the layer(s) that is to be used as a filter"
+            "tooltip": "Username of basemap group owner"
         }]
     }, {
-        "category": "Map",
+        "category": "<b>Find Settings</b>",
         "fields": [{
-            "label": "Hint in search field",
+            "label": "Hint",
             "fieldName": "searchBox.hint",
             "type": "string",
-            "tooltip": "Text to display in the search entry field as a format hint"
+            "tooltip": "Search hint (e.g. Find a Pre-Incident Plan, Find a Park)"
         }, {
-            "label": "Search layer name",
+            "label": "Find Layers",
             "fieldName": "featureSearcher.searchLayerName",
             "type": "string",
-            "tooltip": "Layer name of the feature layer to use for search"
+            "tooltip": "Comma-separated list of map layer names. Only values in these layers will be searched. One or many layers may be specified.",
+            "placeholder": "Layer 1, Layer 2, …"
         }, {
-            "label": "Search layer field(s)",
+            "label": "Find Fields",
             "fieldName": "featureSearcher.searchFields",
             "type": "string",
-            "tooltip": "Comma-separated list of the field(s) to look at during a search"
+            "tooltip": "Comma-separated list of Find Layer field names. Only values in these fields will be searched. One or many fields may be specified.",
+            "placeholder": "FIELD1, FIELD2, …"
         }, {
-            "label": "Zoom level for selected feature",
+            "label": "Result Display Fields",
+            "fieldName": "featureSearcher.displayFields",
+            "type": "string",
+            "tooltip": "Comma-separated list of Find Layer field names. Values in these fields will be returned in the Find results list. If the layer in which a result was found does not contain a field in this list, the Search Field value is returned.",
+            "placeholder": "FIELD1, FIELD2, …"
+        }, {
+            "label": "Zoom Level",
             "fieldName": "highlighter.highlightZoomLevel",
             "type": "number",
             "constraints": {
                 "min": 0,
                 "places": 0
             },
-            "tooltip": "Sets the map zoom level to this level after selecting a feature"
-        }, {
-            "label": "Name of basemap group",
-            "fieldName": "basemapBox.basemapgroupTitle",
-            "type": "string",
-            "tooltip": "Name of the ArcGIS.com group containing your basemaps",
-            "placeholder": "Defaults to Esri basemaps"
-        }, {
-            "label": "Username of basemap group owner",
-            "fieldName": "basemapBox.basemapgroupOwner",
-            "type": "string",
-            "tooltip": "ArcGIS.com username of owner of basemap group"
+            "tooltip": "Map zoom level for viewing selected features"
         }]
     }, {
-        "category": "Help",
+        "category": "<b>Filter & Edit Settings</b>",
         "fields": [{
-            "label": "Help text",
+            "label": "Hint",
+            "fieldName": "filter.hint1",
+            "type": "string",
+            "tooltip": "Filter hint ( e.g., Floor Number, Plan ID)"
+        }, {
+            "label": "Filter Field",
+            "fieldName": "filter.fieldname1",
+            "type": "string",
+            "tooltip": "Field used to filter the features displayed in the map",
+            "placeholder": "Name of filtering field"
+        }, {
+            "label": "Default Value",
+            "fieldName": "filter.value1",
+            "type": "string",
+            "tooltip": "Initial filter value. If the map contains editable layers, this is also the initial default value for new features.",
+            "placeholder": "Initial filter value"
+        }]
+    }, {
+        "category": "<b>Application Help</b>",
+        "fields": [{
+            "label": "Help Text",
             "fieldName": "helpMessageBox.content",
             "type": "string",
             "stringFieldOption": "textarea",
-            "tooltip": "Text to display when the help button is clicked"
+            "tooltip": "Help text displayed to the end users of this application"
         }]
     }],
 
@@ -208,8 +228,37 @@
             "rootId": "map",
             "rootClass": "mapContainer",
             "parentDiv": "contentFrame",
-            "fill": true,
-            "ignorePopups": true
+            "fill": true
+        }
+    }, {
+        "classname": "js.LGSearchFeatureLayerMultiplexer",
+        "config": {
+            "rootId": "featureSearcher",
+            "parentDiv": "contentFrame",
+            "dependencyId": "map",
+            "busyIndicator": "busyIndicator",
+            "publishPointsOnly": false,
+            "searchPattern": "%${1}%",
+            "caseInsensitiveSearch": true
+        }
+    }, {
+        "classname": "js.LGSearchBoxByText",
+        "styles": ".searchBox{display:none;width:200px;max-height:224px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .searchBox{border-radius:8px}.resultsListBox{width:96%;top:53px;overflow:auto}.okIE .resultsListBox{position:absolute;bottom:4px}.lt-ie9 .resultsListBox{width:100%;height:182px}.resultsListTable{width:97%;margin:4px}.lt-ie9 .resultsListTable{width:87%}.resultsListBody{width:80%}.resultsListSearching{background-image:url('images/loading.gif');background-position:center center;background-repeat:no-repeat;width:100%;height:1.5em}.resultsListEntry{width:84%;margin:2px;padding:4px;cursor:pointer}",
+        "config": {
+            "rootId": "searchBox",
+            "trigger": "search",
+            "publish": "showFeature",
+            "parentDiv": "contentFrame",
+            "rootClass": "searchBox",
+            "horizOffset": -2,
+            "vertOffset": [2, -2],
+            "searcher": "featureSearcher",
+            "showPrompt": "@tooltips.search",
+            "resultsListBoxClass": "resultsListBox",
+            "resultsListTableClass": "resultsListTable",
+            "resultsListBodyClass": "resultsListBody",
+            "resultsListSearchingClass": "resultsListSearching",
+            "resultsListEntryClass": "resultsListEntry"
         }
     }, {
         "classname": "js.LGHighlighter",
@@ -233,6 +282,29 @@
             "titleClass": "titleText"
         }
     }, {
+        "classname": "js.LGMapDijitContainer",
+        "styles": ".dijitContainer{position:absolute;z-index:100;}",
+        "config": {
+            "rootId": "homeButton",
+            "parentDiv": "map",
+            "dependencyId": "map",
+            "rootClass": "dijitContainer",
+            "horizOffset": 19,
+            "vertOffset": 91,
+            "dijitAmd": "esri/dijit/HomeButton"
+        }
+    }, {
+        "classname": "js.LGMapDijitContainer",
+        "config": {
+            "rootId": "homeButton",
+            "parentDiv": "map",
+            "dependencyId": "map",
+            "rootClass": "dijitContainer",
+            "horizOffset": 19,
+            "vertOffset": 132,
+            "dijitAmd": "esri/dijit/LocateButton"
+        }
+    }, {
         "classname": "js.LGGallery",
         "styles": ".commandPanel{height:52px;margin:0px;padding:2px;overflow:hidden;position:absolute;text-align:center;vertical-align:middle}.commandPanel table{border-spacing:0px}.commandPanelArrow{width:12px;height:48px;margin:4px;padding:0px;cursor:pointer;vertical-align:middle}.okIE .commandPanelArrow{border-radius:4px}.commandButton{width:44px;height:44px;text-align:center;cursor:pointer}.okIE .commandButton{border-radius:8px}.commandTextButton{width:100%;height:44px;cursor:pointer}.okIE .commandTextButton{border-radius:8px}.commandText{display:inline;height:32px;margin-left:2px;font-size:120%;overflow:hidden;vertical-align:bottom}.okIE .commandText{display:inline-block}.commandIcon{width:32px;height:32px;margin-top:6px}",
         "config": {
@@ -245,61 +317,11 @@
             "arrowClass": "commandPanelArrow"
         }
     }, {
-        "classname": "js.LGSearchFeatureLayer",
-        "config": {
-            "rootId": "featureSearcher",
-            "parentDiv": "contentFrame",
-            "dependencyId": "map",
-            "busyIndicator": "busyIndicator",
-            "publishPointsOnly": false,
-            "searchPattern": "%${1}%",
-            "caseInsensitiveSearch": true
-        }
-    }, {
         "classname": "js.LGLaunchUrl",
         "config": {
             "rootId": "launcher",
             "sameWinTrigger": "launch/parent",
             "newWinTrigger": "launch/blank"
-        }
-    }, {
-        "classname": "js.LGEditTemplatePickerWithDefaults",
-        "styles": ".templateArea{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .templateArea{border-radius:8px}.templatePickerHolder {position:absolute;right:5px;top:5px;left:5px;bottom:5px;overflow-x:hidden;overflow-y:auto;}",
-        "config": {
-            "rootId": "iTemplateArea",
-            "parentDiv": "contentFrame",
-            "rootClass": "templateArea",
-            "templatePickerHolderClass": "templatePickerHolder",
-            "templatePickerDivClass": "templatePickerDiv",
-            "colorizerId": "colorizer",
-            "horizOffset": -2,
-            "vertOffset": [56, -40],
-            "trigger": "markup",
-            "dependencyId": "map",
-            "listenForDefaultsTrigger": "floor"
-        }
-    }, {
-        "classname": "js.LGFilterLayers1WithDefaults",
-        "styles": ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .filter{border-radius:8px}",
-        "config": {
-            "rootId": "filter",
-            "tooltip": "@tooltips.filter",
-            "parentDiv": "contentFrame",
-            "rootClass": "filter",
-            "horizOffset": -2,
-            "vertOffset": 2,
-            "defnExpression": "${fieldname1}=${value1}",
-            "trigger": "markup",
-            "dependencyId": "map",
-            "broadcastDefaultsPublish": "floor"
-        }
-    }, {
-        "classname": "js.LGLocate",
-        "config": {
-            "rootId": "locator",
-            "parentDiv": "contentFrame",
-            "trigger": "locate",
-            "publish": "position"
         }
     }, {
         "classname": "js.LGMessageBox",
@@ -333,7 +355,8 @@
             "horizOffset": -2,
             "vertOffset": [2, -2],
             "trigger": "basemap",
-            "dependencyId": "map"
+            "dependencyId": "map",
+            "webmapThumbnail": "images/webmap.png"
         }
     }, {
         "classname": "js.LGMapBasedMenuBox",
@@ -348,23 +371,38 @@
             "dependencyId": "map"
         }
     }, {
-        "classname": "js.LGSearchBoxByText",
-        "styles": ".searchBox{display:none;width:200px;max-height:224px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .searchBox{border-radius:8px}.resultsListBox{width:96%;top:53px;overflow:auto}.okIE .resultsListBox{position:absolute;bottom:4px}.lt-ie9 .resultsListBox{width:100%;height:182px}.resultsListTable{width:97%;margin:4px}.lt-ie9 .resultsListTable{width:87%}.resultsListBody{width:80%}.resultsListSearching{background-image:url('images/loading.gif');background-position:center center;background-repeat:no-repeat;width:100%;height:1.5em}.resultsListEntry{width:84%;margin:2px;padding:4px;cursor:pointer}",
+        "classname": "js.LGEditTemplatePickerWithDefaults",
+        "styles": ".templateArea{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .templateArea{border-radius:8px}.templatePickerHolder {position:absolute;right:5px;top:5px;left:5px;bottom:5px;overflow-x:hidden;overflow-y:auto;}",
         "config": {
-            "rootId": "searchBox",
-            "trigger": "search",
-            "publish": "showFeature",
+            "rootId": "iTemplateArea",
             "parentDiv": "contentFrame",
-            "rootClass": "searchBox",
+            "rootClass": "templateArea",
+            "templatePickerHolderClass": "templatePickerHolder",
+            "templatePickerDivClass": "templatePickerDiv",
+            "colorizerId": "colorizer",
             "horizOffset": -2,
-            "vertOffset": [2, -2],
-            "searcher": "featureSearcher",
-            "showPrompt": "@prompts.search",
-            "resultsListBoxClass": "resultsListBox",
-            "resultsListTableClass": "resultsListTable",
-            "resultsListBodyClass": "resultsListBody",
-            "resultsListSearchingClass": "resultsListSearching",
-            "resultsListEntryClass": "resultsListEntry"
+            "vertOffset": [56, -40],
+            "trigger": "markup",
+            "dependencyId": "map",
+            "listenForDefaultsTrigger": "floor"
+        }
+    }, {
+        "classname": "js.LGFilterLayers1WithDefaults",
+        "styles": ".filter{display:none;width:210px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .filter{border-radius:8px}",
+        "config": {
+            "rootId": "filter",
+            "tooltip": "@tooltips.filter",
+            "parentDiv": "contentFrame",
+            "rootClass": "filter",
+            "horizOffset": -2,
+            "vertOffset": 2,
+            "defnExpression": "${fieldname1}=${value1}",
+            "trigger": "markup",
+            "dependencyId": "map",
+            "broadcastDefaultsPublish": "floor",
+            "busyIndicator": "busyIndicator",
+            "nonieSwitchDelaySecs": "1.5",
+            "ieSwitchDelaySecs": "3.0"
         }
     }, {
         "classname": "js.LGCommand",
@@ -377,18 +415,6 @@
             "iconClass": "commandIcon",
             "dependencyId": "featureSearcher",
             "publish": "search"
-        }
-    }, {
-        "classname": "js.LGCommand",
-        "config": {
-            "rootId": "locate",
-            "tooltip": "@tooltips.locate",
-            "iconUrl": "images/locate.png",
-            "parentDiv": "commandPanel",
-            "rootClass": "commandButton",
-            "iconClass": "commandIcon",
-            "dependencyId": "locator",
-            "publish": "locate"
         }
     }, {
         "classname": "js.LGCommand",

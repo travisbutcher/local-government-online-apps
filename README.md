@@ -4,7 +4,7 @@ This subset of our open source software helps local governments provide web appl
 via Esri's ArcGIS.com ecosystem, a place where individuals and organizations can create maps and applications
 to share on the Internet.
 
-![Image of Local Government Online App using the 'Parcel Viewer' configuration](https://raw.github.com/Esri/local-government-online-apps/master/local-government-online-apps.png "Local Government Online App using the 'Parcel Viewer' configuration")
+![Image of Local Government Online App using the 'Parcel Viewer' configuration](local-government-online-apps.png "Local Government Online App using the 'Parcel Viewer' configuration")
 
 ## Features
 
@@ -16,9 +16,10 @@ on browser screens from phone through tablet to desktop.
     2. advanced configuration: adjustment of application styles and content
     3. unlimited modifications to the open source
 
-Currently, one application configuration is provided:
+Currently, two application configurations are provided:
 
-* Parcel Viewer
+* Finder (formerly called Parcel Viewer)
+* Find, Edit, and Filter
 
 ![HTML5 Powered with CSS3 / Styling, Device Access, and Graphics, 3D & Effects](http://www.w3.org/html/logo/badge/html5-badge-h-css3-device-graphics.png "HTML5 Powered with CSS3 / Styling, Device Access, and Graphics, 3D & Effects")
 
@@ -48,7 +49,7 @@ Learn more about Esri's [ArcGIS for Local Government maps and apps](http://solut
 
 Show me a list of other [Local Government GitHub repositories](http://esri.github.io/#Local-Government).
 
-This application uses the 3.5 version of
+This application uses the 3.9 version of
 [Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/);
 see the site for concepts, samples, and a reference for using the API to create mapping web sites.
 
@@ -81,7 +82,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 A copy of the license is available in the repository's
-[LICENSE.txt](https://raw.github.com/Esri/local-government-online-apps/master/LICENSE.txt) file.
+[LICENSE.txt](LICENSE.txt) file.
 
 [](Esri Tags: Local-Government Local Government Online Apps Parcel Viewer)
 [](Esri Language: JavaScript)

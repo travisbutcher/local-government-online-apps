@@ -7,7 +7,7 @@ Some resources.arcgis.com background about web mapping applications:
 * [Creating web application templates](http://resources.arcgis.com/en/help/arcgisonline/index.html#/Creating_web_application_templates/010q00000072000000/)
 * [Adding configurable parameters to templates](http://resources.arcgis.com/en/help/arcgisonline/index.html#/Adding_configurable_parameters_to_templates/010q000000ns000000/)
 
-A web mapping application uses three arcgis.com items; each item has the usual arcgis.com description content plus a data
+A web mapping application (WMA) uses three arcgis.com items; each item has the usual arcgis.com description content plus a data
 section.  The key WMA item in the description is the URL.
 
 1.  web mapping application-ties a template and webmap together and stores some customizations
@@ -17,36 +17,23 @@ section.  The key WMA item in the description is the URL.
     2.  data section:
         1.  arcgis.com id of the template that was used to create the WMA
         2.  arcgis.com id of the webmap that was used to create the WMA
-        3.  WMA-specific overrides to the default values for the basic configuration (By "basic configuration", I'm referring
-        to the configuration that one can do post-publication such as title, color, etc.)
-2.  web mapping application template-defines the basic customization UI and provides the URL to the underlying software used by
+        3.  WMA-specific overrides to the default values for the publication configuration (By "publication configuration",
+        we're referring to the configuration -- such as title, color, etc. -- that one can do as part of publishing a webmap into a web app)
+2.  web mapping application template-defines the publication customization UI and provides the URL to the underlying software used by
 the WMA
-    1.  description's URL:  points to application's software only; e.g., http://localgovtemplates2.esri.com/online/s2.html
-    2.  data section:  a JSON structure with 2-3 parts
-        1.  "values":  the default values for the basic configuration (quotes are used because that's the JSON format-tag-value
+    1.  description's URL:  points to application's software only; e.g., http://myorg.arcgis.com/apps/Solutions/s2.html?app=apps2/ParcelViewer
+    2.  data section:  a JSON structure with 2-4 parts
+        1.  "values":  the default values for the publication configuration (quotes are used because that's the JSON format-tag-value
         pairs, with tags as quoted strings)
-        2.  "configuration":  the UI for the basic configuration
-        3.  "ui":  (optional, ParcelViewer only):  the UI for the WMA itself
+        2.  "configuration":  the UI for the publication configuration
+        3.  "ui":  the UI for the WMA itself
+        4.  "license": the license for the open source software
 3.  webmap
     1.  description's URL:  not used
     2.  data section:
         1.  "operationalLayers"
         2.  "baseMap"
         3.  "version"
-
-### local-government-online-apps' extension of the web mapping application
-
-The out-of-the-box ParcelViewer uses a "ui" section from a file hosted with the underlying software, and this UI doesn't open a
-splash screen.  But the software supports this feature-we just have to change the UI.  To keep the whole caboodle in arcgis.com,
-we'll create a web mapping application template that includes the "ui" section, and all WMAs created from that template will use
-that feature.
-
-If you were to take the apps2/ParcelViewer.json file and copy it into a web mapping application template (see
-[Adding configurable parameters to templates](http://resources.arcgis.com/en/help/arcgisonline/index.html#/Adding_configurable_parameters_to_templates/010q000000ns000000/)),
-you'd get the out-of-the-box ParcelViewer.  (The apps2/ParcelViewer_template.json
-file is the ParcelViewer.json file without the "ui" section.)  So if we make the modification described below
-[below](https://github.com/Esri/local-government-online-apps/blob/master/doc/AdvancedConfiguration.md#another-advanced-configuration--show-the-help-text-upon-launch)
-to the ParcelViewer.json file before pasting it into the template, we'll get the splash screen.
 
 
 ## A sample advanced configuration
@@ -86,9 +73,7 @@ Colors may be defined using the normal CSS styles:  text (case-insensitive, e.g.
 extended to six digits ("#ff8800"). Some color names are listed [here](http://w3schools.com/cssref/css_colornames.asp),
 with background about how the hexadecimal digits define a color provided [here](http://w3schools.com/cssref/css_colors.asp).
 
-(This change gives us a way to verify that we're not using the default configuration file).  Now try
-`http://<yourServer>/<yourSite>/ParcelViewer.html?app=apps2/Color` (if you're starting with the Parcel Viewer template
-download) or `http://<yourServer>/<yourSite>/s2.html?app=apps2/Color` (if you're starting with the GitHub repository)
+Now try `http://<yourServer>/<yourSite>/s2.html?app=apps2/Color`
 and you'll see that the app color theme, while still configured as "DarkGray", is lighter both in its
 background and in its highlighting as you hover over menu buttons.
 
@@ -191,6 +176,6 @@ The new search box definition becomes
 
 ## Question:  why don't you wrap the long "styles" lines?
 
-In order to help catch typographic errors, our configuration files are run through a
-JSON validator such as [JSONLint](http://jsonlint.com/). Inserting a break into the `styles`
+In order to help catch typographic errors, our configuration files are run through a JSON validator such as
+[JSLint](http://www.jslint.com/) or [JSONLint](http://jsonlint.com/). Inserting a break into the `styles`
 string would create invalid JSON, so we leave the text continuous to be able to use a validator.

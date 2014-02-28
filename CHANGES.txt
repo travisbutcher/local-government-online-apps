@@ -1,21 +1,34 @@
-change report #1 at 12/10/2013  8:09:23.58
+change report #33 at 02/24/2014 12:53:30.91
 -
 for git branch
-master
+release_3.2
 in repository local-government-online-apps
 -
 changes in this branch since its last commit
-D  ConstituentEngagement.html
-M  ParcelViewer.html
-M  README.md
-D  TagEditView.html
-M  apps2/ParcelViewer.json
-M  images/consteng_thumb.png
-M  images/parcelvw_thumb.png
-M  images/tagedtvw_thumb.png
-M  js2/lgonlineDrawing.js
+ M CHANGES.txt
+M  nls/ar/template.js
+M  nls/cs/template.js
+M  nls/da/template.js
+M  nls/de/template.js
+M  nls/es/template.js
+M  nls/et/template.js
+M  nls/fi/template.js
+M  nls/fr/template.js
+M  nls/he/template.js
+M  nls/it/template.js
+M  nls/ja/template.js
+M  nls/ko/template.js
+M  nls/lt/template.js
+M  nls/lv/template.js
+M  nls/nb/template.js
+M  nls/nl/template.js
 M  nls/pl/template.js
+M  nls/pt-br/template.js
 M  nls/pt-pt/template.js
-M  s1.html
-M  s2.html
-?? CHANGES.txt
+M  nls/ro/template.js
+M  nls/ru/template.js
+M  nls/sv/template.js
+M  nls/template.js
+M  nls/th/template.js
+M  nls/tr/template.js
+M  nls/zh-cn/template.js

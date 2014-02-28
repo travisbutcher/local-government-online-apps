@@ -19,10 +19,10 @@
 define(
 ({
         tooltips: {
-            search: "検索",  // Command button to open a dialog box for searching for a feature or an address (depending on app)
+            search: "検索",  // Command button to open a dialog box for finding a feature or an address (depending on app)
             locate: "現在の位置",  // Command button to zoom and pan to the current geographical position reported by the browser
             markup: "補正の送信",  // Command button to submit a correction to the app's host
-            collect: "コンテンツをマップに追加",  // Command button to open a template picker to add features to the map
+            collect: "フィルタ/編集",  // Command button to open a filter and template picker to add features to the map and to edit them afterwards
             filter: "マップ レイヤのフィルタ処理",  // Explains purpose of type-in box affiliated with template picker
             basemap: "ベースマップの切り替え",  // Command button to open a dialog box for switching basemaps
             share: "共有",  // Command button to open a dropdown menu for picking a type of sharing
@@ -38,7 +38,9 @@ define(
         labels: {
             email: "電子メール",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
             Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
-            Twitter: "Twitter"  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            Twitter: "Twitter",  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
+            title: "タイトル",  // Shown as title hint in print specification box if a title hint is not configured
+            author: "作成者"  // Shown as author hint in print specification box if an author hint is not configured
         },
         prompts: {
             search: "検索:",  // Appears before a search text field in dialog box for searching for a feature
@@ -50,8 +52,13 @@ define(
             geolocationDenied: "このサイトには、現在の位置を取得する権限がありません。",  // Shown when the browser does not permit the app to get the current geographical position
             geolocationUnavailable: "ブラウザが現在の位置を取得できませんでした",  // Shown when the browser returns an error instead of the current geographical position
             geolocationTimeout: "ブラウザが現在の位置を適切な時間内に取得できませんでした",  // Shown when the browser does not return within a configured time limit when asked for the current geographical position
-            searchLayerMissing: "この検索レイヤは、マップ内に見つかりませんでした。",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the mapLayers prompt
-            searchFieldMissing: "このフィールドは、マップ検索レイヤ内に見つかりませんでした。"  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
+            searchLayerMissing: "この検索レイヤは、マップ内に見つかりませんでした。",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the mapLayers prompt
+            searchFieldMissing: "このフィールドは、マップ検索レイヤ内に見つかりませんでした。",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the layerFields prompt
+            allSearchFieldsMissing: "これらのフィールドのいずれも、マップ検索レイヤ内に見つかりませんでした。",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find any of the fields that were configured for the find command; works with the layerFields prompt
+            fieldNotFound: "このフィールドはマップ レイヤ内に存在しません",  // Appears when a field used in the configuration was not found in any map layer
+            yourContentSubmitted: "コンテンツが送信されました。",  // Appears after content has been added to the map and successfully submitted to the server
+            noConfiguration: "アプリケーションの構成にアクセスできません",  // Appears if the app, during startup, cannot get access to or find the configuration information; without the information, it cannot build the UI
+            unableToLaunchApp: "アプリケーションが開始できません"  // Appears for any failure to build the user interface
         }
     })
 );

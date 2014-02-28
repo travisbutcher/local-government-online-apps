@@ -37,6 +37,12 @@ define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "
                 defaultColors = ["#fff", "#333333", "#5d5d5d", "#5d5d5d"];
 
             // Retrieve the theme definition from the color table
+            // There are four colors defined:
+            //   * foreground color
+            //   * background color
+            //   * highlight color
+            //   * alternate background color
+            // See the doc/AdvancedConfiguration.md document for more information.
             this.colors = [];
             array.some(this.colorTable, function (themeDefn) {
                 if (pThis.theme === themeDefn.theme) {

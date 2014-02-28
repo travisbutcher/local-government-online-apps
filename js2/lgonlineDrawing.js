@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineMap"], function (Deferred, Color) {
+define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", "js/lgonlineMap"], function (Deferred, Color, esriLang) {
 
     //========================================================================================================================//
 
@@ -28,12 +28,17 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
          * the extents of the feature; highlights a point by drawing
          * a pulsating marker over it and centers the map on the point.
          *
+         * @constructor
          * @class
          * @name js.LGHighlighter
          * @extends js.LGObject, js.LGMapDependency
          * @classdesc
          * Manages the app's highlighter.
          */
+        constructor: function () {
+            // Correct for stringized boolean
+            this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -49,8 +54,8 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
             this.highlighterLayer = pThis.mapObj.createGraphicsLayer("highlighterLayer");
 
             // Convert the color definitions to Dojo Colors--required for AGOL printing
-            this.lineHiliteColor = new Color(this.lineHiliteColor ? this.lineHiliteColor : "#0000ff"),
-            this.fillHiliteColor = new Color(this.fillHiliteColor ? this.fillHiliteColor : [0, 0, 255, 0.1]),
+            this.lineHiliteColor = new Color(this.lineHiliteColor || "#0000ff");
+            this.fillHiliteColor = new Color(this.fillHiliteColor || [0, 0, 255, 0.1]);
 
             // Hold on to the current animating timeout ID and interval ID so that we can
             // clear an active animating highlight before creating a new one
@@ -89,7 +94,7 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                         newMapCenter = geometry;
                     }
                     pThis.showHighlight(highlightGraphics, newMapCenter, pThis.highlightZoomLevel,
-                        attributes && pThis.showFeaturePopup);
+                        esriLang.isDefined(attributes) && esriLang.isDefined(infoTemplate) && pThis.showFeaturePopup);
                 }
             });
         },
@@ -178,13 +183,16 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                     zoomFinished.then(  //??? centerAt/setZoom conflict workaround
                         function () {   //??? centerAt/setZoom conflict workaround
 
+                            // Clear extant animated highlight and any existing highlight graphics & popup
+                            if (pThis.intervalTerminator) {
+                                clearTimeout(pThis.intervalTerminator);
+                                clearInterval(pThis.intervalID);
+                            }
+                            pThis.highlighterLayer.clear();
+                            pThis.mapObj.hidePopup();
+
                             // Display the highlight graphic
                             if (highlightGraphics.length > 1) {
-                                // Clear extant animated highlight
-                                if (pThis.intervalTerminator) {
-                                    clearTimeout(pThis.intervalTerminator);
-                                    clearInterval(pThis.intervalID);
-                                }
 
                                 // Create a highlight
                                 i = 0;
@@ -215,13 +223,12 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "js/lgonlineM
                                     pThis.highlighterLayer.clear();
                                 }, 5000);  // ms
                             } else {
-                                pThis.highlighterLayer.clear();
                                 pThis.highlighterLayer.add(highlightGraphics[0]);
                             }
 
                             // If we have attributes and a desire to complement the highlight with
                             // a popup, prep & display the popup
-                            if (pThis.toBoolean(showFeaturePopup, true)) {
+                            if (showFeaturePopup) {
                                 //??? centerAt/setZoom conflict workaround
                                 //???(new DeferredList([focusFinished, zoomFinished])).then(
                                 //???    function (results) {

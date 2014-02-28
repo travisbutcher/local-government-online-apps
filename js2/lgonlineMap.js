@@ -263,16 +263,12 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
 
                     // Start listening for feature highlights
                     pThis.showFeatureHandle = pThis.subscribeToMessage("showFeature", function (feature) {
-                        if (pThis.popupTemplate) {
-                            // Assign the popup template to the highlight item
-                            feature.infoTemplate = pThis.popupTemplate;
-                        }
                         pThis.publishMessage("highlightItem", feature);
                     });
 
                     // Start broadcasting map clicks
                     pThis.clickHandle = on(pThis.mapInfo.map, "click", function (evt) {
-                        pThis.publishMessage("mapClick", evt.mapPoint);
+                        pThis.publishMessage("mapClick", evt);
                     });
 
                     pThis.ready.resolve(pThis);
@@ -294,23 +290,23 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
         },
 
         /**
-         * Sets the popup template to be used by graphics that the map
-         * creates.
-         * @param {object} popupTemplate esri.dijit.PopupTemplate for
-         *        map's infoWindow
-         * @memberOf js.LGMap#
-         */
-        setPopup: function (popupTemplate) {
-            this.popupTemplate = popupTemplate;
-        },
-
-        /**
          * Shows the map's popup using content from the supplied feature.
+         * @param {object} popupLocation Map position to use for popup
+         * @param {object} feature Feature whose content is to be used in the popup
+         * @memberOf js.LGMap#
          */
         showPopupWithFeature: function (popupLocation, feature) {
             this.popup.clearFeatures();
             this.popup.setContent(feature.getContent());
             this.mapInfo.map.infoWindow.show(this.mapInfo.map.toScreen(popupLocation));
+        },
+
+        /**
+         * Hides the map's popup.
+         * @memberOf js.LGMap#
+         */
+        hidePopup: function () {
+            this.mapInfo.map.infoWindow.hide();
         },
 
         /**
@@ -372,8 +368,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         getStringFromExtents: function (extents) {
-            var projectionParams,
-                extentsString =
+            var extentsString =
                     extents.xmin.toFixed().toString() + "," +
                     extents.ymin.toFixed().toString() + "," +
                     extents.xmax.toFixed().toString() + "," +
@@ -407,7 +402,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         getExtentsFromString: function (extentsString) {
-            var minmax, extents = null, wkid;
+            var minmax, extents = null, wkid, iPROJCS;
 
             // Get the four to five comma-separated parts
             minmax = extentsString.split(",");
@@ -415,7 +410,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             // If there are no commas, then they're escaped.
             if (minmax.length === 1) {
                 // Split the string on "PROJCS" if it exists
-                var iPROJCS = extentsString.indexOf("PROJCS");
+                iPROJCS = extentsString.indexOf("PROJCS");
                 if (iPROJCS > 0) {
                     // Split the numbers on the escaped commas
                     minmax = extentsString.substr(0, iPROJCS).split("%2C");
