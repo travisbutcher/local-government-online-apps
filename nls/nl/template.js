@@ -52,11 +52,11 @@ define(
             geolocationDenied: "Deze site heeft geen toestemming om de huidige locatie op te halen",  // Shown when the browser does not permit the app to get the current geographical position
             geolocationUnavailable: "De browser kon de huidige locatie niet ophalen",  // Shown when the browser returns an error instead of the current geographical position
             geolocationTimeout: "De browser kon de huidige locatie niet tijdig ophalen",  // Shown when the browser does not return within a configured time limit when asked for the current geographical position
-            searchLayerMissing: "Deze zoeklaag is niet gevonden op de kaart",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the mapLayers prompt
-            searchFieldMissing: "Dit veld is niet gevonden in de zoeklaag van de kaart",  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
-            allSearchFieldsMissing: "Deze velden zijn niet gevonden in de zoeklaag van de kaart",  // Appears before a list of fields in the configured map search layer; shown when the app cannot find any of the fields that were configured for the search command; works with the layerFields prompt
+            searchLayerMissing: "Ĳ_This find layer was not found in the map_ä",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the mapLayers prompt
+            searchFieldMissing: "Ĳ_This field was not found in the map find layer_ä",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the layerFields prompt
+            allSearchFieldsMissing: "Ĳ_None of these fields was found in the map find layer_ä",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find any of the fields that were configured for the find command; works with the layerFields prompt
             fieldNotFound: "Dit veld bestaat in geen enkele van de kaartlagen",  // Appears when a field used in the configuration was not found in any map layer
-            yourContentSubmitted: "Uw inhoud is verzonden. Dank u.",  // Appears after content has been added to the map and successfully submitted to the server
+            yourContentSubmitted: "Uw content is verzonden. Dank u.",  // Appears after content has been added to the map and successfully submitted to the server
             noConfiguration: "Geen toegang tot de configuratie van de applicatie",  // Appears if the app, during startup, cannot get access to or find the configuration information; without the information, it cannot build the UI
             unableToLaunchApp: "Kan de applicatie niet starten"  // Appears for any failure to build the user interface
         }

@@ -19,10 +19,10 @@
 define(
 ({
         tooltips: {
-            search: "Å_Find_ö",  // Command button to open a dialog box for finding a feature or an address (depending on app)
+            search: "Etsi",  // Command button to open a dialog box for finding a feature or an address (depending on app)
             locate: "Nykyinen sijainti",  // Command button to zoom and pan to the current geographical position reported by the browser
             markup: "Lähetä korjaus",  // Command button to submit a correction to the app's host
-            collect: "Å_Filter/Edit_ö",  // Command button to open a filter and template picker to add features to the map and to edit them afterwards
+            collect: "Suodata/Muokkaa",  // Command button to open a filter and template picker to add features to the map and to edit them afterwards
             filter: "Suodata karttatasot",  // Explains purpose of type-in box affiliated with template picker
             basemap: "Vaihda taustakartta",  // Command button to open a dialog box for switching basemaps
             share: "Jaa",  // Command button to open a dropdown menu for picking a type of sharing
@@ -52,9 +52,9 @@ define(
             geolocationDenied: "Tällä sivustolla ei ole oikeutta nykyisen sijainnin hakemiseen",  // Shown when the browser does not permit the app to get the current geographical position
             geolocationUnavailable: "Selain ei pystynyt hakemaan nykyistä sijaintia",  // Shown when the browser returns an error instead of the current geographical position
             geolocationTimeout: "Selain ei pystynyt hakemaan nykyistä sijaintia ajoissa",  // Shown when the browser does not return within a configured time limit when asked for the current geographical position
-            searchLayerMissing: "Tätä hakutasoa ei löytynyt kartasta",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the mapLayers prompt
-            searchFieldMissing: "Tätä kenttää ei löydy kartan hakutasosta",  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the layerFields prompt
-            allSearchFieldsMissing: "Näitä kenttiä ei löydy kartan hakutasosta",  // Appears before a list of fields in the configured map search layer; shown when the app cannot find any of the fields that were configured for the search command; works with the layerFields prompt
+            searchLayerMissing: "Tätä hakukarttatasoa ei löytynyt kartasta",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the mapLayers prompt
+            searchFieldMissing: "Tätä kenttää ei löydy kartan hakukarttatasosta",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the layerFields prompt
+            allSearchFieldsMissing: "Näitä kenttiä ei löydy kartan hakukarttatasosta",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find any of the fields that were configured for the find command; works with the layerFields prompt
             fieldNotFound: "Tätä kenttää ei ole yhdessäkään karttatasossa",  // Appears when a field used in the configuration was not found in any map layer
             yourContentSubmitted: "Sisältö on lähetetty. Kiitos.",  // Appears after content has been added to the map and successfully submitted to the server
             noConfiguration: "Sovelluksen määrityksiä ei voi käyttää",  // Appears if the app, during startup, cannot get access to or find the configuration information; without the information, it cannot build the UI
