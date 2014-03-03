@@ -2146,7 +2146,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
                 if (mapLayer.layerObject) {
                     if (mapLayer.layerObject.type === "Feature Layer") {
-                        message += "<li>\"" + mapLayer.layerObject.name + "\"<ul>";
+                        message += "<li>\"" + mapLayer.title + "\"<ul>";
                         for (field = 0; field < mapLayer.layerObject.fields.length; field += 1) {
                             message += "<li>\"" + mapLayer.layerObject.fields[field].name + "\"</li>";
                         }
