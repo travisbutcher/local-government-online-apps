@@ -503,6 +503,9 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
         createGraphicsLayer: function (layerId) {
             var gLayer = new esri.layers.GraphicsLayer();
             gLayer.id = layerId;
+            on(gLayer, "graphic-add", function () {
+                gLayer.disableMouseEvents();
+            });
             return this.mapInfo.map.addLayer(gLayer);
         },
 
