@@ -8,6 +8,7 @@
 [show a splash screen]: markdown/HowToShowSplashScreen.md
 [sample of invalid JSON]: markdown/images/invalidJSON.png "sample of invalid JSON"
 [sample of JSLint check of invalid JSON]: markdown/images/invalidJSONLinted.png "sample of JSLint check of invalid JSON"
+[lint]: http://en.wikipedia.org/wiki/Lint_(software)
 [JSLint]: http://www.jslint.com/
 
 [nls/ folder]: ../nls/
@@ -54,17 +55,17 @@ Inserting a line break into the styles string or concatenating strings would cre
 
 #### Why the emphasis on linting JavaScript and JSON?
 
-In order to help catch typographic errors, all JavaScript & JSON in the repository is validated except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. That way, you have a known starting point for your modifications to files.
+In order to help catch typographic errors, all JavaScript & JSON in the repository is validated ("[lint][]ed") except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. That way, you have a known starting point for your modifications to files.
 
 The value of linting can be illustrated by the following snippet of a configuration file. On a slow computer, you may not notice mistyping. And it's very difficult for the web app to tell you the problem: the JSON parser that it uses just tells it that the JSON can't be interpreted -- the whole file is bad in some way.
 
 ![sample of invalid JSON][]
 
-A linter will notice, however, and usually will be able to narrow the problem down to help you to fix it quickly. Here, I typed a period instead of a comma in the "config" structure of the js.LGTitleBar component named "titleBar".
+A linter will notice, however, and usually will be able to narrow the problem down to help you to fix it quickly. In this configuration file, I typed a period instead of a comma in the "config" structure of the js.LGTitleBar component named "titleBar". This is an error that I made in the past, which, without a linter, would have taken a very long time to figure out. The error report below is from using [JSLint][] on this configuration file.
 
 ![sample of JSLint check of invalid JSON][]
 
-This is a reproduction of an error that I made in the past, which, without a linter, would have taken a very long time to figure out. The error report is from [JSLint][]. See the [Resources][] page for information about validation.
+See the [Resources][] page for information about validation.
 
 
 ----------
