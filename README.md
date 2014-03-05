@@ -1,3 +1,7 @@
+[Getting Started with Finder]: doc/GettingStartedWithFinder.md
+[Getting Started with Find, Edit, and Filter]: doc/GettingStartedWithFindEditFilter.md
+[FAQ]: doc/FAQ.md
+
 # local-government-online-apps
 
 This subset of our open source software helps local governments provide web applications to their citizens
@@ -40,10 +44,9 @@ Currently, two application configurations are provided:
 
 Additional documentation about the online apps:
 
-* [Background information about web application templates](http://resources.arcgis.com/en/help/arcgisonline/index.html#/About_web_application_templates/010q000000nt000000/)
-* [Getting started with configuring the online apps](https://github.com/Esri/local-government-online-apps/blob/master/doc/GettingStarted.md)
-* [Advanced configuration](https://github.com/Esri/local-government-online-apps/blob/master/doc/AdvancedConfiguration.md)
-* [Modifying the code](https://github.com/Esri/local-government-online-apps/blob/master/doc/ModifyingTheCode.md)
+* [Getting Started with Finder][]
+* [Getting Started with Find, Edit, and Filter][]
+* [FAQ][]
 
 Learn more about Esri's [ArcGIS for Local Government maps and apps](http://solutions.arcgis.com/local-government/).
 
