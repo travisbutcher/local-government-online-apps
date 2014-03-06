@@ -35,7 +35,7 @@ These instructions assume that you have a Web server like Internet Information S
 
     ![default map][]
 
-* Try the URL `http://<yourServer>/<yourSite>/s2.html?app=apps2/Finder` with the appropriate substitutions; you should see a general map like this:
+* Try the URL `http://<yourServer>/<yourSite>/s2.html?app=apps2/Finder` with the appropriate substitutions; you should see a try-it Finder map like this:
 
     ![default Finder map][]
 
