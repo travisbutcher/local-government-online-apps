@@ -31,9 +31,13 @@ The "configurationSettings" section is a list of [publication configuration app 
 
 The "values" section is a structure that lists initial values to be used when the publication configuration app is first started. Any changes that the publishing user makes during this configuration are stored in the web app and take precedence over the corresponding items in the values section.
 
+When your user changes values during publication configuration, the changes are stored within the web app ArcGIS Online item also in a "values" section.
+
 ### Web app's user interface components
 
 The "ui" section is a list of [web app user interface components]. The order that the components appear in this list is the order in which the components are created. If a component references another component, the referenced component must exist earlier in the list; the app does not support deferred reference resolution at this time. References are by component name.
+
+The app uses the values in the "values" section of the configuration unless they are overridden by changes recorded in the web app ArcGIS Online item.
 
 ----------
 Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.
