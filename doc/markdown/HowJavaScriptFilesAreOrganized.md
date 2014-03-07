@@ -21,7 +21,7 @@ lgonlineStart.js and lgonlineBuildUI.js are kept separate to maximize parallel a
 
 ### Documentation
 
-All JavaScript is documented using [JSDoc][] tags so that code documentation may be automatically generated. The documentation may be accessed [here][javascript code doc];
+All JavaScript is documented using [JSDoc][] tags so that code documentation may be automatically generated. The documentation may be accessed [here][javascript code doc].
 
 ### Validation
 

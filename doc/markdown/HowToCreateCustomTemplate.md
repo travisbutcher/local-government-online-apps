@@ -39,7 +39,7 @@
 
 ### Summary
 
-When you [publish a web map using a web application template][]), ArcGIS Online creates an app for you. This app is a go-between that points to your webmap, the web application template that you choose, and some template configuration values (more about this later).
+When you [publish a web map using a web application template][], ArcGIS Online creates an app for you. This app is a go-between that points to your webmap, the web application template that you choose, and some template configuration values (more about this later).
 
 ![web app structure][]
 
