@@ -1,14 +1,11 @@
-change report #37 at 03/06/2014 11:57:34.41
+change report #38 at 03/06/2014 16:49:43.19
 -
 for git branch
-hotfix_redirect_to_tryit
+master
 in repository local-government-online-apps
 -
 changes in this branch since its last commit
  M CHANGES.txt
-M  apps2/FindEditFilter.json
-M  apps2/Finder.json
-M  doc/markdown/HowToHostAppOnYourServer.md
-M  doc/markdown/images/defaultFinderMap.png
-M  doc/markdown/images/understanding.png
-M  js2/lgonlineBuildUI.js
+M  README.md
+M  local-government-online-apps.png
+A  local-government-online-apps2.png
