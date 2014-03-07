@@ -1,5 +1,6 @@
 [AMD]: http://dojotoolkit.org/blog/learn-more-about-amd
 [JSDoc]: https://github.com/jsdoc3/jsdoc
+[javascript code doc]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/index.html
 [nls/ folder]: ../../nls/
 [js2/ folder]: ../../js2/
 [Resources]: Resources.md
@@ -20,7 +21,7 @@ lgonlineStart.js and lgonlineBuildUI.js are kept separate to maximize parallel a
 
 ### Documentation
 
-All JavaScript is documented using [JSDoc][] tags so that code documentation may be automatically generated.
+All JavaScript is documented using [JSDoc][] tags so that code documentation may be automatically generated. The documentation may be accessed [here][javascript code doc];
 
 ### Validation
 

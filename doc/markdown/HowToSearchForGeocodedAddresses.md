@@ -7,6 +7,13 @@
 [multiple feature layer searcher]: images/featureLayerMultiplexerSearcher.png "multiple feature layer searcher"
 [address searcher + multiple feature layer searcher]: images/multiplexerSearcher2.png "address searcher + multiple feature layer searcher"
 
+[js.LGSearch]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearch.html
+[js.LGSearchFeatureLayer]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchFeatureLayer.html
+[js.LGSearchAddress]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchAddress.html
+[js.LGSearchMultiplexer]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchMultiplexer.html
+[js.LGSearchFeatureLayerMultiplexer]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchFeatureLayerMultiplexer.html
+[js.LGSearchBoxByText]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchBoxByText.html
+
 [SearchAddress.json]: ../examples2/SearchAddress.json
 
 [app configuration file]: UnderstandingConfigurationFile.md
@@ -40,24 +47,24 @@ When your user clicks on the magnifying glass, he/she sees a search box with a t
 
 In the web app user interface configuration, this search box is linked to a searcher class. The app's JavaScript library has several searcher classes; because each searcher has the same interface, the box can use any one of them:
 
-*  **js.LGSearchFeatureLayer** searches a feature layer by text. This is the searcher that the standard Parcel Viewer used before the December 2013 release.
+*  **[js.LGSearchFeatureLayer][]** searches a feature layer by text. This is the searcher that the standard Parcel Viewer used before the December 2013 release.
 
     ![feature layer searcher][]
 
-*  **js.LGSearchAddress** searches a geocoder by an address.
+*  **[js.LGSearchAddress][]** searches a geocoder by an address.
 
     ![address searcher][]
 
-*  **js.LGSearchMultiplexer** permits a mix of any number of other types of searchers. The search box is still working with one searcher; that searcher coordinates the efforts of one or more other searchers.
+*  **[js.LGSearchMultiplexer][]** permits a mix of any number of other types of searchers. The search box is still working with one searcher; that searcher coordinates the efforts of one or more other searchers.
 
     ![multiplex multiple searchers][]
 
-*  **js.LGSearchFeatureLayerMultiplexer** is a small modification to LGSearchMultiplexer that permits feature layer subsearchers to be specified by listing them by name in a string; once the component is created, it behaves exactly the same as LGSearchMultiplexer. (This is the searcher that the standard Solutions apps use.) An advantage of this searcher over the LGSearchMultiplexer is that you don't have to set up LGSearchFeatureLayer subsearchers in the configuration because  LGSearchFeatureLayerMultiplexer constructs them as needed based on layer names listed in the publication configuration.
+*  **[js.LGSearchFeatureLayerMultiplexer][]** is a small modification to LGSearchMultiplexer that permits feature layer subsearchers to be specified by listing them by name in a string; once the component is created, it behaves exactly the same as LGSearchMultiplexer. (This is the searcher that the standard Solutions apps use.) An advantage of this searcher over the LGSearchMultiplexer is that you don't have to set up LGSearchFeatureLayer subsearchers in the configuration because  LGSearchFeatureLayerMultiplexer constructs them as needed based on layer names listed in the publication configuration.
 
     ![multiple feature layer searcher][]
 
 
-> An aside for fans of object-oriented programming: The Solutions library contains an abstract class named js.LGSearch that defines the class interface for searchers. js.LGSearchFeatureLayer, js.LGSearchAddress, and js.LGSearchMultiplexer are subclasses of js.LGSearch. js.LGSearchFeatureLayerMultiplexer is a subclass of js.LGSearchMultiplexer that initializes differently but otherwise is the same.
+> An aside for fans of object-oriented programming: The Solutions library contains an abstract class named [js.LGSearch][] that defines the class interface for searchers. [js.LGSearchFeatureLayer][], [js.LGSearchAddress][], and [js.LGSearchMultiplexer][] are subclasses of [js.LGSearch][]. [js.LGSearchFeatureLayerMultiplexer][] is a subclass of [js.LGSearchMultiplexer][] that initializes differently but otherwise is the same.
 
 #### How to use the classes for address AND feature layer searching
 
@@ -67,7 +74,7 @@ We'll add an address searcher to the existing Parcel Viewer by using a js.LGMult
 
 #### How are the components linked?
 
-The search box component is implemented by the JavaScript class js.LGSearchBoxByText. One of its configuration parameters is "searcher", which is the name (rootId) of the searcher to use. If you look at the standard Parcel Viewer, you'll see the following component definition (the "styles" portion is truncated to fit this page):
+The search box component is implemented by the JavaScript class [js.LGSearchBoxByText][]. One of its configuration parameters is "searcher", which is the name (rootId) of the searcher to use. If you look at the standard Parcel Viewer, you'll see the following component definition (the "styles" portion is truncated to fit this page):
 
 ```json
 }, {
@@ -92,7 +99,7 @@ The search box component is implemented by the JavaScript class js.LGSearchBoxBy
 }, {
 ```
 
-So what is the "featureSearcher" component? It's a js.LGSearchFeatureLayerMultiplexer:
+So what is the "featureSearcher" component? It's a [js.LGSearchFeatureLayerMultiplexer][]:
 
 ```json
 }, {
@@ -143,7 +150,7 @@ The tag in the "values" section is a compound name (e.g., `featureSearcher.searc
     "classname": "js.LGSearchFeatureLayerMultiplexer"
     ```
 
-* After this component, we'll add components for js.LGSearchAddress and js.LGSearchMultiplexer; the result will look like this:
+* After this component, we'll add components for [js.LGSearchAddress][] and [js.LGSearchMultiplexer][]; the result will look like this:
 
     ```json
     }, {
@@ -183,17 +190,17 @@ The tag in the "values" section is a compound name (e.g., `featureSearcher.searc
     }, {
     ```
 
-    > Note how LGSearchMultiplexer has configuration parameters that refer to the js.LGSearchFeatureLayerMultiplexer and js.LGSearchAddress components by name.
+    > Note how LGSearchMultiplexer has configuration parameters that refer to the [js.LGSearchFeatureLayerMultiplexer][] and [js.LGSearchAddress][] components by name.
 
-* Copy the "rootId" configuration parameter of the js.LGSearchMultiplexer component that we just added; in this example, it's "multiSearcher".
+* Copy the "rootId" configuration parameter of the [js.LGSearchMultiplexer][] component that we just added; in this example, it's "multiSearcher".
 
-* Search for js.LGSearchBoxByText, the box that uses a searcher:
+* Search for [js.LGSearchBoxByText][], the box that uses a searcher:
 
     ```json
     "classname": "js.LGSearchBoxByText"
     ```
 
-* Change the "searcher" configuration parameter of the js.LGSearchBoxByText component to have it use the js.LGSearchMultiplexer component:
+* Change the "searcher" configuration parameter of the [js.LGSearchBoxByText][] component to have it use the [js.LGSearchMultiplexer][] component:
 
     ```json
     "searcher": "multiSearcher",

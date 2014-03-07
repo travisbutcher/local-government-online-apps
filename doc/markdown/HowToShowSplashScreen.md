@@ -1,4 +1,5 @@
 [sample help display]: images/ParcelViewerHelp.png "sample help display"
+[js.LGCallMethods]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGCallMethods.html
 [StartWithSplash.json]: ../examples2/StartWithSplash.json
 
 [app configuration file]: UnderstandingConfigurationFile.md
@@ -25,7 +26,7 @@ For this article, our change shows the help display when the app starts up. The 
 
 ![sample help display]
 
-There is a component called "js.LGCallMethods" in the web app's JavaScript library that is able to trigger actions on other components while it is being created. It's not used in the standard configuration files because it's not needed, but it is just what we want for our splash screen: We'll use it to tell the display component that contains the help text to become visible.
+There is a component called "[js.LGCallMethods][]" in the web app's JavaScript library that is able to trigger actions on other components while it is being created. It's not used in the standard configuration files because it's not needed, but it is just what we want for our splash screen: We'll use it to tell the display component that contains the help text to become visible.
 
 ----------
 ### Procedure
@@ -47,7 +48,7 @@ There is a component called "js.LGCallMethods" in the web app's JavaScript libra
     }
     ```
 
-* Change the last two lines to the following lines, which places a js.LGCallMethods component as the last component in the "ui" list of components.
+* Change the last two lines to the following lines, which places a [js.LGCallMethods][] component as the last component in the "ui" list of components.
 
     ```json
         }, {
@@ -65,13 +66,13 @@ There is a component called "js.LGCallMethods" in the web app's JavaScript libra
 
 #### What is the "config" part of js.LGCallMethods?
 
-For its configuration, js.LGCallMethods takes a "todo" list. Each element of the list consists of a JSON structure with two or three elements:
+For its configuration, [js.LGCallMethods][] takes a "todo" list. Each element of the list consists of a JSON structure with two or three elements:
 
-* **rootId** is the name of the component that js.LGCallMethods is going to ask to act.
+* **rootId** is the name of the component that [js.LGCallMethods][] is going to ask to act.
 * **method** is the name of the method (function) of that component that will perform the action.
 * **arg** is an optional argument to send to that method.
 
-What we've done is to have js.LGCallMethods tell component "helpMessageBox" to run method "setIsVisible" with the argument "true" -- in other words, to make itself visible. This will occur when the script player creates the js.LGCallMethods component.
+What we've done is to have [js.LGCallMethods][] tell component "helpMessageBox" to run method "setIsVisible" with the argument "true" -- in other words, to make itself visible. This will occur when the script player creates the [js.LGCallMethods][] component.
 
 ----------
 ### Related information

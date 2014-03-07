@@ -1,3 +1,8 @@
+[js.LGSearchFeatureLayer]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchFeatureLayer.html
+[js.LGSearchMultiplexer]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchMultiplexer.html
+[js.LGSearchFeatureLayerMultiplexer]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchFeatureLayerMultiplexer.html
+[js.LGSearchBoxByText]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchBoxByText.html
+
 [UseIndexed.json]: ../examples2/UseIndexed.json
 
 [app configuration file]: UnderstandingConfigurationFile.md
@@ -27,14 +32,14 @@ This freedom to match anywhere in the searched field is helpful, but it comes at
 
 One of the configuration parameters for the feature-layer search components is "searchPattern"; it is into this pattern that the user's typed-in text is inserted for a search. In the standard Finder, the search pattern is `"%${1}%"`. For this article, our change removes the initial wildcard character and instead use the search pattern `"${1}%"`. The resulting search pattern will work with an index in the feature layer.
 
-It is not necessary to give up fully free-text searching for smaller feature layers, however. Because the search string is configured for each searcher, we can use js.LGSearchMultiplexer to coordinate a search of your large feature layer and of your small feature layer. Your user still sees the same single type-in box for entering his/her search; we only need to change what actions are occurring out of sight of the user.
+It is not necessary to give up fully free-text searching for smaller feature layers, however. Because the search string is configured for each searcher, we can use [js.LGSearchMultiplexer][] to coordinate a search of your large feature layer and of your small feature layer. Your user still sees the same single type-in box for entering his/her search; we only need to change what actions are occurring out of sight of the user.
 
 ----------
 ### Procedure
 
-What we'll do is change LGSearchBoxByText to use a js.LGSearchMultiplexer. That searcher will coordinate a js.LGSearchFeatureLayer searcher for the large feature layer and a js.LGSearchFeatureLayerMultiplexer searcher for one or more small feature layers. By using js.LGSearchFeatureLayerMultiplexer for the small layers, it still be possible to specify the feature layers by name during publication configuration just as we can do with the standard Finder. We'll configure the js.LGSearchFeatureLayer outside of the publication configuration so that we don't have to change that user interface yet.
+What we'll do is change LGSearchBoxByText to use a [js.LGSearchMultiplexer][]. That searcher will coordinate a [js.LGSearchFeatureLayer][] searcher for the large feature layer and a [js.LGSearchFeatureLayerMultiplexer][] searcher for one or more small feature layers. By using [js.LGSearchFeatureLayerMultiplexer][] for the small layers, it still be possible to specify the feature layers by name during publication configuration just as we can do with the standard Finder. We'll configure the [js.LGSearchFeatureLayer][] outside of the publication configuration so that we don't have to change that user interface yet.
 
-(Note that the publication configuration user interface *can* be changed if you want to do so. We could remove all feature-layer configuration from the publication configuration user interface, or have two js.LGSearchFeatureLayerMultiplexer configurations with one for large layers and one for small layers, or...; there are many possibilities.)
+(Note that the publication configuration user interface *can* be changed if you want to do so. We could remove all feature-layer configuration from the publication configuration user interface, or have two [js.LGSearchFeatureLayerMultiplexer][] configurations with one for large layers and one for small layers, or...; there are many possibilities.)
 
 * Make a copy of apps2/ParcelViewer.json; we'll call it UseIndexed.json for this exercise, but the name doesn't matter.
 
@@ -44,7 +49,7 @@ What we'll do is change LGSearchBoxByText to use a js.LGSearchMultiplexer. That 
     "classname": "js.LGSearchFeatureLayerMultiplexer"
     ```
 
-* After this component, we'll add components for js.LGSearchFeatureLayer and js.LGSearchMultiplexer; the result will look like this:
+* After this component, we'll add components for [js.LGSearchFeatureLayer][] and [js.LGSearchMultiplexer][]; the result will look like this:
 
     ```json
     }, {
@@ -84,19 +89,19 @@ What we'll do is change LGSearchBoxByText to use a js.LGSearchMultiplexer. That 
     }, {
     ```
 
-    > Note a few details about js.LGSearchFeatureLayer:
-    > *  It includes configuration parameters "searchLayerName" and "searchFields". These are the same configurations that js.LGSearchFeatureLayerMultiplexer has in its publication configuration; we're just defining them here in the script for js.LGSearchFeatureLayer instead of in the publication configuration experience.
-    > *  It has a slightly different "searchPattern" configuration than js.LGSearchFeatureLayerMultiplexer: no leading wildcard.
+    > Note a few details about [js.LGSearchFeatureLayer][]:
+    > *  It includes configuration parameters "searchLayerName" and "searchFields". These are the same configurations that [js.LGSearchFeatureLayerMultiplexer][] has in its publication configuration; we're just defining them here in the script for [js.LGSearchFeatureLayer][] instead of in the publication configuration experience.
+    > *  It has a slightly different "searchPattern" configuration than [js.LGSearchFeatureLayerMultiplexer][]: no leading wildcard.
 
-* Copy the "rootId" configuration parameter of the js.LGSearchMultiplexer component that we just added; in this example, it's "multiSearcher".
+* Copy the "rootId" configuration parameter of the [js.LGSearchMultiplexer][] component that we just added; in this example, it's "multiSearcher".
 
-* Search for js.LGSearchBoxByText, the box that uses a searcher:
+* Search for [js.LGSearchBoxByText][], the box that uses a searcher:
 
     ```json
     "classname": "js.LGSearchBoxByText"
     ```
 
-* Change the "searcher" configuration parameter of the js.LGSearchBoxByText component to have it use the js.LGSearchMultiplexer component:
+* Change the "searcher" configuration parameter of the [js.LGSearchBoxByText][] component to have it use the [js.LGSearchMultiplexer][] component:
 
     ```json
     "searcher": "multiSearcher",

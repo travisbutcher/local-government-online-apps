@@ -10,6 +10,7 @@
 [sample of JSLint check of invalid JSON]: markdown/images/invalidJSONLinted.png "sample of JSLint check of invalid JSON"
 [lint]: http://en.wikipedia.org/wiki/Lint_(software)
 [JSLint]: http://www.jslint.com/
+[js.LGTitleBar]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGTitleBar.html
 
 [nls/ folder]: ../nls/
 [Resources]: markdown/Resources.md
@@ -61,7 +62,7 @@ The value of linting can be illustrated by the following snippet of a configurat
 
 ![sample of invalid JSON][]
 
-A linter will notice, however, and usually will be able to narrow the problem down to help you to fix it quickly. In this configuration file, I typed a period instead of a comma in the "config" structure of the js.LGTitleBar component named "titleBar". This is an error that I made in the past, which, without a linter, would have taken a very long time to figure out. The error report below is from using [JSLint][] on this configuration file.
+A linter will notice, however, and usually will be able to narrow the problem down to help you to fix it quickly. In this configuration file, I typed a period instead of a comma in the "config" structure of the [js.LGTitleBar][] component named "titleBar". This is an error that I made in the past, which, without a linter, would have taken a very long time to figure out. The error report below is from using [JSLint][] on this configuration file.
 
 ![sample of JSLint check of invalid JSON][]
 
