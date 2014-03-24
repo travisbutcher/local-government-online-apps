@@ -398,10 +398,11 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                         }
 
                         // Merge the values in inverse precedence order
-                        pThis.values = fileValues || {};  // defaults
-                        dojo.mixin(pThis.values, arcgisDefaults);  // app template config values
-                        dojo.mixin(pThis.values, arcgisOverrides);  // app config values
-                        dojo.mixin(pThis.values, queryParams);  // query params
+                        pThis.values = {};  // defaults
+                        dojo.mixin(pThis.values, queryParams);      // query params
+                        dojo.mixin(pThis.values, fileValues);       // params in file
+                        dojo.mixin(pThis.values, arcgisDefaults);   // app template config values
+                        dojo.mixin(pThis.values, arcgisOverrides);  // app publication config values
                         pThis.values = pThis.organizeConfigValues(pThis.values);
 
                         // Include the common config

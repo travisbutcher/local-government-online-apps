@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
+define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/Legend", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, Legend, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
 
     //========================================================================================================================//
 
@@ -173,6 +173,59 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             return basemapGroup;
         }
     });
+
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGDijitLegendBox", js.LGMapBasedMenuBox, {
+        /**
+         * Constructs an LGDijitLegendBox.
+         *
+         * @class
+         * @name js.LGDijitLegendBox
+         * @extends js.LGMapBasedMenuBox
+         * @classdesc
+         * Provides a UI holder for the JavaScript API's dijit.Legend.
+         */
+
+        /**
+         * Performs class-specific setup when the map dependency is satisfied.
+         * @memberOf js.LGBasemapBox#
+         * @override
+         */
+        onDependencyReady: function () {
+
+            try {
+
+                var legendHolder, layerInfo, legendDijit,
+                    legendId = this.rootId + "_legend";
+
+                legendHolder = new ContentPane({
+                    id: legendId,
+                    className: this.dijitLegendClass
+                }).placeAt(this.rootDiv);
+                touchScroll(legendId);
+
+                //https://developers.arcgis.com/en/javascript/jsapi/esri.arcgis.utils-amd.html#getlegendlayers
+                //Get the layerInfos list to be passed into the Legend constructor.
+                //It will honor show/hide legend settings of each layer and will not include the basemap layers.
+                layerInfo = esri.arcgis.utils.getLegendLayers(this.mapObj.mapInfo);
+
+                legendDijit = new Legend({
+                    map: this.mapObj.mapInfo.map,
+                    layerInfos: layerInfo
+                }, domConstruct.create('legendDiv')).placeAt(this.rootDiv);
+                legendHolder.set('content', legendDijit.domNode);
+                legendDijit.startup();
+
+                this.inherited(arguments);
+
+            } catch (error) {
+                this.log("LGCallMethods_1: " + error.toString());
+            }
+        }
+    });
+
 
     //========================================================================================================================//
 
@@ -2146,7 +2199,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
                 if (mapLayer.layerObject) {
                     if (mapLayer.layerObject.type === "Feature Layer") {
-                        message += "<li>\"" + mapLayer.layerObject.name + "\"<ul>";
+                        message += "<li>\"" + mapLayer.title + "\"<ul>";
                         for (field = 0; field < mapLayer.layerObject.fields.length; field += 1) {
                             message += "<li>\"" + mapLayer.layerObject.fields[field].name + "\"</li>";
                         }

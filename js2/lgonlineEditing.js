@@ -16,7 +16,7 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "esri/toolbars/draw", "esri/graphic", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, aspect, TemplatePicker, Editor, Draw, Graphic) {
+define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/_base/Color",  "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "esri/toolbars/draw", "esri/graphic", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, Color, aspect, TemplatePicker, Editor, Draw, Graphic) {
 
     //========================================================================================================================//
 
@@ -421,8 +421,8 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                     esri.symbol.SimpleMarkerSymbol.STYLE_SQUARE,
                     10,
                     new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                        new dojo.Color([255, 0, 0]), 1),
-                    new dojo.Color([0, 255, 0, 0.25])
+                        new Color([255, 0, 0]), 1),
+                    new Color([0, 255, 0, 0.25])
                 ));
             this.mapObj.mapInfo.map.graphics.add(graphic);
 
