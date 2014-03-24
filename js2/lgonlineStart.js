@@ -2,7 +2,6 @@
 /*jslint sloppy:true */
 /** @license
  | ArcGIS Solutions
- | Version 10.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
