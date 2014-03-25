@@ -775,6 +775,11 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
                         }
                     }
 
+                    // Get the bing key if the organization has one
+                    if (response.bingKey) {
+                        config.bingMapsKey = response.bingKey;
+                    }
+
                     deferred.resolve(true);
                 });
             } else {
