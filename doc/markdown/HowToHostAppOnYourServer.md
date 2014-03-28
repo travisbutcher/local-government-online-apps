@@ -11,6 +11,7 @@
 [Solutions online apps GitHub site]: https://github.com/Esri/local-government-online-apps
 [Resources]: Resources.md
 [LICENSE.txt]: ../../LICENSE.txt
+[hostonline]: HowToCreateCustomTemplate.md
 
 ![](images/gettingStarted.png)
 
@@ -18,14 +19,14 @@
 
 ### Summary
 
-Whether you are choosing to deploy these apps on your own server or are just using your server to develop and test app configuration changes before installing them in your ArcGIS Online organization, these instructions show you how to set up the project on your server.
+Whether you are choosing to deploy these apps on your own server or are just using your server to develop and test app configuration changes before [installing them in your ArcGIS Online organization][hostonline], these instructions show you how to set up the project on your server.
 
 These instructions assume that you have a Web server like Internet Information Services (IIS) installed and setup on your machine. If you are using another Web server, the general installation steps will be the same but you will need to check your Web server's documentation for specific information on deploying and testing the application, and you will need to provide an [alternate proxy program][].
 
 ----------
 ### Procedure
 
-* Download the [master branch of the repository][] from the [Solutions online apps GitHub site][]; this is the one that you'll be directed to when you choose the "Download" option during web map publishing.
+1. Download the [master branch of the repository][] from the [Solutions online apps GitHub site][]; this is the one that you'll be directed to when you choose the "Download" option during web map publishing.
 
     > The repository uses the git workflow described by [Atlassian][] and [nvie.com][]: "The master branch stores the official release history, and the develop branch serves as an integration branch for features" (Atlassian). Feature-specific branches are used to develop and test new work before it is merged into the develop branch. See [how the project is organized][] for more information about the repository.
 
