@@ -24,7 +24,7 @@
 Additional information is available on the [Resources][] page.
 
 ### Getting Started
-- [How do I host an app on my server?](#hostserver)
+- [How do I host an app on my server?](#How-do-I-host-an-app-on-my-server?)
 - [Can I host these apps in a secure environment?](#secure)
 
 ### Understanding the project
