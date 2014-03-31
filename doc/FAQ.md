@@ -23,25 +23,25 @@
 
 Additional information is available on the [Resources][] page.
 
-###Getting Started
-- [How do I host an app on my server?](hostserver)
-- [Can I host these apps in a secure environment?](secure)
+### Getting Started
+- [How do I host an app on my server?](#hostserver)
+- [Can I host these apps in a secure environment?](#secure)
 
-###Understanding the project
-- [How is the project organized?](projorg)
-- [What is inside an app configuration file?](appconfig)
-- [How are the JavaScript files organized?](jsorg)
-- [Why don't you put comments in the configuration file?](comments)
-- [Why don't you wrap the long "styles" lines in the configuration file?](longstyles)
-- [Why the emphasis on linting JavaScript and JSON?](linting)
-###Configuring
-- [How do I create a custom template?](createcustom)
-- [How do I search for geocoded addresses?](geocoded)
-- [How do I search indexed feature layers?](searchindexed)
-- [How do I show a splash screen?](splashscreen)
+### Understanding the project
+- [How is the project organized?](#projorg)
+- [What is inside an app configuration file?](#appconfig)
+- [How are the JavaScript files organized?](#jsorg)
+- [Why don't you put comments in the configuration file?](#comments)
+- [Why don't you wrap the long "styles" lines in the configuration file?](#longstyles)
+- [Why the emphasis on linting JavaScript and JSON?](#linting)
+### Configuring
+- [How do I create a custom template?](#createcustom)
+- [How do I search for geocoded addresses?](#geocoded)
+- [How do I search indexed feature layers?](#searchindexed)
+- [How do I show a splash screen?](#splashscreen)
 
-###Customizing
-- [What is customization?](custom)
+### Customizing
+- [What is customization?](#custom)
 
 ----------
 ### Getting started
