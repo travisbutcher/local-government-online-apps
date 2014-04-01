@@ -28,12 +28,13 @@ Additional information is available on the [Resources][] page.
 - [Can I host these apps in a secure environment?](#secure)
 
 ### Understanding the project
-- [How is the project organized?](#projorg)
+- [How is the project organized?](#projectorg)
 - [What is inside an app configuration file?](#appconfig)
 - [How are the JavaScript files organized?](#jsorg)
 - [Why don't you put comments in the configuration file?](#comments)
 - [Why don't you wrap the long "styles" lines in the configuration file?](#longstyles)
 - [Why the emphasis on linting JavaScript and JSON?](#linting)
+
 ### Configuring
 - [How do I create a custom template?](#createcustom)
 - [How do I search for geocoded addresses?](#geocoded)
@@ -59,7 +60,7 @@ Yes. Applications hosted and configured fully using ArcGIS Online take care of t
 #### How is the project organized?<a name="projectorg"></a>
 The project consists of a small HTML file with general app JavaScript library that "plays" a JSON script to create the app's user interface. [More...][how the project is organized]
 
-#### What is inside an app configuration file?<a name="insideconfig"></a>
+#### What is inside an app configuration file?<a name="appconfig"></a>
 Each of the templates in the Solutions set of web apps is defined using the contents of an app configuration file. This file contains a pair of user interface configuration scripts that are "played" by a corresponding pair of JavaScript apps. One script is for the publication configuration app, which permits you to do fine-tuning configuration of the app as part of the publication process; the other script is for the web app itself. [More...][app configuration file]
 
 #### How are the JavaScript files organized?<a name="jsorg"></a>
@@ -97,10 +98,10 @@ See the [Resources][] page for information about validation.
 #### How do I create a custom template?<a name="createcustom"></a>
 If you're configuring an app beyond the optins available in the app's configuration panel and using ArcGIS Online to host the app, you'll need to store the configuration in a new web app template. Using this template, your users can publish web  maps to create web apps. [More...][create a custom template]
 
-#### How do I search for geocoded addresses?<a name="geocode"></a>
+#### How do I search for geocoded addresses?<a name="geocoded"></a>
 The standard app configurations search for text in feature layers, but are capable of using Esri's World Geocode Service or another geocoder to search for an address instead of, or in addition to, searching one or more feature layers. [More...][search for geocoded addresses]
 
-#### How do I search indexed feature layers?<a name="serchindexed"></a>
+#### How do I search indexed feature layers?<a name="searchindexed"></a>
 The standard app configurations search for text in feature layers using a wildcard search with leading and trailing wildcard characters. This search matches any feature that has the search term in at least one of the search fields, which is very flexible, but also means that an index can't be used on the feature layer. By configuring the search to not use an initial wildcard, very large feature layers can be searched more efficiently. [More...][search indexed feature layers]
 
 #### How do I show a splash screen?<a name="splashscreen"></a>
