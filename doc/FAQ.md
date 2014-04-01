@@ -1,5 +1,5 @@
 [host an app on my server]: markdown/HowToHostAppOnYourServer.md
-[how the project is organized]: HowProjectIsOrganized.md
+[how the project is organized]: markdown/HowProjectIsOrganized.md
 [app configuration file]: markdown/UnderstandingConfigurationFile.md
 [JavaScript files organized]: markdown/HowJavaScriptFilesAreOrganized.md
 [create a custom template]: markdown/HowToCreateCustomTemplate.md
@@ -68,11 +68,11 @@ The JavaScript files are linted, documented, and compressed for syntax validatio
 
 #### Why don't you put comments in the configuration file?<a name="comments"></a>
 
-Inserting a comment into the the file would create invalid JSON, so we leave out comments to be able to use a validator. For more information, see [*Why the emphasis on linting JavaScript and JSON?*](linting).
+Inserting a comment into the the file would create invalid JSON, so we leave out comments to be able to use a validator. For more information, see [*Why the emphasis on linting JavaScript and JSON?*](#linting).
 
 #### Why don't you wrap the long "styles" lines in the configuration file?<a name="longstyles"></a>
 
-Inserting a line break into the styles string or concatenating strings would create invalid JSON, so we leave the string continuous to be able to use a validator. For more information, see [*Why the emphasis on linting JavaScript and JSON?*](linting).
+Inserting a line break into the styles string or concatenating strings would create invalid JSON, so we leave the string continuous to be able to use a validator. For more information, see [*Why the emphasis on linting JavaScript and JSON?*](#linting).
 
 #### Why the emphasis on linting JavaScript and JSON?<a name="linting"></a>
 
