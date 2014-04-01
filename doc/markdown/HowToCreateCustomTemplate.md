@@ -86,9 +86,9 @@ Because a template can be shared by many web apps, your selections during publis
 
 You can create custom web application templates for your organization and use them the same way as the standard ones. Because the publication configuration user interface and its initial values are defined in the template using [JSON][], you can read and change them.
 
-With the Solutions set of web apps such Parcel Viewer, Finder, et al., you can make much bigger changes, such as make the app search a geocoder with a free-form address in addition to searching the feature layers, or show a splash screen when the app starts up. If the underlying app contains the feature, you can use it in your user interface.
+With the Solutions set of web apps such Finder, and Find, Edit, and Filter, , you can make much bigger changes, such as make the app search a geocoder with a free-form address in addition to searching the feature layers, or show a splash screen when the app starts up. If the underlying app contains the feature, you can use it in your user interface.
 
-[Learn more about hosting a custom app using ArcGIS Online][hostonline]
+[Learn how to host an app using ArcGIS Online][hostonline]
 
 There are a lot of steps, but remember what it gets you: the freedom to configure a hosted app!
 
