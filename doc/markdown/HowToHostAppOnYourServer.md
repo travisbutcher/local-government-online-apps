@@ -11,7 +11,7 @@
 [Solutions online apps GitHub site]: https://github.com/Esri/local-government-online-apps
 [Resources]: Resources.md
 [LICENSE.txt]: ../../LICENSE.txt
-[hostonline]: HowToCreateCustomTemplate.md
+[hostonline]: HowToHostAppOnOnline.md
 
 ![](images/gettingStarted.png)
 

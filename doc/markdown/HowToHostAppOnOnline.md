@@ -1,45 +1,27 @@
-[publish a web map using a web application template]: http://resources.arcgis.com/en/help/arcgisonline/index.html#/Make_your_first_app/010q000000z3000000/
-[web app structure]: images/webappStructure.png "web app structure"
-[web map structure]: images/webmapStructure.png "web map structure"
-[template structure]: images/templateStructure.png "template structure"
-[standard templates]: http://www.arcgis.com/home/gallery.html#c=esri&t=apps&o=modified&f=configurable
-[example publication configuration options]: images/publicationConfiguration.png "example publication configuration options"
-[JSON]: http://en.wikipedia.org/wiki/JSON
-[Configure map viewer description]: http://resources.arcgis.com/en/help/arcgisonline/index.html#/Configure_map_viewer/010q000000mm000000/
-[standard Parcel Viewer]: http://arcgis4localgov2.maps.arcgis.com/home/item.html?id=85ec8f162e654968a3740740075b34c6
 [ArcGIS Online Parcel Viewer item summary]: images/ParcelViewerItemThumb.png "ArcGIS Online Parcel Viewer item summary"
 [web application template's ArcGIS Online id]: images/arcgisItemPageURL.png "web application template's ArcGIS Online id"
 [web application template's server URL location]: images/serverURL.png "web application template's server URL location"
 [create a custom template]: http://resources.arcgis.com/en/help/arcgisonline/index.html#//010q00000076000000#ESRI_SECTION1_55703F1EE9C845C3B07BBD85221FB074
-[http://www.arcgis.com/sharing/content/items/85ec8f162e654968a3740740075b34c6/data?f=pjson]: http://www.arcgis.com/sharing/content/items/85ec8f162e654968a3740740075b34c6/data?f=pjson
-[template in ArcGIS Online]: http://www.arcgis.com/sharing/content/items/85ec8f162e654968a3740740075b34c6/data?f=pjson
-[ArcGIS Resources]: http://resources.arcgis.com/en/help/arcgisonline/index.html#/Add_configurable_parameters_to_templates/010q000000ns000000/
-[JSON.org]: http://www.json.org/
+
 [Share]: http://doc.arcgis.com/en/arcgis-online/share-maps/share-items.htm#ESRI_SECTION1_0CF790E7414B48BEB0E69484A76D6A03
 [create a new group]:http://doc.arcgis.com/en/arcgis-online/share-maps/create-groups.htm
 
-[user interface changed to white on red]: images/ParcelViewerRed.png "user interface changed to white on red"
-[user interface changed to black on orange]: images/ParcelViewerOrange.png "user interface changed to black on orange"
-[apps2/ParcelViewer.json]: ../../apps2/ParcelViewer.json
-[Red.json]: ../examples2/Red.json
-[Orange.json]: ../examples2/Orange.json
-
 [app configuration file]: UnderstandingConfigurationFile.md
-[apps2/ folder]: ../../apps2/
+[customapps]: HowToCreateCustomTemplate.md
 [Solutions online apps GitHub site]: https://github.com/Esri/local-government-online-apps
-[doc/examples2/ folder]: ../examples2/
-[nls/ folder]: ../../nls/
 [Resources]: Resources.md
 [Esri Support]: http://support.esri.com/
 [LICENSE.txt]: ../../LICENSE.txt
 
 ![](images/configuring.png)
 
-## How to host an app using ArcGIS Online
+## How to host an app on ArcGIS Online
 
 ArcGIS Online can host your configured local government application - even if you've made modifications to the json configuration file. Once the modified app is hosted, you can make this template part of your template gallery where other members of the organization can use it to create their own applications.
 
 These steps describe the process for hosting a modified version of an existing configurable ArcGIS Online wep mapping application template, such as Finder.
+
+[Learn more about creating custom apps][customapps]
 
 ### Locate the existing app template
 Your configuration will be applied to an existing template, and the new application item you will create must reference the location of the existing application code.
@@ -94,3 +76,12 @@ The general process for adding a new application item to ArcGIS Online is descri
 5. [Share][] your new application item with your organization's Web App Templates group.
 
 Now when your users publish a webmap, they will be able to use your custom template. The resulting app should appear and behave the same as your model web app template.
+
+----------
+### Related information
+
+All app source code is available from the [Solutions online apps GitHub site][].
+
+Additional information is available on the [Resources][] page.
+
+Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.
