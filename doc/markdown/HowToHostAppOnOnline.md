@@ -17,9 +17,9 @@
 
 ## How to host an app on ArcGIS Online
 
-ArcGIS Online can host your configured local government application - even if you've made modifications to the json configuration file. Once the modified app is hosted, you can make this template part of your template gallery where other members of the organization can use it to create their own applications.
+ArcGIS Online can host your configured local government application - even if you've made modifications to the JSON configuration file. Once the modified app is hosted, you can make this template part of your template gallery where other members of the organization can use it to create their own applications.
 
-These steps describe the process for hosting a modified version of an existing configurable ArcGIS Online wep mapping application template, such as Finder.
+These steps describe the process for hosting a modified version of an existing configurable ArcGIS Online web mapping application template, such as Finder.
 
 [Learn more about creating custom apps][customapps]
 
