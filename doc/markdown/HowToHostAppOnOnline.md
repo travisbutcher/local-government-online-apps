@@ -64,24 +64,24 @@ The general process for adding a new application item to ArcGIS Online is descri
 
 1. In ArcGIS Online, click the "MY CONTENT" link at the top of the page.
 
-* Navigate to the folder where you want to create the configured template
+2. Navigate to the folder where you want to create the configured template
 
-* Click on the "Add Item" link to create a new item. Configure the item using the following options:
+3. Click on the "Add Item" link to create a new item. Configure the item using the following options:
     * The item is: An application
     * Web Mapping
     * URL: use the URL copied from the application description previously (e.g., "/apps/Solutions/s2.html?app=apps2/Finder"). If the pasted URL is modified by the Add Item box, we'll fix it later.
     * Purpose: Configurable
     * API: JavaScript
 
-* Add a title and tags and click the "ADD ITEM" button to open the Details page for the new web app template.
+4. Add a title and tags and click the "ADD ITEM" button to open the Details page for the new web app template.
 
-* Click the "EDIT" link and update title, thumbnail, summary, description, access and use constraints, tags, and credits as you wish.
+5. Click the "EDIT" link and update title, thumbnail, summary, description, access and use constraints, tags, and credits as you wish.
 
-* Fix the URL property if it doesn't match what you originally entered into the Add Item box.
+6. Fix the URL property if it doesn't match what you originally entered into the Add Item box.
 
-* Copy the contents of your modified configuration file into the "Configuration Parameters" text box.
+7. Copy the contents of your modified configuration file into the "Configuration Parameters" text box.
 
-* Click the "Save" button.
+8. Click the "Save" button.
 
 ### Add the template to your template gallery
 
