@@ -23,6 +23,7 @@ define(
             locate: "Aktuální umístění",  // Command button to zoom and pan to the current geographical position reported by the browser
             markup: "Odeslat korekci",  // Command button to submit a correction to the app's host
             collect: "Filtr/editace",  // Command button to open a filter and template picker to add features to the map and to edit them afterwards
+            dijitLegend: "Zobrazit legendu",  //Display the legend
             filter: "Filtrovat mapové vrstvy",  // Explains purpose of type-in box affiliated with template picker
             basemap: "Přepnout podkladovou mapu",  // Command button to open a dialog box for switching basemaps
             share: "Sdílet",  // Command button to open a dropdown menu for picking a type of sharing
@@ -43,18 +44,18 @@ define(
             author: "autor"  // Shown as author hint in print specification box if an author hint is not configured
         },
         prompts: {
-            search: "Najít:",  // Appears before a search text field in dialog box for searching for a feature
+            search: "Najít:",  // Appears before a find text field in dialog box for searching for a feature
             markup: "Vykreslit",  // Appears before a set of tools for drawing on the map
-            mapLayers: "Mapové vrstvy:",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the search command; works with the searchLayerMissing message
-            layerFields: "Pole vrstvy vyhledávání:"  // Appears before a list of fields in the configured map search layer; shown when the app cannot find one or more of the fields that were configured for the search command; works with the searchFieldMissing message
+            mapLayers: "Mapové vrstvy:",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the searchLayerMissing message
+            layerFields: "Hledání polí vrstvy:"  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the searchFieldMissing message
         },
         messages: {
             geolocationDenied: "Tato stránka nemá povolení k získání aktuálního umístění.",  // Shown when the browser does not permit the app to get the current geographical position
             geolocationUnavailable: "Prohlížeči se nepovedlo získat aktuální umístění.",  // Shown when the browser returns an error instead of the current geographical position
             geolocationTimeout: "Prohlížeči se nepovedlo včas získat aktuální umístění.",  // Shown when the browser does not return within a configured time limit when asked for the current geographical position
-            searchLayerMissing: "Tato vrstva hledání nebyla v mapě nalezena.",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the mapLayers prompt
-            searchFieldMissing: "Toto pole nebylo ve vrstvě hledání nalezeno.",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the layerFields prompt
-            allSearchFieldsMissing: "Žádné z těchto polí nebylo ve vrstvě hledání mapy nalezeno.",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find any of the fields that were configured for the find command; works with the layerFields prompt
+            searchLayerMissing: "Tato vrstva hledání nebyla v mapě nalezena",  // Appears before a list of map layers; shown when the app is not configured with the layer to use for the find command; works with the mapLayers prompt
+            searchFieldMissing: "Toto pole nebylo ve vrstvě hledání nalezeno",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find one or more of the fields that were configured for the find command; works with the layerFields prompt
+            allSearchFieldsMissing: "Žádné z těchto polí nebylo ve vrstvě hledání mapy nalezeno",  // Appears before a list of fields in the configured map find layer; shown when the app cannot find any of the fields that were configured for the find command; works with the layerFields prompt
             fieldNotFound: "Toto pole neexistuje v žádné mapové vrstvě",  // Appears when a field used in the configuration was not found in any map layer
             yourContentSubmitted: "Váš obsah byl odeslán. Děkujeme.",  // Appears after content has been added to the map and successfully submitted to the server
             noConfiguration: "Nelze získat přístup ke konfiguraci aplikace",  // Appears if the app, during startup, cannot get access to or find the configuration information; without the information, it cannot build the UI
