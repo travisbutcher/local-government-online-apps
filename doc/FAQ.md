@@ -1,4 +1,5 @@
 [host an app on my server]: markdown/HowToHostAppOnYourServer.md
+[host an app on online]: markdown/HowToHostAppOnOnline.md
 [how the project is organized]: markdown/HowProjectIsOrganized.md
 [app configuration file]: markdown/UnderstandingConfigurationFile.md
 [JavaScript files organized]: markdown/HowJavaScriptFilesAreOrganized.md
@@ -25,6 +26,7 @@ Additional information is available on the [Resources][] page.
 
 ### Getting Started
 - [How do I host an app on my server?](#hostserver)
+- [How do I host a configured app in ArcGIS Online?](#hostonline)
 - [Can I host these apps in a secure environment?](#secure)
 
 ### Understanding the project
@@ -49,6 +51,9 @@ Additional information is available on the [Resources][] page.
 
 #### How do I host an app on my server?<a name="hostserver"></a>
 Whether you are choosing to deploy these apps on your own server or are just using your server to develop and test app configuration changes before installing them in your ArcGIS Online organization, these instructions show you how to set up the project on your server. [More...][host an app on my server]
+
+#### How do I host a configured app in ArcGIS Online?<a name="hostonline"></a>
+Just because you've configured one of the Local Government Online apps using the configuration file doesn't mean that you have to host the app on your own web server. Learn how to host your configured app in your ArcGIS Online organization. [More...][host an app on online]
 
 #### Can I host these apps in a secure environment?<a name="secure"></a>
 Yes. Applications hosted and configured fully using ArcGIS Online take care of this for you automatically, but if you are hosting the app yourself in a secure environment, you'll need to update each reference to *http://* to the correct protocol, such as *https://*.
