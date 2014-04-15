@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js,window,document */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2012 Esri
  |

@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js,require */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2014 Esri
  |
@@ -54,8 +54,8 @@ define("js/lgonlineDijit", ["dojo/Deferred", "dojo/dom-construct", "js/lgonlineM
             var pThis = this;
 
             // Bring in the dijit's AMD, and then construct the dijit
-            require([this.dijitAmd], function (dijitConstructor) {
-                pThis.dijit = new dijitConstructor({
+            require([this.dijitAmd], function (DijitConstructor) {
+                pThis.dijit = new DijitConstructor({
                     map: pThis.mapObj.mapInfo.map
                 }, domConstruct.create("div", null, pThis.rootDiv)).startup();
 
