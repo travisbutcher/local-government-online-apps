@@ -427,7 +427,10 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
                 if (overwrite) {
                     map[key] = value;
                 } else {
-                    (map[key] = map[key] || []).push(value);
+                    // Modified original assignment for new JSLint rule
+                    //(map[key] = map[key] || []).push(value);
+                    map[key] = map[key] || [];
+                    map[key].push(value);
                 }
             });
             return map;

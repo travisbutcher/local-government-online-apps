@@ -2182,10 +2182,10 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
                             // Otherwise, use the geometry service
                             } else if (esri.config.defaults.geometryService) {
-                                var params = new esri.tasks.ProjectParameters();
-                                params.geometries = [newCenterPoint];
-                                params.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(params).then(
+                                var params2 = new esri.tasks.ProjectParameters();
+                                params2.geometries = [newCenterPoint];
+                                params2.outSR = pThis.mapInfo.map.spatialReference;
+                                esri.config.defaults.geometryService.project(params2).then(
                                     function (geometries) {
                                         newCenterPoint = geometries[0];
                                         pThis.highlightPoint(newCenterPoint);
