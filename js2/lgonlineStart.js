@@ -1,7 +1,6 @@
-/*global require,dojo,window,Modernizr,console,js,location,esri,defaultAppUI:true,alert */
-/*jslint sloppy:true */
-/** @license
- | ArcGIS Solutions
+﻿/*global require,dojo,Modernizr,console,js,esri,defaultAppUI:true,alert */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
