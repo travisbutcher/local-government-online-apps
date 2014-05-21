@@ -1,6 +1,6 @@
 ﻿/*global require,dojo,Modernizr,console,js,esri */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
-/*
+/** @license
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ require(["dojo/ready", "dojo/_base/Deferred", "esri/map", "dojo/i18n"], function
         }
 
         // Bring in language files
-        dojo.requireLocalization("esriTemplate", "template");
+        dojo.requireLocalization("esriTemplate", "resources");
 
         // Normalize the browser features
         Modernizr.load([{
