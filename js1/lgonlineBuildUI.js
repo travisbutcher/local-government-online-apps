@@ -1,6 +1,6 @@
 ﻿/*global define,dojo,esri,js,unescape,console */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,evil:true,regexp:true */
-/*
+/** @license
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
