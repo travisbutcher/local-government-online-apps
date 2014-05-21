@@ -35,7 +35,7 @@ require(["dojo/ready", "dojo/Deferred", "esri/map", "dojo/i18n"], function (read
         }
 
         // Bring in language files
-        dojo.requireLocalization("esriTemplate", "template");
+        dojo.requireLocalization("esriTemplate", "resources");
 
         // Load the UI loader
         require(["dojo/ready", "js/lgonlineBuildUI"], function (ready) {

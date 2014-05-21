@@ -30,7 +30,7 @@ require(["dojo/ready", "dojo/_base/Deferred", "esri/map", "dojo/i18n"], function
         }
 
         // Bring in language files
-        dojo.requireLocalization("esriTemplate", "template");
+        dojo.requireLocalization("esriTemplate", "resources");
 
         // Normalize the browser features
         Modernizr.load([{

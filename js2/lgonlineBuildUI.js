@@ -250,7 +250,7 @@ define("js/lgonlineBuildUI", ["dojo/on", "dojo/Deferred", "dojo/DeferredList", "
              * @member {object} i18n
              * @memberOf js.LGUIBuilder#
              */
-            this.i18n = dojo.i18n.getLocalization("esriTemplate", "template");
+            this.i18n = dojo.i18n.getLocalization("esriTemplate", "resources");
 
             // We need two things:  the UI specification and configured values,
             // whether default or overridden
