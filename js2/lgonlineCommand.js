@@ -181,7 +181,8 @@ define("js/lgonlineCommand", [
          * @override
          */
         onDependencyReady: function () {
-            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup();
+            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup(),
+                thumbnailUrl = this.webmapThumbnail;
 
             galleryId = this.rootId + "_gallery";
 
@@ -191,13 +192,27 @@ define("js/lgonlineCommand", [
             }).placeAt(this.rootDiv);
             touchScroll(galleryId);
 
+            // We'll use the webmap's thumbnail to represent its basemap
+            if (!thumbnailUrl) {
+                try {
+                    if (this.appConfig.itemInfo.item.thumbnail) {
+                        thumbnailUrl = this.appConfig.sharinghost + "/sharing/rest/content/items/" + this.appConfig.itemInfo.item.id
+                            + "/info/" + this.appConfig.itemInfo.item.thumbnail;
+                    } else {
+                        thumbnailUrl = "images/webmap.png";
+                    }
+                } catch (err) {
+                    thumbnailUrl = "images/webmap.png";
+                }
+            }
+
             // Create the gallery, adding in the basemap from the webmap (even if it is already represented
             // via the ArcGIS basemaps or the custom basemap group
             basemapGallery = new BasemapGallery({
                 basemaps: [new Basemap({
                     layers: this.appConfig.itemInfo.itemData.baseMap.baseMapLayers,
                     title: this.appConfig.itemInfo.itemData.baseMap.title,
-                    thumbnailUrl: this.webmapThumbnail || "images/webmap.png"
+                    thumbnailUrl: thumbnailUrl
                 })],
                 showArcGISBasemaps: true,  // ignored if a group is configured
                 basemapsGroup: basemapGroup,
