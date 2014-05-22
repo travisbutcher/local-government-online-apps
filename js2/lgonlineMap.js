@@ -142,7 +142,7 @@ define("js/lgonlineMap", [
          * Provides a UI web map display.
          */
         constructor: function (args) {
-            var options, extent = null, urlExtent = null, pThis = this, map;
+            var extent = null, urlExtent = null, pThis = this, map, saveInitialExtent, projectionParams;
 
             /**
              * Provides a way to test the success or failure of the map
@@ -156,7 +156,7 @@ define("js/lgonlineMap", [
 
             // Save the initial map extent to re-apply it to the map after the map's div
             // is reparented (and perhaps resized) if no other source of extent is provided
-            var saveInitialExtent = map.extent;
+            saveInitialExtent = map.extent;
 
             // Replace the standard div associated with this object with the one created
             // by the application boilerplate

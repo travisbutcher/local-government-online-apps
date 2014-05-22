@@ -96,7 +96,7 @@ define("js/lgonlineEditing", [
             // Test for editing permission
             if (this.appConfig.userPrivileges) {
                 canEdit = false;
-                array.some(this.appConfig.userPrivileges, function (privilege) {   //???
+                array.some(this.appConfig.userPrivileges, function (privilege) {
                     if (privilege === "features:user:edit") {
                         canEdit = true;
                         return true;

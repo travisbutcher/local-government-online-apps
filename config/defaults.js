@@ -1,5 +1,5 @@
-﻿/*global define,location */
-/*jslint sloppy:true */
+﻿/*global define */
+/*jslint browser:true,sloppy:true */
 /*
  | Copyright 2014 Esri
  |
