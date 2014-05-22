@@ -1,4 +1,4 @@
-/*global define,document,dojo,esri,js,unescape,console,require */
+/*global define,dojo,esri,js,unescape,console,require */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,evil:true,regexp:true */
 /*
  | Copyright 2014 Esri
@@ -56,6 +56,8 @@ define([
             // any url parameters and any application specific configuration information.
             if (config) {
                 this.config = config;
+                this.config.testpoint = this._checkTestpoint("TestFrameCallback");
+
                 // document ready
                 ready(lang.hitch(this, function () {
                     //supply either the webmap id or, if available, the item info
@@ -89,6 +91,19 @@ define([
             }
         },
 
+        // Checks for the presence of an ActiveX callback in a way that both works and passes JSLint
+        _checkTestpoint: function (testpointName) {
+            var ext, testpoint;
+            ext = typeof window.external;
+            if (ext !== "undefined") {
+                testpoint = typeof window.external[testpointName];
+                if (testpoint !== "undefined") {
+                    return testpointName;
+                }
+            }
+            return null;
+        },
+
         // Get the UI elements
         _getUIElements: function () {
             var deferred = new Deferred();
@@ -102,8 +117,8 @@ define([
             return deferred.promise;
         },
 
+        // Provides a launch error message
         _launchError: function () {
-            // Provide a launch error message
             var error;
             if (this.config && this.config.i18n) {
                 error = new Error(this.config.i18n.messages.unableToLaunchApp);
@@ -113,8 +128,8 @@ define([
             return error;
         },
 
+        // Hides the loading indicator and reveal the content
         _revealApp: function () {
-            // Hide the loading indicator and reveal the content
             domClass.remove(document.body, "app-loading");
             fx.fadeIn({
                 node: "contentDiv",
@@ -333,14 +348,12 @@ define([
                     console.log("Application is ready");
                     this._revealApp();
 
-                    if (window.external && window.external.TestFrameCallback) {  // http://stackoverflow.com/a/8585683
-                    //if (window.external && 'TestFrameCallback' in window.external) {  // http://stackoverflow.com/a/8585683
-                    //if (window.external && window.external.hasOwnProperty('TestFrameCallback')) {  // http://stackoverflow.com/a/8585683
+                    // Provide feedback to test frame
+                    if (this.config.testpoint) {
                         setTimeout(lang.hitch(this, function () {
-                            window.external.TestFrameCallback(1, JSON.stringify(this.config, ["app", "appid", "webmap"]));
+                            window.external[this.config.testpoint](1, JSON.stringify(this.config, ["app", "appid", "webmap"]));
                         }), 2000);
                     }
-
                 }),
                 lang.hitch(this, function (error) {
                     console.log(error ? error.message : this._launchError().message);
