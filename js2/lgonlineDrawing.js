@@ -16,7 +16,16 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", "js/lgonlineMap"], function (Deferred, Color, esriLang) {
+define("js/lgonlineDrawing", [
+    "dojo/Deferred",
+    "dojo/_base/Color",
+    "esri/lang",
+    "js/lgonlineMap"
+], function (
+    Deferred,
+    Color,
+    esriLang
+) {
 
     //========================================================================================================================//
 

@@ -16,7 +16,25 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "dojo/_base/lang"], function (domConstruct, dom, on, domStyle, domClass, array, topic, lang) {
+define("js/lgonlineBase", [
+    "dojo/dom-construct",
+    "dojo/dom",
+    "dojo/on",
+    "dojo/dom-style",
+    "dojo/dom-class",
+    "dojo/_base/array",
+    "dojo/topic",
+    "dojo/_base/lang"
+], function (
+    domConstruct,
+    dom,
+    on,
+    domStyle,
+    domClass,
+    array,
+    topic,
+    lang
+) {
 
     //========================================================================================================================//
 
@@ -43,6 +61,12 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         constructor: function (args) {
             var rootAttrs, parentDiv, parentDivObj, pThis = this;
 
+            // Every object gets an "args" structure with its custom parameters
+            // plus a parameter called appConfig with the application's configuration.
+            // With an application-boilerplate rootstock, the online apps scion contains
+            // a map predefined in args.appConfig.map and the webmap info in
+            // args.appConfig.itemInfo. After the safeMixin, the contents of args become
+            // contents of the object.
             if (undefined !== args) {  // Guard needed by IE7, IE8
                 dojo.safeMixin(this, args);
             }
@@ -645,7 +669,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         /**
          * Performs class-specific setup before waiting for a
          * dependency.
-         * @memberOf js.LGCommand#
+         * @memberOf js.LGDependency#
          * @param {object} dependsOn LG object that this object depends
          *        on
          */
@@ -656,7 +680,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         /**
          * Performs class-specific setup when the dependency is
          * satisfied.
-         * @memberOf js.LGCommand#
+         * @memberOf js.LGDependency#
          */
         onDependencyReady: function () {
             return null;

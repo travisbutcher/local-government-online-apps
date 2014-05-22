@@ -16,7 +16,14 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDijit", ["dojo/Deferred", "dojo/dom-construct", "js/lgonlineMap"], function (Deferred, domConstruct) {
+define("js/lgonlineDijit", [
+    "dojo/Deferred",
+    "dojo/dom-construct",
+    "js/lgonlineMap"
+], function (
+    Deferred,
+    domConstruct
+) {
 
     //========================================================================================================================//
 

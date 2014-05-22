@@ -16,7 +16,30 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/_base/Color",  "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "esri/toolbars/draw", "esri/graphic", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, Color, aspect, TemplatePicker, Editor, Draw, Graphic) {
+define("js/lgonlineEditing", [
+    "dojo/dom-construct",
+    "dojo/_base/array",
+    "dojo/_base/lang",
+    "dojo/_base/Color",
+    "dojo/aspect",
+    "esri/dijit/editing/TemplatePicker",
+    "esri/dijit/editing/Editor",
+    "esri/toolbars/draw",
+    "esri/graphic",
+    "js/lgonlineBase",
+    "js/lgonlineMap",
+    "js/lgonlineCommand"
+], function (
+    domConstruct,
+    array,
+    lang,
+    Color,
+    aspect,
+    TemplatePicker,
+    Editor,
+    Draw,
+    Graphic
+) {
 
     //========================================================================================================================//
 
@@ -235,7 +258,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
         /**
          * Makes the graphic visible and creates the class' editor.
-         * @memberOf js.LGGraphic#
+         * @memberOf js.LGEditTemplatePicker#
          * @override
          */
         show: function () {
@@ -245,7 +268,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
         /**
          * Makes the graphic invisible and deletes the class' editor.
-         * @memberOf js.LGGraphic#
+         * @memberOf js.LGEditTemplatePicker#
          * @override
          */
         hide: function () {

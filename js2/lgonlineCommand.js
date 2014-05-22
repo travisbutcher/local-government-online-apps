@@ -16,7 +16,53 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/Legend", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, Legend, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
+define("js/lgonlineCommand", [
+    "dojo/dom-construct",
+    "dojo/dom",
+    "dojo/on",
+    "dojo/Deferred",
+    "dojo/DeferredList",
+    "dojo/dom-style",
+    "dojo/dom-class",
+    "dojo/_base/array",
+    "dojo/_base/lang",
+    "dojo/string",
+    "dijit/form/TextBox",
+    "dijit/layout/ContentPane",
+    "esri/dijit/Legend",
+    "esri/dijit/BasemapGallery",
+    "esri/dijit/Basemap",
+    "esri/tasks/locator",
+    "esri/tasks/PrintTask",
+    "esri/tasks/PrintParameters",
+    "esri/tasks/PrintTemplate",
+    "esri/tasks/LegendLayer",
+    "esri/dijit/PopupTemplate",
+    "js/lgonlineBase",
+    "js/lgonlineMap"
+], function (
+    domConstruct,
+    dom,
+    on,
+    Deferred,
+    DeferredList,
+    domStyle,
+    domClass,
+    array,
+    lang,
+    string,
+    TextBox,
+    ContentPane,
+    Legend,
+    BasemapGallery,
+    Basemap,
+    Locator,
+    PrintTask,
+    PrintParameters,
+    PrintTemplate,
+    LegendLayer,
+    PopupTemplate
+) {
 
     //========================================================================================================================//
 

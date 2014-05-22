@@ -16,7 +16,34 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "esri/arcgis/utils", "esri/dijit/Popup", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, utils, Popup) {
+define("js/lgonlineMap", [
+    "dojo/dom-construct",
+    "dojo/dom",
+    "dojo/on",
+    "dojo/_base/lang",
+    "dojo/_base/array",
+    "dojo/Deferred",
+    "dojo/dom-class",
+    "dojo/dom-attr",
+    "esri/arcgis/utils",
+    "esri/dijit/Popup",
+    "esri/layers/GraphicsLayer",
+    "esri/tasks/ProjectParameters",
+    "js/lgonlineBase"
+], function (
+    domConstruct,
+    dom,
+    on,
+    lang,
+    array,
+    Deferred,
+    domClass,
+    domAttr,
+    utils,
+    Popup,
+    GraphicsLayer,
+    ProjectParameters
+) {
 
     //========================================================================================================================//
 
@@ -53,8 +80,8 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * Constructs an LGMap.
          * <br><b>N.B.: this implementation does not support more
          * than one map per app.</b>
-         * <br>All four extents parameters must be supplied in order for
-         * extents to be modified; otherwise, web map's extents are
+         * <br>All four extent parameters must be supplied in order for
+         * extent to be modified; otherwise, web map's extent are
          * used.
          * <br>Listens for "position" messages of the form
          * {latitude:<number>, longitude:<number>}, recenters the map to
@@ -101,7 +128,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          *        extent
          * @param {string|number} [args.values.ymax] Northernmost map
          *        extent
-         * @param {string|number} [args.values.wkid] wkid for extents
+         * @param {string|number} [args.values.wkid] wkid for extent
          *        coordinates
          *
          * @param {object} [args.i18n] Key-value pairs for text
@@ -115,7 +142,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * Provides a UI web map display.
          */
         constructor: function () {
-            var options, extents = null, pThis = this;
+            var options, extent = null, pThis = this;
 
             /**
              * Provides a way to test the success or failure of the map
@@ -132,32 +159,32 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             this.popup = new Popup(null, domConstruct.create("div"));
             options.mapOptions.infoWindow = this.popup;
 
-            // Set up configured extents
+            // Set up configured extent
             if (this.xmin && this.ymin && this.xmax && this.ymax) {
                 try {
-                    extents = {
+                    extent = {
                         xmin: this.xmin,
                         ymin: this.ymin,
                         xmax: this.xmax,
                         ymax: this.ymax
                     };
 
-                    extents.spatialReference = {};
+                    extent.spatialReference = {};
                     if (this.wkid) {
-                        extents.spatialReference.wkid = Number(this.wkid);
+                        extent.spatialReference.wkid = Number(this.wkid);
                     } else {
-                        extents.spatialReference.wkid = 102100;
+                        extent.spatialReference.wkid = 102100;
                     }
-                    extents = new esri.geometry.Extent(extents);
+                    extent = new esri.geometry.Extent(extent);
                 } catch (err1) {
-                    extents = null;
+                    extent = null;
                 }
             }
 
             // Override the initial extent from the configuration with URL extent values;
             // need to have a complete set of the latter
             if (this.ex) {
-                extents = this.getExtentsFromString(this.ex);
+                extent = this.getExtentsFromString(this.ex);
             }
 
             // Do we have a Bing maps key?
@@ -196,28 +223,28 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
                     }));
                     //);
 
-                    // Jump to the initial extents
-                    if (extents) {
+                    // Jump to the initial extent
+                    if (extent) {
                         // Set the initial extent, but keep the map's spatial reference,
-                        // so we have to convert the extents to match the map
-                        if (extents.spatialReference.wkid !== pThis.mapInfo.map.spatialReference.wkid) {
+                        // so we have to convert the extent to match the map
+                        if (extent.spatialReference.wkid !== pThis.mapInfo.map.spatialReference.wkid) {
                             if (esri.config.defaults.geometryService) {
                                 projectionParams = new esri.tasks.ProjectParameters();
-                                projectionParams.geometries = [extents];
+                                projectionParams.geometries = [extent];
                                 projectionParams.outSR = pThis.mapInfo.map.spatialReference;
                                 esri.config.defaults.geometryService.project(projectionParams).then(
                                     function (geometries) {
-                                        extents = geometries[0];
-                                        pThis.mapInfo.map.setExtent(extents);
+                                        extent = geometries[0];
+                                        pThis.mapInfo.map.setExtent(extent);
                                     }
                                 );
                             } else {
-                                pThis.log("LGMap_1: " + "Need geometry service to convert extents from wkid "
-                                    + extents.spatialReference.wkid
+                                pThis.log("LGMap_1: " + "Need geometry service to convert extent from wkid "
+                                    + extent.spatialReference.wkid
                                     + " to map's " + pThis.mapInfo.map.spatialReference.wkid);
                             }
                         } else {
-                            pThis.mapInfo.map.setExtent(extents);
+                            pThis.mapInfo.map.setExtent(extent);
                         }
                     }
 
@@ -346,107 +373,107 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
         },
 
         /**
-         * Creates a string from the map's current extents.
-         * @return {string} Comma-separated extents in the order xmin,
+         * Creates a string from the map's current extent.
+         * @return {string} Comma-separated extent in the order xmin,
          *         ymin, xmax, ymax, spatial reference's wkid
          * @memberOf js.LGMap#
          */
         getMapExtentsAsString: function () {
-            var extentsString = "";
+            var extentString = "";
             if (this.mapInfo && this.mapInfo.map) {
-                extentsString = this.getStringFromExtents(this.mapInfo.map.extent);
+                extentString = this.getStringFromExtents(this.mapInfo.map.extent);
             }
-            return extentsString;
+            return extentString;
         },
 
         /**
-         * Creates a string from extents.
-         * @param {object} extents Extents structure
-         * @return {string} Comma-separated extents in the order xmin,
+         * Creates a string from extent.
+         * @param {object} extent Extent structure
+         * @return {string} Comma-separated extent in the order xmin,
          *         ymin, xmax, ymax, spatial reference's wkid or wkt
          * @see getExtentsFromString
          * @memberOf js.LGMap#
          */
-        getStringFromExtents: function (extents) {
-            var extentsString =
-                    extents.xmin.toFixed().toString() + "," +
-                    extents.ymin.toFixed().toString() + "," +
-                    extents.xmax.toFixed().toString() + "," +
-                    extents.ymax.toFixed().toString(),
-                sr = extents.spatialReference;
+        getStringFromExtents: function (extent) {
+            var extentString =
+                    extent.xmin.toFixed().toString() + "," +
+                    extent.ymin.toFixed().toString() + "," +
+                    extent.xmax.toFixed().toString() + "," +
+                    extent.ymax.toFixed().toString(),
+                sr = extent.spatialReference;
 
             if (sr) {
                 if (sr.wkid) {
-                    extentsString = extentsString + "," + sr.wkid.toString();
+                    extentString = extentString + "," + sr.wkid.toString();
                 } else if (sr.wkt) {
-                    extentsString = extentsString + "," + encodeURIComponent(sr.wkt);
+                    extentString = extentString + "," + encodeURIComponent(sr.wkt);
                 }
             }
-            return extentsString;
+            return extentString;
         },
 
         /**
-         * Creates extents from a string.
-         * @param {string} extentsString String containing comma-
+         * Creates extent from a string.
+         * @param {string} extentString String containing comma-
          *         separated xmin, ymin, xmax, ymax, and (optionally)
          *         the spatial reference's wkid or wkt; comma separator
          *         may take the escaped form "%2C"
-         * @return {object} Extents object containing xmin,
+         * @return {object} Extent object containing xmin,
          *         ymin, xmax, ymax set to the first four numbers
          *         in the string; if the string contains a fifth
-         *         number, it is used as the wkid of the extents'
+         *         number, it is used as the wkid of the extent'
          *         spatial reference; if it contains a fifth element,
          *         it is used as the wkt of the spatial reference;
          *         otherwise 102100 is used
          * @see getStringFromExtents
          * @memberOf js.LGMap#
          */
-        getExtentsFromString: function (extentsString) {
-            var minmax, extents = null, wkid, iPROJCS;
+        getExtentsFromString: function (extentString) {
+            var minmax, extent = null, wkid, iPROJCS;
 
             // Get the four to five comma-separated parts
-            minmax = extentsString.split(",");
+            minmax = extentString.split(",");
 
             // If there are no commas, then they're escaped.
             if (minmax.length === 1) {
                 // Split the string on "PROJCS" if it exists
-                iPROJCS = extentsString.indexOf("PROJCS");
+                iPROJCS = extentString.indexOf("PROJCS");
                 if (iPROJCS > 0) {
                     // Split the numbers on the escaped commas
-                    minmax = extentsString.substr(0, iPROJCS).split("%2C");
+                    minmax = extentString.substr(0, iPROJCS).split("%2C");
 
                     // And put the wkt in the list's last slot
-                    minmax[4] = (extentsString.substr(iPROJCS));
+                    minmax[4] = (extentString.substr(iPROJCS));
                 } else {
                     // Split the whole string on the escaped commas
-                    minmax = extentsString.split("%2C");
+                    minmax = extentString.split("%2C");
                 }
             }
 
             try {
-                extents = {
+                extent = {
                     xmin: Number(minmax[0]),
                     ymin: Number(minmax[1]),
                     xmax: Number(minmax[2]),
                     ymax: Number(minmax[3])
                 };
 
-                extents.spatialReference = {};
+                extent.spatialReference = {};
                 if (minmax.length > 4) {
                     wkid = Number(minmax[4]);
                     if (!isNaN(wkid)) {
-                        extents.spatialReference.wkid = wkid;
+                        extent.spatialReference.wkid = wkid;
                     } else {
-                        extents.spatialReference.wkt = decodeURIComponent(minmax[4]);
+                        extent.spatialReference.wkt = decodeURIComponent(minmax[4]);
                     }
                 } else {
-                    extents.spatialReference.wkid = 102100;
+                    extent.spatialReference.wkid = 102100;
                 }
-                extents = new esri.geometry.Extent(extents);
+                extent = new esri.geometry.Extent(extent);
             } catch (err2) {
-                extents = null;
+                extent = null;
             }
-            return extents;
+            return extent;
         },
 
         /**
@@ -501,7 +528,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         createGraphicsLayer: function (layerId) {
-            var gLayer = new esri.layers.GraphicsLayer();
+            var gLayer = new GraphicsLayer();
             gLayer.id = layerId;
             on(gLayer, "graphic-add", function () {
                 gLayer.disableMouseEvents();
