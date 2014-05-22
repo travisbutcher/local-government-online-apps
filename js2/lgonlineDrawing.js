@@ -47,6 +47,8 @@ define("js/lgonlineDrawing", [
         constructor: function () {
             // Correct for stringized boolean
             this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
+
+            this.setUpWaitForDependency("js.LGHighlighter");
         },
 
         /**

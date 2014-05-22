@@ -41,6 +41,8 @@ define("js/lgonlineDijit", [
          */
         constructor: function () {
             this.ready = new Deferred();
+
+            this.setUpWaitForDependency("js.LGMapDijitContainer");
         },
 
         /**
@@ -63,7 +65,7 @@ define("js/lgonlineDijit", [
             // Bring in the dijit's AMD, and then construct the dijit
             require([this.dijitAmd], function (DijitConstructor) {
                 pThis.dijit = new DijitConstructor({
-                    map: pThis.mapObj.mapInfo.map
+                    map: pThis.appConfig.map
                 }, domConstruct.create("div", null, pThis.rootDiv)).startup();
 
                 pThis.ready.resolve(pThis);

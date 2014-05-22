@@ -141,8 +141,8 @@ define("js/lgonlineMap", [
          * @classdesc
          * Provides a UI web map display.
          */
-        constructor: function () {
-            var options, extent = null, pThis = this;
+        constructor: function (args) {
+            var options, extent = null, urlExtent = null, pThis = this, map;
 
             /**
              * Provides a way to test the success or failure of the map
@@ -152,14 +152,37 @@ define("js/lgonlineMap", [
              */
             this.ready = new Deferred();
 
-            options = { ignorePopups: this.toBoolean(this.ignorePopups, false) };
-            options.mapOptions = this.mapOptions || {};
-            options.mapOptions.showAttribution = true;
+            map = this.appConfig.map;
 
-            this.popup = new Popup(null, domConstruct.create("div"));
-            options.mapOptions.infoWindow = this.popup;
+            // Save the initial map extent to re-apply it to the map after the map's div
+            // is reparented (and perhaps resized) if no other source of extent is provided
+            var saveInitialExtent = map.extent;
 
-            // Set up configured extent
+            // Replace the standard div associated with this object with the one created
+            // by the application boilerplate
+            domConstruct.destroy(this.rootDiv);
+            this.rootDiv = dom.byId("mapDiv");
+            domConstruct.place(this.rootDiv, this.parentDiv);
+
+            // Patch the map div to have the expected attributes
+            domClass.add(this.rootDiv, this.rootClass);
+            domAttr.set(this.rootDiv, "id", this.rootId);
+            this.rootDiv.getLGObject = function () {
+                return pThis;
+            };
+
+            // The map div may have been resized if it has gone from filling the window to being
+            // contained within the parent, so fix its sizing
+            this.handleWindowResize();
+            map.resize(true);
+            map.reposition();
+
+            // Update the initial extent. There are three sources for the initial extent, listed in increasing importance:
+            //   1. webmap visible extent when saved
+            //   2. application extent on the application item
+            //   3. configured in LGMap item
+            //   4. supplied in the URL using the format ex=xmin,ymin,xmax,ymax[,wkid=102100],
+            //      e.g., ex=-9279312,5238092,-9259324,5256972,102100
             if (this.xmin && this.ymin && this.xmax && this.ymax) {
                 try {
                     extent = {
@@ -183,137 +206,114 @@ define("js/lgonlineMap", [
 
             // Override the initial extent from the configuration with URL extent values;
             // need to have a complete set of the latter
-            if (this.ex) {
-                extent = this.getExtentsFromString(this.ex);
-            }
-
-            // Do we have a Bing maps key?
-            if (this.commonConfig && this.commonConfig.bingMapsKey) {
-                options.bingMapsKey = this.commonConfig.bingMapsKey;
-            }
-
-            // Create the map
-            if (this.webmap) {
-                this.mapId = this.webmap;
-            }
-
-            utils.createMap(this.mapId, this.rootDiv, options).then(
-                function (response) {
-                    var projectionParams;
-                    pThis.mapInfo = response;
-
-                    // For some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
-                    // This is a bit of a hack to set it manually
-                    if (!response.map.spatialReference) {
-                        pThis.mapInfo.map.spatialReference = new esri.SpatialReference(102100);
-                    }
-
-                    //pThis.listeners.push(
-                    //    dojo.connect(pThis.mapInfo.map, "onUnload", function () {  // release event listeners upon unload
-                    //        // http://help.arcgis.com/en/webapi/javascript/arcgis/jshelp/inside_events.html
-                    //        dojo.forEach(var fred in pThis.listeners) {
-                    //            dojo.disconnect(fred);
-                    //        }
-                    //    });
-                    //);
-                    //pThis.listeners.push(
-                    on(window, "resize", lang.hitch(pThis.mapInfo.map, function () {
-                        pThis.mapInfo.map.resize();
-                        pThis.mapInfo.map.reposition();
-                    }));
-                    //);
-
-                    // Jump to the initial extent
-                    if (extent) {
-                        // Set the initial extent, but keep the map's spatial reference,
-                        // so we have to convert the extent to match the map
-                        if (extent.spatialReference.wkid !== pThis.mapInfo.map.spatialReference.wkid) {
-                            if (esri.config.defaults.geometryService) {
-                                projectionParams = new esri.tasks.ProjectParameters();
-                                projectionParams.geometries = [extent];
-                                projectionParams.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(projectionParams).then(
-                                    function (geometries) {
-                                        extent = geometries[0];
-                                        pThis.mapInfo.map.setExtent(extent);
-                                    }
-                                );
-                            } else {
-                                pThis.log("LGMap_1: " + "Need geometry service to convert extent from wkid "
-                                    + extent.spatialReference.wkid
-                                    + " to map's " + pThis.mapInfo.map.spatialReference.wkid);
-                            }
-                        } else {
-                            pThis.mapInfo.map.setExtent(extent);
-                        }
-                    }
-
-                    // Set up a graphics layer for receiving position updates and feature highlights
-                    pThis.tempGraphicsLayer = pThis.createGraphicsLayer("tempGraphicsLayer");
-
-                    // Start listening for position updates
-                    pThis.positionHandle = pThis.subscribeToMessage("position", function (newCenterPoint) {
-                        var projectionParams2;
-
-                        // Highlight the point's position if it's in the same coord system as the map
-                        if (newCenterPoint.spatialReference.wkid === pThis.mapInfo.map.spatialReference.wkid) {
-                            pThis.publishMessage("highlightItem", newCenterPoint);
-
-                        // Otherwise, convert the position into the map's spatial reference before highlighting it
-                        } else {
-                            // Use a shortcut routine for the geographic --> web mercator conversion
-                            if (newCenterPoint.spatialReference.wkid === 4326
-                                    && pThis.mapInfo.map.spatialReference.wkid === 102100) {
-                                newCenterPoint = esri.geometry.geographicToWebMercator(newCenterPoint);
-                                pThis.publishMessage("highlightItem", newCenterPoint);
-
-                            // Otherwise, use the geometry service
-                            } else if (esri.config.defaults.geometryService) {
-                                projectionParams2 = new esri.tasks.ProjectParameters();
-                                projectionParams2.geometries = [newCenterPoint];
-                                projectionParams2.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(projectionParams2).then(
-                                    function (geometries) {
-                                        newCenterPoint = geometries[0];
-                                        pThis.publishMessage("highlightItem", newCenterPoint);
-                                    }
-                                );
-
-                            // If we can't convert, we can't highlight
-                            } else {
-                                pThis.log("LGMap_1: " + "Need geometry service to convert position from wkid "
-                                    + newCenterPoint.spatialReference.wkid
-                                    + " to map's " + pThis.mapInfo.map.spatialReference.wkid);
-                            }
-                        }
-                    });
-
-                    // Start listening for feature highlights
-                    pThis.showFeatureHandle = pThis.subscribeToMessage("showFeature", function (feature) {
-                        pThis.publishMessage("highlightItem", feature);
-                    });
-
-                    // Start broadcasting map clicks
-                    pThis.clickHandle = on(pThis.mapInfo.map, "click", function (evt) {
-                        pThis.publishMessage("mapClick", evt);
-                    });
-
-                    pThis.ready.resolve(pThis);
-                },
-                function () {
-                    pThis.ready.reject(pThis);
+            if (this.appConfig.urlValues.ex) {
+                urlExtent = this.getExtentsFromString(this.appConfig.urlValues.ex);
+                if (urlExtent) {
+                    extent = urlExtent;
                 }
-            );
-        },
+            }
 
-        /**
-         * Returns the object's mapInfo object, which contains the
-         * webmap creation information and the ArcGIS API map object.
-         * @return {object} Object's mapInfo object
-         * @memberOf js.LGMap#
-         */
-        mapInfo: function () {
-            return this.mapInfo;
+            // Jump to the initial extent
+            if (extent) {
+                // Set the initial extent, but keep the map's spatial reference,
+                // so we have to convert the extent to match the map
+                if (extent.spatialReference.wkid !== map.spatialReference.wkid) {
+                    if (esri.config.defaults.geometryService) {
+                        projectionParams = new ProjectParameters();
+                        projectionParams.geometries = [extent];
+                        projectionParams.outSR = map.spatialReference;
+                        esri.config.defaults.geometryService.project(projectionParams).then(
+                            function (geometries) {
+                                extent = geometries[0];
+                                map.setExtent(extent);
+                            }
+                        );
+                    } else {
+                        this.log("LGMap_1: " + "Need geometry service to convert extent from wkid "
+                            + extent.spatialReference.wkid
+                            + " to map's " + map.spatialReference.wkid);
+                    }
+                } else {
+                    map.setExtent(extent);
+                }
+            } else {
+                // Re-apply the initial extent
+                map.setExtent(saveInitialExtent);
+            }
+
+
+            // For some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
+            // This is a bit of a hack to set it manually
+            if (!map.spatialReference) {
+                map.spatialReference = new esri.SpatialReference(102100);
+            }
+
+            //this.listeners.push(
+            //    dojo.connect(pThis.appConfig.map, "onUnload", function () {  // release event listeners upon unload
+            //        // http://help.arcgis.com/en/webapi/javascript/arcgis/jshelp/inside_events.html
+            //        dojo.forEach(var fred in this.listeners) {
+            //            dojo.disconnect(fred);
+            //        }
+            //    });
+            //);
+            //pThis.listeners.push(
+            on(window, "resize", lang.hitch(this, function () {
+                map.resize();
+                map.reposition();
+            }));
+            //);
+
+            // Set up a graphics layer for receiving position updates and feature highlights
+            this.tempGraphicsLayer = this.createGraphicsLayer("tempGraphicsLayer");
+
+            // Start listening for position updates
+            this.positionHandle = this.subscribeToMessage("position", function (newCenterPoint) {
+                var projectionParams2;
+
+                // Highlight the point's position if it's in the same coord system as the map
+                if (newCenterPoint.spatialReference.wkid === pThis.appConfig.map.spatialReference.wkid) {
+                    pThis.publishMessage("highlightItem", newCenterPoint);
+
+                // Otherwise, convert the position into the map's spatial reference before highlighting it
+                } else {
+                    // Use a shortcut routine for the geographic --> web mercator conversion
+                    if (newCenterPoint.spatialReference.wkid === 4326
+                            && pThis.appConfig.map.spatialReference.wkid === 102100) {
+                        newCenterPoint = esri.geometry.geographicToWebMercator(newCenterPoint);
+                        pThis.publishMessage("highlightItem", newCenterPoint);
+
+                    // Otherwise, use the geometry service
+                    } else if (esri.config.defaults.geometryService) {
+                        projectionParams2 = new esri.tasks.ProjectParameters();
+                        projectionParams2.geometries = [newCenterPoint];
+                        projectionParams2.outSR = pThis.appConfig.map.spatialReference;
+                        esri.config.defaults.geometryService.project(projectionParams2).then(
+                            function (geometries) {
+                                newCenterPoint = geometries[0];
+                                pThis.publishMessage("highlightItem", newCenterPoint);
+                            }
+                        );
+
+                    // If we can't convert, we can't highlight
+                    } else {
+                        pThis.log("LGMap_1: " + "Need geometry service to convert position from wkid "
+                            + newCenterPoint.spatialReference.wkid
+                            + " to map's " + pThis.appConfig.map.spatialReference.wkid);
+                    }
+                }
+            });
+
+            // Start listening for feature highlights
+            this.showFeatureHandle = this.subscribeToMessage("showFeature", function (feature) {
+                pThis.publishMessage("highlightItem", feature);
+            });
+
+            // Start broadcasting map clicks
+            this.clickHandle = on(map, "click", function (evt) {
+                pThis.publishMessage("mapClick", evt);
+            });
+
+            this.ready.resolve(this);
         },
 
         /**
@@ -323,9 +323,11 @@ define("js/lgonlineMap", [
          * @memberOf js.LGMap#
          */
         showPopupWithFeature: function (popupLocation, feature) {
-            this.popup.clearFeatures();
-            this.popup.setContent(feature.getContent());
-            this.mapInfo.map.infoWindow.show(this.mapInfo.map.toScreen(popupLocation));
+            var infoWin = this.appConfig.map.infoWindow;
+
+            infoWin.clearFeatures();
+            infoWin.setContent(feature.getContent());
+            this.appConfig.map.infoWindow.show(popupLocation);
         },
 
         /**
@@ -333,7 +335,7 @@ define("js/lgonlineMap", [
          * @memberOf js.LGMap#
          */
         hidePopup: function () {
-            this.mapInfo.map.infoWindow.hide();
+            this.appConfig.map.infoWindow.hide();
         },
 
         /**
@@ -342,7 +344,7 @@ define("js/lgonlineMap", [
          * @memberOf js.LGMap#
          */
         setExtent: function (extent) {
-            return this.mapInfo.map.setExtent(extent);
+            return this.appConfig.map.setExtent(extent);
         },
 
         /**
@@ -351,7 +353,7 @@ define("js/lgonlineMap", [
          * @memberOf js.LGMap#
          */
         centerAt: function (mapPoint) {
-            return this.mapInfo.map.centerAt(mapPoint);
+            return this.appConfig.map.centerAt(mapPoint);
         },
 
         /**
@@ -362,14 +364,14 @@ define("js/lgonlineMap", [
          * @memberOf js.LGMap#
          */
         setZoom: function (zoom) {
-            var minZoom = this.mapInfo.map.getMinZoom(),
-                maxZoom = this.mapInfo.map.getMaxZoom();
+            var minZoom = this.appConfig.map.getMinZoom(),
+                maxZoom = this.appConfig.map.getMaxZoom();
 
             // Constrain the zoom to the map's zoom levels if the map has them
             if (minZoom >= 0 && maxZoom >= 0) {
                 zoom = Math.max(minZoom, Math.min(maxZoom, zoom));
             }
-            return this.mapInfo.map.setZoom(zoom);
+            return this.appConfig.map.setZoom(zoom);
         },
 
         /**
@@ -380,8 +382,8 @@ define("js/lgonlineMap", [
          */
         getMapExtentsAsString: function () {
             var extentString = "";
-            if (this.mapInfo && this.mapInfo.map) {
-                extentString = this.getStringFromExtents(this.mapInfo.map.extent);
+            if (this.appConfig.map) {
+                extentString = this.getStringFromExtents(this.appConfig.map.extent);
             }
             return extentString;
         },
@@ -486,7 +488,7 @@ define("js/lgonlineMap", [
             var layer;
 
             // Find the operational layer that matches the specified search layer
-            array.some(this.mapInfo.itemInfo.itemData.operationalLayers, function (opLayer) {
+            array.some(this.appConfig.itemInfo.itemData.operationalLayers, function (opLayer) {
                 if (opLayer.title === name) {
                     layer = opLayer.layerObject;
                     return true;
@@ -505,7 +507,7 @@ define("js/lgonlineMap", [
         getLayerNameList: function () {
             var layerNameList = [];
 
-            array.forEach(this.mapInfo.itemInfo.itemData.operationalLayers, function (layer) {
+            array.forEach(this.appConfig.itemInfo.itemData.operationalLayers, function (layer) {
                 layerNameList.push(layer.title);
             });
 
@@ -518,7 +520,7 @@ define("js/lgonlineMap", [
          * @memberOf js.LGMap#
          */
         getOperationalLayers: function () {
-            return this.mapInfo.itemInfo.itemData.operationalLayers;
+            return this.appConfig.itemInfo.itemData.operationalLayers;
         },
 
         /**
@@ -533,7 +535,7 @@ define("js/lgonlineMap", [
             on(gLayer, "graphic-add", function () {
                 gLayer.disableMouseEvents();
             });
-            return this.mapInfo.map.addLayer(gLayer);
+            return this.appConfig.map.addLayer(gLayer);
         },
 
         /**
@@ -544,8 +546,8 @@ define("js/lgonlineMap", [
          */
         enablePopups: function () {
             // Not usable until we've created the map
-            if (this.mapInfo && this.mapInfo.clickEventListener) {
-                this.mapInfo.clickEventHandle = on(this.mapInfo.map, "click", this.mapInfo.clickEventListener);
+            if (this.appConfig.mapInfo.clickEventListener) {
+                this.appConfig.mapInfo.clickEventHandle = on(this.appConfig.map, "click", this.appConfig.mapInfo.clickEventListener);
             }
         },
 
@@ -557,8 +559,8 @@ define("js/lgonlineMap", [
          */
         disablePopups: function () {
             // Not usable until we've created the map
-            if (this.mapInfo && this.mapInfo.clickEventHandle) {
-                this.mapInfo.clickEventHandle.remove();
+            if (this.appConfig.mapInfo.clickEventHandle) {
+                this.appConfig.mapInfo.clickEventHandle.remove();
             }
         }
     });

@@ -80,6 +80,8 @@ define("js/lgonlineEditing", [
                 colorizer.foregroundColor() + "!important;background-color:" + colorizer.alternateBackgroundColor() +
                 "!important}";
             this.injectCSS(styleString);
+
+            this.setUpWaitForDependency("js.LGEditTemplatePicker");
         },
 
         /**
@@ -89,12 +91,12 @@ define("js/lgonlineEditing", [
          * @override
          */
         onDependencyReady: function () {
-            var mapInfo, allFieldsInfos, layerInfo, canEdit = true;
+            var opLayers, allFieldsInfos, layerInfo, canEdit = true;
 
             // Test for editing permission
-            if (this.commonConfig.userPrivileges) {
+            if (this.appConfig.userPrivileges) {
                 canEdit = false;
-                array.some(this.commonConfig.userPrivileges, function (privilege) {
+                array.some(this.appConfig.userPrivileges, function (privilege) {   //???
                     if (privilege === "features:user:edit") {
                         canEdit = true;
                         return true;
@@ -105,10 +107,10 @@ define("js/lgonlineEditing", [
 
             // Build a list of editable layers in this map if this user can edit
             if (canEdit) {
-                mapInfo = this.mapObj.mapInfo;
+                opLayers = this.appConfig.itemInfo.itemData.operationalLayers;
                 this.layerInfos = [];
                 this.layers = [];
-                array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                array.forEach(opLayers, lang.hitch(this, function (mapLayer) {
                     var visibleFieldInfos, eLayer = mapLayer.layerObject;
                     if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
                         if ((mapLayer.capabilities === null || mapLayer.capabilities !== "Query")
@@ -152,8 +154,6 @@ define("js/lgonlineEditing", [
                     this.setShowable(false);
 
                 } else {
-                    this.map = mapInfo.map;
-
                     // Create a place for template picker and editor combination within the dropdown
                     this.templatePickerHolder = domConstruct.create("div",
                         { className: this.templatePickerHolderClass });
@@ -208,7 +208,7 @@ define("js/lgonlineEditing", [
 
                 // Create an editing tool linked to the template picker
                 editorSettings = {
-                    map: this.map,
+                    map: this.appConfig.map,
                     templatePicker: templatePicker,
                     toolbarVisible: false,
                     layerInfos: this.layerInfos
@@ -314,12 +314,18 @@ define("js/lgonlineEditing", [
         /**
          * Constructs an LGEditTemplatePickerWithDefaults.
          *
+         * @constructor
          * @class
          * @name js.LGEditTemplatePickerWithDefaults
          * @extends js.LGEditTemplatePicker, js.LGDefaults
          * @classdesc
          * Displays an Editing Template Picker that contains default values for specified fields.
          */
+        constructor: function () {
+            this.changeDefaults();
+
+            this.setUpWaitForDependency("js.LGEditTemplatePickerWithDefaults");
+        },
 
         /**
          * Preprocesses a set of "add" edits for a layer.
@@ -341,12 +347,16 @@ define("js/lgonlineEditing", [
         /**
          * Constructs an LGFeatureByClick.
          *
+         * @constructor
          * @class
          * @name js.LGFeatureByClick
          * @extends js.LGObject, js.LGMapDependency
          * @classdesc
          * Connects a map click with a feature.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGFeatureByClick");
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -383,12 +393,16 @@ define("js/lgonlineEditing", [
         /**
          * Constructs an LGAddFeatureByClick.
          *
+         * @constructor
          * @class
          * @name js.LGAddFeatureByClick
          * @extends js.LGFeatureByClick
          * @classdesc
          * Converts a map click into a feature.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGAddFeatureByClick");
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -401,7 +415,7 @@ define("js/lgonlineEditing", [
 
             // Prepare a drawing toolbar
             esri.bundle.toolbars.draw.addPoint = this.checkForSubstitution("@tooltips.collect");
-            this.drawingToolbar = new Draw(this.mapObj.mapInfo.map, {});
+            this.drawingToolbar = new Draw(this.appConfig.map, {});
             this.drawingToolbarActive = false;
             this.drawingToolbar.on("draw-end", lang.hitch(this, this.handleDrawEnd));
         },
@@ -447,7 +461,7 @@ define("js/lgonlineEditing", [
                         new Color([255, 0, 0]), 1),
                     new Color([0, 255, 0, 0.25])
                 ));
-            this.mapObj.mapInfo.map.graphics.add(graphic);
+            this.appConfig.map.graphics.add(graphic);
 
             // Displays an info window that permits the entry or editing of a graphics attributes.
             // Get the attributes from the user via a form defined in the webmap
@@ -461,7 +475,7 @@ define("js/lgonlineEditing", [
             // Remove the placeholder graphics
             setTimeout(function () {  //???
                 alert(pThis.checkForSubstitution("@messages.yourContentSubmitted"));
-                pThis.mapObj.mapInfo.map.graphics.remove(graphic);
+                pThis.appConfig.map.graphics.remove(graphic);
             }, 2000);
         }
     });
