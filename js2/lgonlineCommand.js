@@ -16,7 +16,53 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/Legend", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, Legend, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
+define("js/lgonlineCommand", [
+    "dojo/dom-construct",
+    "dojo/dom",
+    "dojo/on",
+    "dojo/Deferred",
+    "dojo/DeferredList",
+    "dojo/dom-style",
+    "dojo/dom-class",
+    "dojo/_base/array",
+    "dojo/_base/lang",
+    "dojo/string",
+    "dijit/form/TextBox",
+    "dijit/layout/ContentPane",
+    "esri/dijit/Legend",
+    "esri/dijit/BasemapGallery",
+    "esri/dijit/Basemap",
+    "esri/tasks/locator",
+    "esri/tasks/PrintTask",
+    "esri/tasks/PrintParameters",
+    "esri/tasks/PrintTemplate",
+    "esri/tasks/LegendLayer",
+    "esri/dijit/PopupTemplate",
+    "js/lgonlineBase",
+    "js/lgonlineMap"
+], function (
+    domConstruct,
+    dom,
+    on,
+    Deferred,
+    DeferredList,
+    domStyle,
+    domClass,
+    array,
+    lang,
+    string,
+    TextBox,
+    ContentPane,
+    Legend,
+    BasemapGallery,
+    Basemap,
+    Locator,
+    PrintTask,
+    PrintParameters,
+    PrintTemplate,
+    LegendLayer,
+    PopupTemplate
+) {
 
     //========================================================================================================================//
 
@@ -94,6 +140,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         constructor: function () {
             this.ready = new Deferred();
+
+            this.setUpWaitForDependency("js.LGMapBasedMenuBox");
         },
 
         /**
@@ -114,6 +162,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * Constructs an LGBasemapBox.
          *
+         * @constructor
          * @class
          * @name js.LGBasemapBox
          * @extends js.LGMapBasedMenuBox
@@ -121,6 +170,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Provides a UI holder for the JavaScript API's basemap
          * gallery.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGBasemapBox");
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -143,14 +195,14 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             // via the ArcGIS basemaps or the custom basemap group
             basemapGallery = new BasemapGallery({
                 basemaps: [new Basemap({
-                    layers: this.mapObj.mapInfo.itemInfo.itemData.baseMap.baseMapLayers,
-                    title: this.mapObj.mapInfo.itemInfo.itemData.baseMap.title,
+                    layers: this.appConfig.itemInfo.itemData.baseMap.baseMapLayers,
+                    title: this.appConfig.itemInfo.itemData.baseMap.title,
                     thumbnailUrl: this.webmapThumbnail || "images/webmap.png"
                 })],
                 showArcGISBasemaps: true,  // ignored if a group is configured
                 basemapsGroup: basemapGroup,
-                bingMapsKey: this.mapObj.commonConfig.bingMapsKey,
-                map: this.mapObj.mapInfo.map
+                bingMapsKey: this.appConfig.bingKey,
+                map: this.appConfig.map
             }, domConstruct.create('div')).placeAt(this.rootDiv);
             galleryHolder.set('content', basemapGallery.domNode);
 
@@ -181,12 +233,16 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * Constructs an LGDijitLegendBox.
          *
+         * @constructor
          * @class
          * @name js.LGDijitLegendBox
          * @extends js.LGMapBasedMenuBox
          * @classdesc
          * Provides a UI holder for the JavaScript API's dijit.Legend.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGDijitLegendBox");
+        },
 
         /**
          * Performs class-specific setup when the map dependency is satisfied.
@@ -194,7 +250,6 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         onDependencyReady: function () {
-
             try {
 
                 var legendHolder, layerInfo, legendDijit,
@@ -209,10 +264,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 //https://developers.arcgis.com/en/javascript/jsapi/esri.arcgis.utils-amd.html#getlegendlayers
                 //Get the layerInfos list to be passed into the Legend constructor.
                 //It will honor show/hide legend settings of each layer and will not include the basemap layers.
-                layerInfo = esri.arcgis.utils.getLegendLayers(this.mapObj.mapInfo);
+                layerInfo = esri.arcgis.utils.getLegendLayers({
+                    map: this.appConfig.map,
+                    itemInfo: this.appConfig.itemInfo
+                });
 
                 legendDijit = new Legend({
-                    map: this.mapObj.mapInfo.map,
+                    map: this.appConfig.map,
                     layerInfos: layerInfo
                 }, domConstruct.create('legendDiv')).placeAt(this.rootDiv);
                 legendHolder.set('content', legendDijit.domNode);
@@ -221,7 +279,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 this.inherited(arguments);
 
             } catch (error) {
-                this.log("LGCallMethods_1: " + error.toString());
+                this.log("LGDijitLegendBox_1: " + error.toString());
             }
         }
     });
@@ -520,6 +578,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             if (this.publish) {
                 this.clickHandler = on(this.rootDiv, "click", this.handleClick);
             }
+
+            this.setUpWaitForDependency("js.LGCommand");
         },
 
         /**
@@ -612,6 +672,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     pThis.setIsVisible(pThis.isVisible);
                 });
             }
+
+            this.setUpWaitForDependency("js.LGCommandToggle");
         },
 
         /**
@@ -775,8 +837,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 selectedLayout = selectedLayout ? selectedLayout.value : null;
 
                 printParams = new PrintParameters();
-                printParams.map = pThis.mapObj.mapInfo.map;
-                printParams.outSpatialReference = pThis.mapObj.mapInfo.map.spatialReference;
+                printParams.map = pThis.appConfig.map;
+                printParams.outSpatialReference = pThis.appConfig.map.spatialReference;
 
                 printParams.template = new PrintTemplate();
                 printParams.template.format = pThis.format || "PDF";
@@ -805,6 +867,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     }
                     );
             });
+
+            this.setUpWaitForDependency("js.LGPrintMap");
         },
 
         /**
@@ -816,11 +880,11 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         checkPrerequisites: function () {
-            if (this.commonConfig.helperServices &&
-                    this.commonConfig.helperServices.printTask &&
-                    this.commonConfig.helperServices.printTask.url) {
+            if (this.appConfig.helperServices &&
+                    this.appConfig.helperServices.printTask &&
+                    this.appConfig.helperServices.printTask.url) {
                 this.printTask = new PrintTask(
-                    this.commonConfig.helperServices.printTask.url,
+                    this.appConfig.helperServices.printTask.url,
                     {
                         async: false  // depends on print service
                     }
@@ -850,6 +914,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             this.fetchPrintUrl = null;
             this.printAvailabilityTimeoutMinutes = this.toNumber(this.printAvailabilityTimeoutMinutes, 10);  // minutes
             this.printTimeouter = null;
+
+            this.setUpWaitForDependency("js.LGFetchPrintedMap");
         },
 
         /**
@@ -1083,11 +1149,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Provides a searcher for addresses.
          */
         constructor: function () {
-            this.searcher = new esri.tasks.Locator(this.searchUrl);
+            this.searcher = new Locator(this.searchUrl);
             this.searcher.outSpatialReference = new esri.SpatialReference({"wkid": this.outWkid});
             this.params = {};
             this.params.outFields = this.outFields;
             this.ready = new Deferred();
+
+            this.setUpWaitForDependency("js.LGSearchAddress");
         },
 
         /**
@@ -1097,7 +1165,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         onDependencyReady: function () {
-            this.params.searchExtent = this.mapObj.mapInfo.map.extent;
+            this.params.searchExtent = this.appConfig.map.extent;
             this.ready.resolve(this);
             this.inherited(arguments);
         },
@@ -1206,6 +1274,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             } else {
                 this.displayField = "";
             }
+
+            this.setUpWaitForDependency("js.LGSearchFeatureLayer");
         },
 
         /**
@@ -1278,7 +1348,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                         // Set up the general layer query task: pattern match
                         this.generalSearchParams = new esri.tasks.Query();
                         this.generalSearchParams.returnGeometry = false;
-                        this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+                        this.generalSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
 
                         generalOutFields = [searchLayer.objectIdField];
                         if (this.displayField !== "") {
@@ -1289,11 +1359,11 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                         // Set up the specific layer query task: object id
                         this.objectSearchParams = new esri.tasks.Query();
                         this.objectSearchParams.returnGeometry = true;
-                        this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+                        this.objectSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
                         this.objectSearchParams.outFields = ["*"];
 
                         // Get the popup for this layer & save it with the layer
-                        opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
+                        opLayers = this.appConfig.itemInfo.itemData.operationalLayers;
                         array.some(opLayers, function (layer) {
                             if (layer.title === pThis.searchLayerName) {
                                 pThis.popupTemplate = new PopupTemplate(layer.popupInfo);
@@ -1707,6 +1777,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * Constructs an LGSearchFeatureLayerMultiplexer.
          *
+         * @constructor
          * @class
          * @name js.LGSearchFeatureLayerMultiplexer
          * @extends js.LGSearchMultiplexer, js.LGMapDependency
@@ -1714,6 +1785,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Provides a searcher that multiplexes the work of LGSearchFeatureLayer searchers,
          * selecting them by feature layer name
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGSearchFeatureLayerMultiplexer");
+        },
 
         /**
          * Initializes the object's list of searchers.
@@ -1738,10 +1812,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             for (i = 0; i < featureLayerNames.length; i = i + 1) {
                 searcherName = this.rootId + "_" + this.searchers.length;
                 searcher = new js.LGSearchFeatureLayer({
-                    app: this.app,
-                    commonConfig: this.commonConfig,
-                    i18n: this.i18n,
-                    webmap: this.webmap,
+                    appConfig: this.appConfig,
                     rootId: searcherName,
                     parentDiv: this.parentDiv,
                     dependencyId: this.dependencyId,
@@ -2034,6 +2105,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * LGShareAppExtents
          *
+         * @constructor
          * @class
          * @name js.LGShareAppExtents
          * @extends js.LGShare, js.LGMapDependency
@@ -2041,6 +2113,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Extends simple sharing to include the app's map's current
          * extents.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGShareAppExtents");
+        },
 
         /**
          * Returns the subject message to use in the sharing.
@@ -2107,6 +2182,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 this.switchDelaySecs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 3.0);
                 this.switchDelayMultiplier = 3;  // we'll reset this to 1 after the first use
             @*/
+
+            this.setUpWaitForDependency("js.LGFilterLayers1");
         },
 
         /**
@@ -2122,7 +2199,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // Build a list of layers that contain the managed field.
                 // Loop through all the operation layers added to the map. If layer type is Feature layer, find if layer has
                 // the managed field.  If so, push the field type and layer object to an array of objects.
-                array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                array.forEach(this.appConfig.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                     var field, layerAndDefExpObject;
 
                     if (mapLayer.layerObject) {
@@ -2194,7 +2271,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             // Add map layers to message
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
 
-            array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+            array.forEach(this.appConfig.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                 var field;
 
                 if (mapLayer.layerObject) {
@@ -2308,6 +2385,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         constructor: function () {
             this.changeDefaults();
+
+            this.setUpWaitForDependency("js.LGFilterLayers1WithDefaults");
         },
 
         /**

@@ -16,7 +16,20 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "dojo/_base/array", "dojo/_base/lang", "js/lgonlineBase"], function (domConstruct, on, domStyle, array, lang) {
+define("js/lgonlineFrame", [
+    "dojo/dom-construct",
+    "dojo/on",
+    "dojo/dom-style",
+    "dojo/_base/array",
+    "dojo/_base/lang",
+    "js/lgonlineBase"
+], function (
+    domConstruct,
+    on,
+    domStyle,
+    array,
+    lang
+) {
 
     //========================================================================================================================//
 

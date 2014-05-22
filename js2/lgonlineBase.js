@@ -16,7 +16,25 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/topic", "dojo/_base/lang"], function (domConstruct, dom, on, domStyle, domClass, array, topic, lang) {
+define("js/lgonlineBase", [
+    "dojo/dom-construct",
+    "dojo/dom",
+    "dojo/on",
+    "dojo/dom-style",
+    "dojo/dom-class",
+    "dojo/_base/array",
+    "dojo/topic",
+    "dojo/_base/lang"
+], function (
+    domConstruct,
+    dom,
+    on,
+    domStyle,
+    domClass,
+    array,
+    topic,
+    lang
+) {
 
     //========================================================================================================================//
 
@@ -43,6 +61,12 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         constructor: function (args) {
             var rootAttrs, parentDiv, parentDivObj, pThis = this;
 
+            // Every object gets an "args" structure with its custom parameters
+            // plus a parameter called appConfig with the application's configuration.
+            // With an application-boilerplate rootstock, the online apps scion contains
+            // a map predefined in args.appConfig.map and the webmap info in
+            // args.appConfig.itemInfo. After the safeMixin, the contents of args become
+            // contents of the object.
             if (undefined !== args) {  // Guard needed by IE7, IE8
                 dojo.safeMixin(this, args);
             }
@@ -191,8 +215,8 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
             if (aString && aString.length > 1) {
                 leadChar = aString.substring(0, 1);  // IE7/8 cannot use aString[0]
                 if ("@" === leadChar) {
-                    if (this.i18n) {
-                        resolvedString = this.followAttributePath(this.i18n, aString.substring(1));
+                    if (this.appConfig.i18n) {
+                        resolvedString = this.followAttributePath(this.appConfig.i18n, aString.substring(1));
                     }
                 } else if ("." === leadChar) {
                     resolvedString = this.followAttributePath(null, aString.substring(1));
@@ -316,7 +340,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
                 console.log(message);
             }
             if (publishError) {
-                this.publishMessage("error", message);
+                this.publishMessage(this.appConfig.errorPublishingFlag, message);
             }
             if (window.gLogMessageBox) {
                 window.gLogMessageBox.append(message);
@@ -630,22 +654,45 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
          * Provides a mixin for handling a ready dependency on another
          * object.
          */
-        constructor: function () {
+
+        /**
+         * Sets up the wait for the dependency.
+         * <br><b>N.B.: this is done by calling the function with the name of the class so that it is
+         * not executed until the class at the base of the inheritance chain is ready. This call must
+         * be made in order for the wait to occur.</b>
+         * <br>E.g., one might call
+         * <br>this.setUpWaitForDependency("js.LGDependency");
+         * <br>in class js.LGDependency's constructor and
+         * <br>this.setUpWaitForDependency("js.LGHighlighter");
+         * <br>in class js.LGHighlighter's constructor. Because js.LGHighlighter inherits from js.LGDependency,
+         * without the class name check, it would be possible for the dependency handling to happen in the
+         * js.LGDependency superclass before the js.LGHighlighter constructor even executes. If another class
+         * were to inherit from js.LGHighlighter and call setUpWaitForDependency in its constructor, only that
+         * final class' version will run.
+         * @memberOf js.LGDependency#
+         * @param {string} callingClassName Name of the class calling the function
+         */
+        setUpWaitForDependency: function (callingClassName) {
             var dependsOn, pThis = this;
 
             if (this.dependencyId) {
-                dependsOn = this.lgById(this.dependencyId);
-                this.onDependencyPrep(dependsOn);
-                dependsOn.ready.then(function () {
-                    pThis.onDependencyReady();
-                });
+                // If we're in the declared class, go ahead with setting up the wait for the dependency
+                // because we're done with our constructor chain
+                if (this.declaredClass === callingClassName) {
+                    dependsOn = this.lgById(this.dependencyId);
+                    this.onDependencyPrep(dependsOn);
+
+                    dependsOn.ready.then(function () {
+                        pThis.onDependencyReady();
+                    });
+                }
             }
         },
 
         /**
          * Performs class-specific setup before waiting for a
          * dependency.
-         * @memberOf js.LGCommand#
+         * @memberOf js.LGDependency#
          * @param {object} dependsOn LG object that this object depends
          *        on
          */
@@ -656,7 +703,7 @@ define("js/lgonlineBase", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/do
         /**
          * Performs class-specific setup when the dependency is
          * satisfied.
-         * @memberOf js.LGCommand#
+         * @memberOf js.LGDependency#
          */
         onDependencyReady: function () {
             return null;

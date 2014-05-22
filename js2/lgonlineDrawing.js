@@ -16,7 +16,16 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", "js/lgonlineMap"], function (Deferred, Color, esriLang) {
+define("js/lgonlineDrawing", [
+    "dojo/Deferred",
+    "dojo/_base/Color",
+    "esri/lang",
+    "js/lgonlineMap"
+], function (
+    Deferred,
+    Color,
+    esriLang
+) {
 
     //========================================================================================================================//
 
@@ -38,6 +47,8 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
         constructor: function () {
             // Correct for stringized boolean
             this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
+
+            this.setUpWaitForDependency("js.LGHighlighter");
         },
 
         /**
