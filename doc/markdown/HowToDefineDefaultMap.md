@@ -30,7 +30,7 @@ The default map displayed in the app can be defined in the configuration file.
 
 * Open NewWebMap.json in a text editor and search for
 
-		"webmap": "796c572e6dcb4c88b77c024ae003bd88",
+        "webmap": "796c572e6dcb4c88b77c024ae003bd88",
 
 * In a web browser, browse to the web map you'd like to display as the default map.
 * Copy the map ID (GUID) from the end of the map URL.
@@ -43,6 +43,6 @@ The default map displayed in the app can be defined in the configuration file.
 
 All app source code is available from the [Solutions online apps GitHub site][].
 
-Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. Additional information is available on the [Resources][] page.
+Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries. Additional information is available on the [Resources][] page.
 
 Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.

@@ -55,7 +55,7 @@ Inserting a line break into the styles string or concatenating strings would cre
 
 #### Why the emphasis on linting JavaScript and JSON?
 
-In order to help catch typographic errors, all JavaScript & JSON in the repository is validated ("[lint][]ed") except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. That way, you have a known starting point for your modifications to files.
+In order to help catch typographic errors, all JavaScript & JSON in the repository is validated ("[lint][]ed") except for third-party libraries. That way, you have a known starting point for your modifications to files.
 
 The value of linting can be illustrated by the following snippet of a configuration file. On a slow computer, you may not notice mistyping. And it's very difficult for the web app to tell you the problem: the JSON parser that it uses just tells it that the JSON can't be interpreted -- the whole file is bad in some way.
 
