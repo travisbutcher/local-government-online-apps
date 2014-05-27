@@ -19,6 +19,7 @@
 define("js/lgonlineDrawing", [
     "dojo/Deferred",
     "dojo/_base/Color",
+    "dojo/on",
     "esri/lang",
     "esri/graphic",
     "esri/symbols/SimpleLineSymbol",
@@ -28,6 +29,7 @@ define("js/lgonlineDrawing", [
 ], function (
     Deferred,
     Color,
+    on,
     esriLang,
     Graphic,
     SimpleLineSymbol,
@@ -117,6 +119,23 @@ define("js/lgonlineDrawing", [
                         esriLang.isDefined(attributes) && esriLang.isDefined(infoTemplate) && pThis.showFeaturePopup);
                 }
             });
+
+            // Clear highlight graphics when the popup closes
+            if (this.appConfig.map.infoWindow) {
+                on(this.appConfig.map.infoWindow, "hide", function () {
+                    pThis.highlighterLayer.clear();
+                });
+            }
+
+            // If we're not opening a popup for a selected search result, also clear the highlight
+            // graphics when a popup opens
+            if (!this.showFeaturePopup) {
+                if (this.appConfig.map.infoWindow) {
+                    on(this.appConfig.map.infoWindow, "show", function () {
+                        pThis.highlighterLayer.clear();
+                    });
+                }
+            }
         },
 
         /**
@@ -208,7 +227,6 @@ define("js/lgonlineDrawing", [
                                 clearTimeout(pThis.intervalTerminator);
                                 clearInterval(pThis.intervalID);
                             }
-                            pThis.highlighterLayer.clear();
                             pThis.mapObj.hidePopup();
 
                             // Display the highlight graphic
