@@ -19,12 +19,22 @@
 define("js/lgonlineDrawing", [
     "dojo/Deferred",
     "dojo/_base/Color",
+    "dojo/on",
     "esri/lang",
+    "esri/graphic",
+    "esri/symbols/SimpleLineSymbol",
+    "esri/symbols/SimpleMarkerSymbol",
+    "esri/symbols/SimpleFillSymbol",
     "js/lgonlineMap"
 ], function (
     Deferred,
     Color,
-    esriLang
+    on,
+    esriLang,
+    Graphic,
+    SimpleLineSymbol,
+    SimpleMarkerSymbol,
+    SimpleFillSymbol
 ) {
 
     //========================================================================================================================//
@@ -74,7 +84,7 @@ define("js/lgonlineDrawing", [
             this.intervalTerminator = null;
             this.intervalID = null;
 
-            // Cache the URL to the print when triggered
+            // Highlight the supplied item when triggered
             this.subscribeToMessage("highlightItem", function (focalItem) {
                 var geometry, attributes, infoTemplate, highlightGraphics;
 
@@ -109,6 +119,23 @@ define("js/lgonlineDrawing", [
                         esriLang.isDefined(attributes) && esriLang.isDefined(infoTemplate) && pThis.showFeaturePopup);
                 }
             });
+
+            // Clear highlight graphics when the popup closes
+            if (this.appConfig.map.infoWindow) {
+                on(this.appConfig.map.infoWindow, "hide", function () {
+                    pThis.highlighterLayer.clear();
+                });
+            }
+
+            // If we're not opening a popup for a selected search result, also clear the highlight
+            // graphics when a popup opens
+            if (!this.showFeaturePopup) {
+                if (this.appConfig.map.infoWindow) {
+                    on(this.appConfig.map.infoWindow, "show", function () {
+                        pThis.highlighterLayer.clear();
+                    });
+                }
+            }
         },
 
         /**
@@ -126,8 +153,8 @@ define("js/lgonlineDrawing", [
 
             if (geometry.type === "polyline") {
                 // Create a line symbol using the configured line highlight color
-                highlightGraphics.push(new esri.Graphic(geometry,
-                    new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                highlightGraphics.push(new Graphic(geometry,
+                    new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
                         this.lineHiliteColor, 3),
                     attributes, infoTemplate));
 
@@ -140,11 +167,11 @@ define("js/lgonlineDrawing", [
 
                     // Create a series of concentric circle symbols using the configured line highlight color
                     for (i = 0; i <= 4; ++i) {
-                        highlightGraphics.push(new esri.Graphic(geometry,
-                            new esri.symbol.SimpleMarkerSymbol(
-                                esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE,
+                        highlightGraphics.push(new Graphic(geometry,
+                            new SimpleMarkerSymbol(
+                                SimpleMarkerSymbol.STYLE_CIRCLE,
                                 (i + 16) * 2.5,
-                                new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
                                     this.lineHiliteColor, 3),
                                 this.concentricCircleFillColor
                             ),
@@ -154,8 +181,8 @@ define("js/lgonlineDrawing", [
                 } else if (geometry.type) {
                     // Create a polygon symbol using the configured line & fill highlight colors
                     highlightGraphics.push(new esri.Graphic(geometry,
-                        new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                            new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                        new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                            new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
                                 this.lineHiliteColor, 3), this.fillHiliteColor),
                         attributes, infoTemplate));
                 }
@@ -200,7 +227,6 @@ define("js/lgonlineDrawing", [
                                 clearTimeout(pThis.intervalTerminator);
                                 clearInterval(pThis.intervalID);
                             }
-                            pThis.highlighterLayer.clear();
                             pThis.mapObj.hidePopup();
 
                             // Display the highlight graphic
