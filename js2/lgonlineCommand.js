@@ -29,6 +29,8 @@ define("js/lgonlineCommand", [
     "dojo/string",
     "dijit/form/TextBox",
     "dijit/layout/ContentPane",
+    "dojox/gfx",
+    "dojox/gfx/utils",
     "esri/dijit/Legend",
     "esri/dijit/BasemapGallery",
     "esri/dijit/Basemap",
@@ -53,6 +55,8 @@ define("js/lgonlineCommand", [
     string,
     TextBox,
     ContentPane,
+    gfx,
+    gfxUtils,
     Legend,
     BasemapGallery,
     Basemap,
@@ -352,31 +356,124 @@ define("js/lgonlineCommand", [
          * Builds and manages a UI object that represents a button.
          */
         constructor: function () {
-            var attrs;
+            var attrs, surface, colorizer;
 
-            this.applyTheme(true);
+            if (this.iconJson) {
+                // Get the coloring
+                this.foregroundColor = "#000";
+                this.hoverColor = "#00f";
 
-            // If we have an icon, add it to the face of the button
-            if (this.iconUrl) {
-                attrs = {src: this.iconUrl};
+                if (this.iconColorizerId) {
+                    colorizer = dom.byId(this.iconColorizerId);
+                    if (colorizer) {
+                        colorizer = colorizer.getLGObject();
+                        this.foregroundColor = colorizer.foregroundColor();
+                        this.hoverColor = colorizer.hoverColor();
+                    }
+                }
+
+                // Use theme without hover
+                this.applyTheme(false);
+
+                // Manually handle hover by changing the color of the vectors
+                on(this.rootDiv, "mouseover", lang.hitch(this, function (evt) {
+                    this.changeColor(evt.currentTarget.surface, this.hoverColor);
+                }));
+                on(this.rootDiv, "mouseout", lang.hitch(this, function (evt) {
+                    if (this.mouseOut(evt)) {
+                        this.changeColor(evt.currentTarget.surface, this.foregroundColor);
+                    }
+                }));
+
+                // Create the vectors from the JSON description
+                surface = gfx.createSurface(this.rootDiv, 32, 32);
+                gfxUtils.fromJson(surface, this.iconJson);
+                this.rootDiv.surface = surface;
+                this.changeColor(this.rootDiv.surface, this.foregroundColor);
+
                 if (this.iconClass) {
-                    attrs.className = this.iconClass;
+                    // domClass.add doesn't work with SVG node;
+                    // workaround by Simon Speich: https://bugs.dojotoolkit.org/ticket/16309
+                    this.rootDiv.surface.rawNode.setAttribute('class', this.iconClass);
                 }
-                this.iconImg = domConstruct.create("img", attrs, this.rootDiv);
-            }
-            // If we have text, add it to the face of the button
-            if (this.displayText) {
-                attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
-                if (this.displayTextClass) {
-                    attrs.className = this.displayTextClass;
+
+            } else {
+                // Use theme with hover
+                this.applyTheme(true);
+
+                // If we have an icon, add it to the face of the button
+                if (this.iconUrl) {
+                    attrs = {src: this.iconUrl};
+                    if (this.iconClass) {
+                        attrs.className = this.iconClass;
+                    }
+                    this.iconImg = domConstruct.create("img", attrs, this.rootDiv);
                 }
-                domConstruct.create("div", attrs, this.rootDiv);
+
+                // If we have text, add it to the face of the button
+                if (this.displayText) {
+                    attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
+                    if (this.displayTextClass) {
+                        attrs.className = this.displayTextClass;
+                    }
+                    domConstruct.create("div", attrs, this.rootDiv);
+                }
             }
 
             if (this.tooltip) {
                 this.rootDiv.title = this.checkForSubstitution(this.tooltip);
             }
+        },
+
+        /**
+         * Tests to see if the cursor is really leaving the target or if it is
+         * just passing over a nested item.
+         * @param {object} evt A mouseover event
+         * @return {boolean} True if the cursor is really leaving the bounds of
+         * the target
+         * @memberOf js.LGButton#
+         */
+        mouseOut: function (evt) {
+            // Dan
+            // http://blog.syedgakbar.com/2012/08/html-nested-elements-onmouseout-event/
+            // see also http://www.quirksmode.org/js/events_mouse.html
+            // With changes to make it lintable
+            var child, target;
+
+            target = evt.currentTarget || evt.srcElement;
+            child = evt.relatedTarget || evt.toElement;
+            while (child.parentElement) {
+                if (target === child) {
+                    return false;
+                }
+                child = child.parentElement;
+            }
+            return true;
+        },
+
+        /**
+         * Changes the color of the children of an SVG surface.
+         * @param {object} surface An SVG surface
+         * @param {object} newColor The new color as "a named color, hex color,
+         * linear gradient, or radial gradient"
+         * (http://dojotoolkit.org/documentation/tutorials/1.9/gfx/)
+         * @memberOf js.LGButton#
+         */
+        changeColor: function (surface, newColor) {
+            array.forEach(surface.children, function (component) {
+                // Text is filled
+                if (component.shape.type === "text") {
+                    component.setFill(newColor);
+
+                // Lines are stroked
+                } else {
+                    var stroke = component.getStroke();
+                    stroke.color = newColor;
+                    component.setStroke(stroke);
+                }
+            });
         }
+
     });
 
     //========================================================================================================================//
