@@ -327,7 +327,7 @@ define("js/lgonlineMap", [
 
             infoWin.clearFeatures();
             infoWin.setContent(feature.getContent());
-            this.appConfig.map.infoWindow.show(popupLocation);
+            infoWin.show(popupLocation);
         },
 
         /**
