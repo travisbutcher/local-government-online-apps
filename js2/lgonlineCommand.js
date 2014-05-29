@@ -39,6 +39,8 @@ define("js/lgonlineCommand", [
     "esri/tasks/PrintParameters",
     "esri/tasks/PrintTemplate",
     "esri/tasks/LegendLayer",
+    "esri/tasks/query",
+    "esri/tasks/QueryTask",
     "esri/dijit/PopupTemplate",
     "js/lgonlineBase",
     "js/lgonlineMap"
@@ -65,6 +67,8 @@ define("js/lgonlineCommand", [
     PrintParameters,
     PrintTemplate,
     LegendLayer,
+    Query,
+    QueryTask,
     PopupTemplate
 ) {
 
@@ -1455,10 +1459,10 @@ define("js/lgonlineCommand", [
                         this.objectIdField = searchLayer.objectIdField;
                         this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
 
-                        this.searcher = new esri.tasks.QueryTask(this.searchURL);
+                        this.searcher = new QueryTask(this.searchURL);
 
                         // Set up the general layer query task: pattern match
-                        this.generalSearchParams = new esri.tasks.Query();
+                        this.generalSearchParams = new Query();
                         this.generalSearchParams.returnGeometry = false;
                         this.generalSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
 
@@ -1469,7 +1473,7 @@ define("js/lgonlineCommand", [
                         this.generalSearchParams.outFields = generalOutFields.concat(this.searchFields);
 
                         // Set up the specific layer query task: object id
-                        this.objectSearchParams = new esri.tasks.Query();
+                        this.objectSearchParams = new Query();
                         this.objectSearchParams.returnGeometry = true;
                         this.objectSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
                         this.objectSearchParams.outFields = ["*"];
@@ -1478,6 +1482,7 @@ define("js/lgonlineCommand", [
                         opLayers = this.appConfig.itemInfo.itemData.operationalLayers;
                         array.some(opLayers, function (layer) {
                             if (layer.title === pThis.searchLayerName) {
+                                pThis.layer = layer;
                                 pThis.popupTemplate = new PopupTemplate(layer.popupInfo);
                                 return true;
                             }
@@ -1693,6 +1698,9 @@ define("js/lgonlineCommand", [
 
                     // Assign the layer's popup (if any) to the item
                     item.infoTemplate = pThis.popupTemplate;
+
+                    // Assign the layer to the item
+                    item._graphicsLayer = pThis.layer.layerObject;
 
                     if (pThis.publishPointsOnly) {
                         // Find a point that can be used to represent this item
