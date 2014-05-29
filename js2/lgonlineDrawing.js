@@ -68,7 +68,7 @@ define("js/lgonlineDrawing", [
          * @override
          */
         onDependencyReady: function () {
-            var extent, newMapCenter, pThis = this;
+            var pThis = this;
             // Now that the map (our dependency) is ready, finish setup
 
             // Create a graphics layer to hold the highlights
@@ -86,37 +86,32 @@ define("js/lgonlineDrawing", [
 
             // Highlight the supplied item when triggered
             this.subscribeToMessage("highlightItem", function (focalItem) {
-                var geometry, attributes, infoTemplate, highlightGraphics;
+                var extent, newMapCenter, geometry, highlightGraphics;
 
-                // Normalize focal item into attributes, geometry, and infoTemplate components
                 if (!focalItem) {
                     return;
                 }
-                if (focalItem.geometry) {
-                    geometry = focalItem.geometry;
+
+                // We will pan & zoom to the selected item, so we'll start with centering on the
+                // center of the item's extent or the item itself, if a point
+                geometry = focalItem.geometry || focalItem;
+                extent = geometry.getExtent();
+                if (extent) {
+                    newMapCenter = extent.getCenter();  // if geometry not a point
                 } else {
-                    geometry = focalItem;
-                }
-                if (focalItem.attributes) {
-                    attributes = focalItem.attributes;
-                }
-                if (focalItem.infoTemplate) {
-                    infoTemplate = focalItem.infoTemplate;
+                    newMapCenter = geometry;  // for point
                 }
 
                 // Create highlight graphic(s)
-                highlightGraphics = pThis.createHighlightGraphics(geometry, attributes, infoTemplate);
+                highlightGraphics = pThis.createHighlightGraphics(geometry,
+                    focalItem.attributes, focalItem.infoTemplate);
 
                 // Pan & zoom to highlight graphic(s)
                 if (highlightGraphics.length > 0) {
-                    extent = geometry.getExtent();
-                    if (extent) {
-                        newMapCenter = extent.getCenter();
-                    } else {
-                        newMapCenter = geometry;
-                    }
                     pThis.showHighlight(highlightGraphics, newMapCenter, pThis.highlightZoomLevel,
-                        esriLang.isDefined(attributes) && esriLang.isDefined(infoTemplate) && pThis.showFeaturePopup);
+                        esriLang.isDefined(focalItem.attributes)
+                        && esriLang.isDefined(focalItem.infoTemplate)
+                        && pThis.showFeaturePopup, focalItem);
                 }
             });
 
@@ -201,7 +196,7 @@ define("js/lgonlineDrawing", [
          *        after pan and zoom are finished; default is to not show
          * @memberOf js.LGHighlighter#
          */
-        showHighlight: function (highlightGraphics, newMapCenter, newZoomLevel, showFeaturePopup) {
+        showHighlight: function (highlightGraphics, newMapCenter, newZoomLevel, showFeaturePopup, focalItem) {
             var focusFinished, zoomFinished, i, increasingRadius, pThis = this;
 
             if (newMapCenter) {
@@ -210,8 +205,8 @@ define("js/lgonlineDrawing", [
                 focusFinished = new Deferred();
                 focusFinished.resolve();
             }
-            focusFinished.then(  //??? centerAt/setZoom conflict workaround
-                function () {    //??? centerAt/setZoom conflict workaround
+            focusFinished.then(
+                function () {
 
                     if (newZoomLevel) {
                         zoomFinished = pThis.mapObj.setZoom(newZoomLevel);
@@ -219,8 +214,8 @@ define("js/lgonlineDrawing", [
                         zoomFinished = new Deferred();
                         zoomFinished.resolve();
                     }
-                    zoomFinished.then(  //??? centerAt/setZoom conflict workaround
-                        function () {   //??? centerAt/setZoom conflict workaround
+                    zoomFinished.then(
+                        function () {
 
                             // Clear extant animated highlight and any existing highlight graphics & popup
                             if (pThis.intervalTerminator) {
@@ -264,21 +259,15 @@ define("js/lgonlineDrawing", [
                                 pThis.highlighterLayer.add(highlightGraphics[0]);
                             }
 
-                            // If we have attributes and a desire to complement the highlight with
-                            // a popup, prep & display the popup
+                            // If we're showing the popup, use the original feature because it will handle
+                            // coded value domains better
                             if (showFeaturePopup) {
-                                //??? centerAt/setZoom conflict workaround
-                                //???(new DeferredList([focusFinished, zoomFinished])).then(
-                                //???    function (results) {
-                                pThis.mapObj.showPopupWithFeature(newMapCenter, highlightGraphics[0]);
-                                //???    }
-                                //???);
+                                pThis.mapObj.showPopupWithFeature(newMapCenter, focalItem);
                             }
-
                         }
-                    );  //??? centerAt/setZoom conflict workaround
+                    );
                 }
-            );  //??? centerAt/setZoom conflict workaround
+            );
         }
     });
 
