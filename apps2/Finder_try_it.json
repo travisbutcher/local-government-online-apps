@@ -339,6 +339,18 @@
             "trigger": "help"
         }
     }, {
+        "classname": "js.LGSelfHidingMessageBox",
+        "config": {
+            "rootId": "printingNotificationMessageBox",
+            "parentDiv": "contentFrame",
+            "rootClass": "helpMessageBox",
+            "content": "@messages.printingHasStarted",
+            "timeoutSeconds": 5,
+            "horizOffset": -2,
+            "vertOffset": 2,
+            "trigger": "printing"
+        }
+    }, {
         "classname": "js.LGPublishEcho",
         "config": {
             "rootId": "diagMessageBox",
