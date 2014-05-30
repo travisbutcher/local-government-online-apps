@@ -503,11 +503,25 @@ define("js/lgonlineCommand", [
             // Dan
             // http://blog.syedgakbar.com/2012/08/html-nested-elements-onmouseout-event/
             // see also http://www.quirksmode.org/js/events_mouse.html
-            // With changes to make it lintable
+            // With comments added, changes to make it lintable, and catch for missing related target
             var child, target;
 
+            // "The EventTarget whose EventListeners are currently being processed.
+            // As the event capturing and bubbling occurs this value changes."
+            // https://developer.mozilla.org/en-US/docs/Web/API/Event/Comparison_of_Event_Targets
             target = evt.currentTarget || evt.srcElement;
+
+            // "which EventTarget the pointing device exited to"
+            // https://developer.mozilla.org/en-US/docs/Web/API/event.relatedTarget
             child = evt.relatedTarget || evt.toElement;
+
+            // Fast mouse movement can cause us to miss the exit, so if there's no
+            // related target, assume that we've exited
+            if (!child) {
+                return true;
+            }
+
+            // Run up the ancestry to see if we're still in the item
             while (child.parentElement) {
                 if (target === child) {
                     return false;
