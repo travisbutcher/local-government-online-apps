@@ -20,12 +20,14 @@ define("js/lgonlineOutput", [
     "dojo/dom-construct",
     "dojo/dom-class",
     "dojo/_base/array",
+    "dojo/_base/lang",
     "dojo/topic",
     "js/lgonlineBase"
 ], function (
     domConstruct,
     domClass,
     array,
+    lang,
     topic
 ) {
 
@@ -126,10 +128,78 @@ define("js/lgonlineOutput", [
          * Provides a UI display of a chunk of HTML.
          */
         constructor: function () {
-            if (this.content && this.content.length > 0) {
-                this.rootDiv.innerHTML = this.content;
+            if (this.content) {
+                this.content = this.checkForSubstitution(this.content);
+            } else {
+                this.content = "";
             }
+            this.rootDiv.innerHTML = this.content;
+
             touchScroll(this.rootDiv);
+        },
+
+        /**
+         * Sets the content of the message box and makes the box visible
+         * @param {string} content HTML to insert into box
+         * @memberOf js.LGMessageBox#
+         */
+        setMessage: function (content) {
+            this.show();
+            this.content = content;
+            this.rootDiv.innerHTML = this.content;
+        }
+    });
+
+    //========================================================================================================================//
+
+    dojo.declare("js.LGSelfHidingMessageBox", js.LGMessageBox, {
+        /**
+         * Constructs an LGSelfHidingMessageBox.
+         *
+         * @param {string} content HTML to insert into box
+         *
+         * @constructor
+         * @class
+         * @name js.LGSelfHidingMessageBox
+         * @extends js.LGMessageBox
+         * @classdesc
+         * Provides a UI display of a chunk of HTML; closes after the specified period of time
+         */
+        constructor: function () {
+            this.timeoutSeconds = this.toNumber(this.timeoutSeconds, 5);
+        },
+
+        /**
+         * Set up a listener for generic command activation.
+         * @memberOf js.LGDropdownBox#
+         * @override
+         */
+        setUpListeningForCommands: function () {
+            // We ignore command activations--only close with timeout
+        },
+
+        /**
+         * Handles a trigger by toggling visibility.
+         * @param {object} [data] Data accompanying trigger.
+         * @memberOf js.LGSelfHidingMessageBox#
+         * @override
+         */
+        handleTrigger: function () {
+            // If we're not visible, show ourselves for the specified time; box
+            // only closes after timeout, not via trigger
+            if (!this.getIsVisible()) {
+                if (this.pendingClosure) {
+                    clearTimeout(this.pendingClosure);
+                    this.pendingClosure = null;
+                }
+
+                this.show();
+
+                this.pendingClosure = setTimeout(lang.hitch(this, function () {
+                    this.hide();
+                    this.pendingClosure = null;
+                }), this.timeoutSeconds * 1000);
+            }
         }
     });
 
