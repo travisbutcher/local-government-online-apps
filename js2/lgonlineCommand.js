@@ -91,15 +91,26 @@ define("js/lgonlineCommand", [
 
             // Start listening for activation/deactivation call
             if (this.trigger) {
-                this.subscribeToMessage("command", function (sendingTrigger) {
-                    if (sendingTrigger !== pThis.trigger) {
-                        pThis.setIsVisible(false);
-                    }
-                });
+                this.setUpListeningForCommands();
+
                 this.subscribeToMessage(this.trigger, function (data) {
                     pThis.handleTrigger(data);
                 });
             }
+        },
+
+        /**
+         * Set up a listener for generic command activation.
+         * @memberOf js.LGDropdownBox#
+         */
+        setUpListeningForCommands: function () {
+            var pThis = this;
+
+            this.subscribeToMessage("command", function (sendingTrigger) {
+                if (sendingTrigger !== pThis.trigger) {
+                    pThis.setIsVisible(false);
+                }
+            });
         },
 
         /**
