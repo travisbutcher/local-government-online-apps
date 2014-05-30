@@ -371,7 +371,7 @@ define("js/lgonlineCommand", [
          * Builds and manages a UI object that represents a button.
          */
         constructor: function () {
-            var attrs, surface, colorizer;
+            var attrs, colorizer;
 
             if (this.iconJson) {
                 // Get the coloring
@@ -390,27 +390,17 @@ define("js/lgonlineCommand", [
                 // Use theme without hover
                 this.applyTheme(false);
 
-                // Manually handle hover by changing the color of the vectors
+                this.rootDiv.surface = this.createSVGIcon(this.iconJson);
+
+                // Manually handle hover
                 on(this.rootDiv, "mouseover", lang.hitch(this, function (evt) {
-                    this.changeColor(evt.currentTarget.surface, this.hoverColor);
+                    this.onMouseOver(evt);
                 }));
                 on(this.rootDiv, "mouseout", lang.hitch(this, function (evt) {
                     if (this.mouseOut(evt)) {
-                        this.changeColor(evt.currentTarget.surface, this.foregroundColor);
+                        this.onMouseOut(evt);
                     }
                 }));
-
-                // Create the vectors from the JSON description
-                surface = gfx.createSurface(this.rootDiv, 32, 32);
-                gfxUtils.fromJson(surface, this.iconJson);
-                this.rootDiv.surface = surface;
-                this.changeColor(this.rootDiv.surface, this.foregroundColor);
-
-                if (this.iconClass) {
-                    // domClass.add doesn't work with SVG node;
-                    // workaround by Simon Speich: https://bugs.dojotoolkit.org/ticket/16309
-                    this.rootDiv.surface.rawNode.setAttribute('class', this.iconClass);
-                }
 
             } else {
                 // Use theme with hover
@@ -438,6 +428,67 @@ define("js/lgonlineCommand", [
             if (this.tooltip) {
                 this.rootDiv.title = this.checkForSubstitution(this.tooltip);
             }
+        },
+
+        /**
+         * Creates a 32x32 SVG item in the root div.
+         * @param {object} definition JSON text describing the SVG item, e.g.,
+         * "[{'shape':{'type':'circle','cx':13,'cy':13,'r':10},...,'style':'solid','width':2,'cap':'butt','join':4}}]"
+         * Its color(s) for lines and text fill are ignored
+         * @param {object} initialColor The initial color to be applied to the
+         * item's vectors; uses this.foregroundColor if omitted or undefined
+         * @return {object} The created SVG surface
+         * @memberOf js.LGButton#
+         */
+        createSVGIcon: function (definition, initialColor) {
+            var surface;
+
+            // Create the vectors from the JSON description
+            surface = gfx.createSurface(this.rootDiv, 32, 32);
+            gfxUtils.fromJson(surface, definition);
+
+            // Have to change the color of the icon from the beginning, regardless of the
+            // color definition in the JSON description. Shouldn't be necessary, and isn't
+            // necessary in the sample in the Dojo page
+            // http://livedocs.dojotoolkit.org/dojox/gfx/utils/fromJson ,
+            // but seems to be required in this app and in every sample that I've written.
+            if (!initialColor) {
+                initialColor = this.foregroundColor;
+            }
+            this.changeColor(surface, initialColor);
+
+            // Apply any icon class from the configuration
+            if (this.iconClass) {
+                // domClass.add doesn't work with SVG node;
+                // workaround by Simon Speich: https://bugs.dojotoolkit.org/ticket/16309
+                surface.rawNode.setAttribute("class", this.iconClass);
+            }
+
+            return surface;
+        },
+
+        /**
+         * Performs the object's mouse over action
+         * @param {object} evt A mouseover event
+         * @memberOf js.LGButton#
+         */
+        onMouseOver: function (evt) {
+            // Manually handle hover by changing the color of the vectors
+            // Note that "this" refers to the LGButton
+            this.changeColor(evt.currentTarget.surface, this.hoverColor);
+        },
+
+        /**
+         * Performs the object's mouse out action
+         * @param {object} evt A mouseout event, pre-screened to be sure
+         * that it's really a mouseout and not just passing over a nested
+         * item
+         * @memberOf js.LGButton#
+         */
+        onMouseOut: function (evt) {
+            // Manually handle hover by changing the color of the vectors
+            // Note that "this" refers to the LGButton
+            this.changeColor(evt.currentTarget.surface, this.foregroundColor);
         },
 
         /**
@@ -764,8 +815,15 @@ define("js/lgonlineCommand", [
         constructor: function () {
             var pThis = this;
 
+            // Create the button's disabled-state icon as SVG or image
+            if (this.rootDiv.surface) {
+                this.iconDisabledJson = this.iconDisabledJson || this.iconJson;
+                this.rootDiv.surface2 = this.createSVGIcon(this.iconDisabledJson);
+            } else {
+                this.iconDisabledUrl = this.iconDisabledUrl || this.iconUrl;
+            }
+
             // Set initial state
-            this.iconDisabledUrl = this.iconDisabledUrl || this.iconUrl;
             this.isEnabled = this.toBoolean(this.isEnabled, true);
             pThis.setIsEnabled(this.isEnabled);
 
@@ -811,12 +869,26 @@ define("js/lgonlineCommand", [
          */
         setIsEnabled: function (isEnabled) {
             this.isEnabled = isEnabled;
-            if (this.isEnabled) {
-                this.iconImg.src = this.iconUrl;
-                domClass.add(this.rootDiv, "appThemeHover");
+
+            // For an SVG icon, switch between the two SVG surfaces
+            if (this.rootDiv.surface) {
+                if (this.isEnabled) {
+                    this.rootDiv.surface.rawNode.setAttribute("display", "");
+                    this.rootDiv.surface2.rawNode.setAttribute("display", "none");
+                } else {
+                    this.rootDiv.surface.rawNode.setAttribute("display", "none");
+                    this.rootDiv.surface2.rawNode.setAttribute("display", "");
+                }
+
+            // For an image icon, switch between the two icon URLs and also enable/disable hover
             } else {
-                this.iconImg.src = this.iconDisabledUrl;
-                domClass.remove(this.rootDiv, "appThemeHover");
+                if (this.isEnabled) {
+                    this.iconImg.src = this.iconUrl;
+                    domClass.add(this.rootDiv, "appThemeHover");
+                } else {
+                    this.iconImg.src = this.iconDisabledUrl;
+                    domClass.remove(this.rootDiv, "appThemeHover");
+                }
             }
         },
 
@@ -984,8 +1056,8 @@ define("js/lgonlineCommand", [
                     function (result) {
                         /* success */
                         // Broadcast status
-                        pThis.publishMessage(pThis.publishReady);
                         pThis.publishMessage(pThis.publishPrintUrl, result.url);
+                        pThis.publishMessage(pThis.publishReady);
                     }, function (error) {
                         /* failure */
                         // Broadcast status
