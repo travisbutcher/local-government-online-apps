@@ -600,10 +600,58 @@ define("js/lgonlineCommand", [
          */
         setIsOn: function (isOn) {
             this.isOn = isOn;
-            if (this.isOn) {
-                this.applyThemeAltBkgd(true);
+
+            if (this.rootDiv.surface) {
+                if (this.isOn) {
+                    this.changeColor(this.rootDiv.surface, this.hoverColor);
+                } else {
+                    this.changeColor(this.rootDiv.surface, this.foregroundColor);
+                }
+
             } else {
-                this.applyTheme(true);
+                if (this.isOn) {
+                    this.applyThemeAltBkgd(true);
+                } else {
+                    this.applyTheme(true);
+                }
+            }
+        },
+
+        /**
+         * Performs the object's mouse over action
+         * @param {object} evt A mouseover event
+         * @memberOf js.LGRadioButton#
+         * @override
+         */
+        onMouseOver: function (evt) {
+            if (this.rootDiv.surface) {
+                // Manually handle hover by changing the color of the vectors
+                // Note that "this" refers to the LGButton
+                if (!this.isOn) {
+                    this.changeColor(this.rootDiv.surface, this.hoverColor);
+                }
+            } else {
+                this.inherited(arguments);
+            }
+        },
+
+        /**
+         * Performs the object's mouse out action
+         * @param {object} evt A mouseout event, pre-screened to be sure
+         * that it's really a mouseout and not just passing over a nested
+         * item
+         * @memberOf js.LGRadioButton#
+         * @override
+         */
+        onMouseOut: function (evt) {
+            if (this.rootDiv.surface) {
+                // Manually handle hover by changing the color of the vectors
+                // Note that "this" refers to the LGButton
+                if (!this.isOn) {
+                    this.changeColor(this.rootDiv.surface, this.foregroundColor);
+                }
+            } else {
+                this.inherited(arguments);
             }
         },
 
@@ -831,8 +879,10 @@ define("js/lgonlineCommand", [
 
             // Create the button's disabled-state icon as SVG or image
             if (this.rootDiv.surface) {
-                this.iconDisabledJson = this.iconDisabledJson || this.iconJson;
-                this.rootDiv.surface2 = this.createSVGIcon(this.iconDisabledJson);
+                if (domClass.contains(document.body, "okIE")) {
+                    this.iconDisabledJson = this.iconDisabledJson || this.iconJson;
+                    this.rootDiv.surface2 = this.createSVGIcon(this.iconDisabledJson);
+                }
             } else {
                 this.iconDisabledUrl = this.iconDisabledUrl || this.iconUrl;
             }
@@ -886,12 +936,14 @@ define("js/lgonlineCommand", [
 
             // For an SVG icon, switch between the two SVG surfaces
             if (this.rootDiv.surface) {
-                if (this.isEnabled) {
-                    this.rootDiv.surface.rawNode.setAttribute("display", "");
-                    this.rootDiv.surface2.rawNode.setAttribute("display", "none");
-                } else {
-                    this.rootDiv.surface.rawNode.setAttribute("display", "none");
-                    this.rootDiv.surface2.rawNode.setAttribute("display", "");
+                if (domClass.contains(document.body, "okIE")) {
+                    if (this.isEnabled) {
+                        domStyle.set(this.rootDiv.surface.rawNode, "display", "inline-block");
+                        domStyle.set(this.rootDiv.surface2.rawNode, "display", "none");
+                    } else {
+                        domStyle.set(this.rootDiv.surface.rawNode, "display", "none");
+                        domStyle.set(this.rootDiv.surface2.rawNode, "display", "inline-block");
+                    }
                 }
 
             // For an image icon, switch between the two icon URLs and also enable/disable hover
@@ -973,6 +1025,8 @@ define("js/lgonlineCommand", [
                 rootId: this.rootId + "_landscape",
                 parentDiv: this.rootId,
                 iconUrl: this.landscapeButtonIconUrl,
+                iconJson: this.landscapeButtonIconJson,
+                iconColorizerId: this.iconColorizerId,
                 rootClass: this.orientationButtonClass,
                 iconClass: this.orientationButtonIconClass,
                 tooltip: this.checkForSubstitution(this.landscapeButtonTooltip),
@@ -986,6 +1040,8 @@ define("js/lgonlineCommand", [
                 rootId: this.rootId + "_portrait",
                 parentDiv: this.rootId,
                 iconUrl: this.portraitButtonIconUrl,
+                iconJson: this.portraitButtonIconJson,
+                iconColorizerId: this.iconColorizerId,
                 rootClass: this.orientationButtonClass,
                 iconClass: this.orientationButtonIconClass,
                 tooltip: this.checkForSubstitution(this.portraitButtonTooltip),
@@ -1017,6 +1073,8 @@ define("js/lgonlineCommand", [
                 rootId: this.rootId + "_doPrint",
                 parentDiv: this.rootId,
                 iconUrl: this.printButtonIconUrl,
+                iconJson: this.printButtonIconJson,
+                iconColorizerId: this.iconColorizerId,
                 rootClass: this.printButtonClass,
                 iconClass: this.printButtonIconClass,
                 tooltip: this.checkForSubstitution(this.printButtonTooltip)
