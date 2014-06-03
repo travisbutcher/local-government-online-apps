@@ -414,15 +414,15 @@ define("js/lgonlineCommand", [
                     }
                     this.iconImg = domConstruct.create("img", attrs, this.rootDiv);
                 }
+            }
 
-                // If we have text, add it to the face of the button
-                if (this.displayText) {
-                    attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
-                    if (this.displayTextClass) {
-                        attrs.className = this.displayTextClass;
-                    }
-                    domConstruct.create("div", attrs, this.rootDiv);
+            // If we have text, add it to the face of the button
+            if (this.displayText) {
+                attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
+                if (this.displayTextClass) {
+                    attrs.className = this.displayTextClass;
                 }
+                domConstruct.create("div", attrs, this.rootDiv);
             }
 
             if (this.tooltip) {
