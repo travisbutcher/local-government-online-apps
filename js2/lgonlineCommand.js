@@ -26,6 +26,7 @@ define("js/lgonlineCommand", [
     "dojo/dom-class",
     "dojo/_base/array",
     "dojo/_base/lang",
+    "dojo/request/xhr",
     "dojo/string",
     "dijit/form/TextBox",
     "dijit/layout/ContentPane",
@@ -54,6 +55,7 @@ define("js/lgonlineCommand", [
     domClass,
     array,
     lang,
+    xhr,
     string,
     TextBox,
     ContentPane,
@@ -201,7 +203,7 @@ define("js/lgonlineCommand", [
          */
         onDependencyReady: function () {
             var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup(),
-                thumbnailUrl = this.webmapThumbnail;
+                thumbnailUrl, webmapThumbnailUrl, testForWebmapThumbnail;
 
             galleryId = this.rootId + "_gallery";
 
@@ -211,36 +213,47 @@ define("js/lgonlineCommand", [
             }).placeAt(this.rootDiv);
             touchScroll(galleryId);
 
-            // We'll use the webmap's thumbnail to represent its basemap
-            if (!thumbnailUrl) {
-                try {
-                    if (this.appConfig.itemInfo.item.thumbnail) {
-                        thumbnailUrl = this.appConfig.sharinghost + "/sharing/rest/content/items/" + this.appConfig.itemInfo.item.id
-                            + "/info/" + this.appConfig.itemInfo.item.thumbnail;
-                    } else {
-                        thumbnailUrl = "images/webmap.png";
-                    }
-                } catch (err) {
-                    thumbnailUrl = "images/webmap.png";
+            // We'll try to use the webmap's thumbnail to represent its basemap, but have a fallback to the configured
+            // value and then to a static value
+            thumbnailUrl = this.webmapThumbnail || "images/webmap.png";
+            testForWebmapThumbnail = new Deferred();
+            try {
+                if (this.appConfig.proxyurl && this.appConfig.itemInfo.item.thumbnail) {
+                    webmapThumbnailUrl =
+                        this.appConfig.sharinghost + "/sharing/rest/content/items/" + this.appConfig.itemInfo.item.id
+                        + "/info/" + this.appConfig.itemInfo.item.thumbnail;
+                    xhr(this.appConfig.proxyurl + "?" + webmapThumbnailUrl).then(function () {
+                        thumbnailUrl = webmapThumbnailUrl;
+                        testForWebmapThumbnail.resolve();
+                    }, function (err) {
+                        testForWebmapThumbnail.resolve();
+                    });
+                } else {
+                    testForWebmapThumbnail.resolve();
                 }
+            } catch (err) {
+                testForWebmapThumbnail.resolve();
             }
 
-            // Create the gallery, adding in the basemap from the webmap (even if it is already represented
-            // via the ArcGIS basemaps or the custom basemap group
-            basemapGallery = new BasemapGallery({
-                basemaps: [new Basemap({
-                    layers: this.appConfig.itemInfo.itemData.baseMap.baseMapLayers,
-                    title: this.appConfig.itemInfo.itemData.baseMap.title,
-                    thumbnailUrl: thumbnailUrl
-                })],
-                showArcGISBasemaps: true,  // ignored if a group is configured
-                basemapsGroup: basemapGroup,
-                bingMapsKey: this.appConfig.bingKey,
-                map: this.appConfig.map
-            }, domConstruct.create('div')).placeAt(this.rootDiv);
-            galleryHolder.set('content', basemapGallery.domNode);
+            testForWebmapThumbnail.then(lang.hitch(this, function () {
+                // Create the gallery, adding in the basemap from the webmap (even if it is already represented
+                // via the ArcGIS basemaps or the custom basemap group
+                basemapGallery = new BasemapGallery({
+                    basemaps: [new Basemap({
+                        layers: this.appConfig.itemInfo.itemData.baseMap.baseMapLayers,
+                        title: this.appConfig.itemInfo.itemData.baseMap.title,
+                        thumbnailUrl: thumbnailUrl
+                    })],
+                    showArcGISBasemaps: true,  // ignored if a group is configured
+                    basemapsGroup: basemapGroup,
+                    bingMapsKey: this.appConfig.bingKey,
+                    map: this.appConfig.map
+                }, domConstruct.create('div')).placeAt(this.rootDiv);
+                galleryHolder.set('content', basemapGallery.domNode);
 
-            basemapGallery.startup();
+                basemapGallery.startup();
+
+            }));
 
             this.inherited(arguments);
         },
