@@ -14,7 +14,13 @@
         " | See the License for the specific language governing permissions and",
         " | limitations under the License."
     ],
-
+    
+    "documentation":[
+        "For help configuring this application, see:",
+        "http://solutions.arcgis.com/local-government/help/finder/, or",
+        "http://solutions.arcgis.com/state-government/help/finder/"
+     ],
+     
     "values": {
         "webmap": "d3df161ab8204e848b359d5f352b5b65",
         "titleBar.title": "Finder",
