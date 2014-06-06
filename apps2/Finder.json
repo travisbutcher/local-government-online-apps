@@ -345,7 +345,7 @@
             "rootId": "printingNotificationMessageBox",
             "parentDiv": "contentFrame",
             "rootClass": "helpMessageBox",
-            "content": "@messages.printingHasStarted",
+            "content": "!widgets.print.NLS_printing",
             "timeoutSeconds": 5,
             "horizOffset": -2,
             "vertOffset": 2,
