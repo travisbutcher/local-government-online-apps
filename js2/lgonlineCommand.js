@@ -1713,29 +1713,37 @@ define("js/lgonlineCommand", [
         showSearchLayerFieldError: function (candidateFields, searchLayerName, searchLayer) {
             var reason = "", message;
 
-            // List the requested fields
-            array.forEach(candidateFields, function (field) {
-                if (reason.length > 0) {
-                    reason += ",";
+            if (searchLayer.fields) {
+                // List the requested fields
+                array.forEach(candidateFields, function (field) {
+                    if (reason.length > 0) {
+                        reason += ",";
+                    }
+                    reason += field;
+                });
+
+                // Add a message to the field list
+                message = "\"" + reason + "\"<br>";
+                if (candidateFields.length > 1) {
+                    message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
+                } else {
+                    message += this.checkForSubstitution("@messages.searchFieldMissing");
                 }
-                reason += field;
-            });
 
-            // Add a message to the field list
-            message = "\"" + reason + "\"<br>";
-            if (candidateFields.length > 1) {
-                message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
+                // Add the search layer name and a list of available fields in that layer
+                message += "<br><hr>\"" + searchLayerName + "\"<br>";
+                message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
+                array.forEach(searchLayer.fields, function (layerField) {
+                    message += "<li>\"" + layerField.name + "\"</li>";
+                });
+                message += "</ul>";
+
             } else {
-                message += this.checkForSubstitution("@messages.searchFieldMissing");
+                // For a search layer with no available fields, just show its name and
+                // some guidance about what to do
+                message = "\"" + searchLayerName + "\"<br>";
+                message += this.checkForSubstitution("@messages.searchLayerNotSearchable");
             }
-
-            // Add the search layer name and a list of available fields in that layer
-            message += "<br><hr>\"" + searchLayerName + "\"<br>";
-            message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
-            array.forEach(searchLayer.fields, function (layerField) {
-                message += "<li>\"" + layerField.name + "\"</li>";
-            });
-            message += "</ul>";
 
             // Log it
             this.log(message, true);
