@@ -14,7 +14,10 @@
         " | See the License for the specific language governing permissions and",
         " | limitations under the License."
     ],
-
+    "documentation":[
+        "For help configuring this application, see:",
+        "http://solutions.arcgis.com/local-government/help/find-edit-filter/"
+    ],
     "values": {
         "webmap": "b5dda2c5afda4b7cb77a07be97100a84",
         "titleBar.title": "Pre-Incident Plans",
@@ -169,22 +172,22 @@
             "parentDiv": "contentDiv",
             "colorTable": [{
                 "theme": "NeutralGrays",
-                "colors": ["#969696", "#fff", "#464646", "#b4b4b4"]
+                "colors": ["#969696", "#fff", "#464646", "#d8d8d8"]
             }, {
                 "theme": "EarthBrowns",
-                "colors": ["#be9969", "#fff", "#523b20", "#b4b4b4"]
+                "colors": ["#be9969", "#fff", "#523b20", "#d8d8d8"]
             }, {
                 "theme": "SeaBlues",
-                "colors": ["#00b9f2", "#fff", "#004575", "#b4b4b4"]
+                "colors": ["#00b9f2", "#fff", "#004575", "#d8d8d8"]
             }, {
                 "theme": "NaturalGreens",
-                "colors": ["#aad04b", "#fff", "#2a7f33", "#b4b4b4"]
+                "colors": ["#aad04b", "#fff", "#2a7f33", "#d8d8d8"]
             }, {
                 "theme": "WarmBrights",
-                "colors": ["#f89927", "#fff", "#da4d1e", "#b4b4b4"]
+                "colors": ["#f89927", "#fff", "#da4d1e", "#d8d8d8"]
             }, {
                 "theme": "ScenicPurples",
-                "colors": ["#b279b4", "#fff", "#6b1978", "#b4b4b4"]
+                "colors": ["#b279b4", "#fff", "#6b1978", "#d8d8d8"]
             }]
         }
     }, {
