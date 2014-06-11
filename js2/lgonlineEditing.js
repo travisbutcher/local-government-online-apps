@@ -180,9 +180,9 @@ define("js/lgonlineEditing", [
                 //------------------------- Template Picker dijit -------------------------
 
                 // The template picker will not size properly if its containing divs have no
-                // substance, so we'll hide the divs but give them substance (i.e., "display" is
-                // "block" and "visibility" is "hidden")
-                this.setIsVisible(false, true);
+                // substance, so we'll make the divs "visible" during construction (their containers
+                // keep them from flashing onscreen)
+                this.setIsVisible(true, true);
 
                 // Create a div that will become the picker
                 templatePickerDiv = domConstruct.create("div");
