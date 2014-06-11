@@ -241,7 +241,7 @@
     }, {
         "classname": "js.LGMapDijitContainer",
         "config": {
-            "rootId": "homeButton",
+            "rootId": "locateButton",
             "parentDiv": "map",
             "dependencyId": "map",
             "rootClass": "dijitContainer",
