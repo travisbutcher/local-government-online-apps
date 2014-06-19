@@ -1673,6 +1673,15 @@ define("js/lgonlineCommand", [
             this.ready.reject(this);
             this.inherited(arguments);
         },
+        /**
+         * Determines if a layer can be queried.
+         * @param {object} searchLayer Search layer returned from map
+         * @return {boolean} false if layer is definitely note queryable
+         * @memberOf js.LGSearchFeatureLayer#
+         */
+        isSearchableLayer: function (searchLayer) {
+            return searchLayer && searchLayer.url && searchLayer.fields;
+        },
 
         /**
          * Reports layers that don't appear in the map.
@@ -1682,19 +1691,26 @@ define("js/lgonlineCommand", [
          * @memberOf js.LGSearchFeatureLayer#
          */
         showSearchLayerError: function (searchLayerName, reason) {
-            var message, pThis = this;
-
-            if (!reason) {
-                reason = this.checkForSubstitution("@messages.searchLayerMissing");
-            }
+            var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            message += reason + "<br><hr>";
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && !this.isSearchableLayer(searchLayer)) {
+                // For a search layer with no available fields, just show its name and
+                // some guidance about what to do
+                message += this.checkForSubstitution("@messages.searchLayerNotSearchable");
+
+            } else {
+                if (!reason) {
+                    reason = this.checkForSubstitution("@messages.searchLayerMissing");
+                }
+                message += reason;
+            }
 
             // Add map layers to message
-            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+            message += "<br><hr>" + this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
-                if (pThis.mapObj.getLayer(layerName)) {
+                if (pThis.isSearchableLayer(layerName)) {
                     message += "<li>\"" + layerName + "\"</li>";
                 }
             });
@@ -1740,15 +1756,14 @@ define("js/lgonlineCommand", [
                 });
                 message += "</ul>";
 
+                // Log it
+                this.log(message, true);
+
             } else {
                 // For a search layer with no available fields, just show its name and
                 // some guidance about what to do
-                message = "\"" + searchLayerName + "\"<br>";
-                message += this.checkForSubstitution("@messages.searchLayerNotSearchable");
+                this.showSearchLayerError(searchLayerName);
             }
-
-            // Log it
-            this.log(message, true);
         },
 
         /**
@@ -2141,6 +2156,15 @@ define("js/lgonlineCommand", [
                 this.showSearchLayerError("");
             }
         },
+        /**
+         * Determines if a layer can be queried.
+         * @param {object} searchLayer Search layer returned from map
+         * @return {boolean} false if layer is definitely note queryable
+         * @memberOf js.LGSearchFeatureLayer#
+         */
+        isSearchableLayer: function (searchLayer) {
+            return searchLayer && searchLayer.url && searchLayer.fields;
+        },
 
         /**
          * Reports layers that don't appear in the map.
@@ -2150,17 +2174,26 @@ define("js/lgonlineCommand", [
          * @memberOf js.LGSearchFeatureLayerMultiplexer#
          */
         showSearchLayerError: function (searchLayerName, reason) {
-            var message, pThis = this;
-
-            if (!reason) {
-                reason = this.checkForSubstitution("@messages.searchLayerMissing");
-            }
+            var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            message += reason + "<br><hr>";
-            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && !this.isSearchableLayer(searchLayer)) {
+                // For a search layer with no available fields, just show its name and
+                // some guidance about what to do
+                message += this.checkForSubstitution("@messages.searchLayerNotSearchable");
+
+            } else {
+                if (!reason) {
+                    reason = this.checkForSubstitution("@messages.searchLayerMissing");
+                }
+                message += reason;
+            }
+
+            // Add map layers to message
+            message += "<br><hr>" + this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
-                if (pThis.mapObj.getLayer(layerName)) {
+                if (pThis.isSearchableLayer(layerName)) {
                     message += "<li>\"" + layerName + "\"</li>";
                 }
             });
