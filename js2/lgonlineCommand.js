@@ -1682,7 +1682,7 @@ define("js/lgonlineCommand", [
          * @memberOf js.LGSearchFeatureLayer#
          */
         showSearchLayerError: function (searchLayerName, reason) {
-            var message;
+            var message, pThis = this;
 
             if (!reason) {
                 reason = this.checkForSubstitution("@messages.searchLayerMissing");
@@ -1694,7 +1694,9 @@ define("js/lgonlineCommand", [
             // Add map layers to message
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
-                message += "<li>\"" + layerName + "\"</li>";
+                if (pThis.mapObj.getLayer(layerName)) {
+                    message += "<li>\"" + layerName + "\"</li>";
+                }
             });
             message += "</ul>";
 
@@ -2148,7 +2150,7 @@ define("js/lgonlineCommand", [
          * @memberOf js.LGSearchFeatureLayerMultiplexer#
          */
         showSearchLayerError: function (searchLayerName, reason) {
-            var message;
+            var message, pThis = this;
 
             if (!reason) {
                 reason = this.checkForSubstitution("@messages.searchLayerMissing");
@@ -2158,7 +2160,9 @@ define("js/lgonlineCommand", [
             message += reason + "<br><hr>";
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
-                message += "<li>\"" + layerName + "\"</li>";
+                if (pThis.mapObj.getLayer(layerName)) {
+                    message += "<li>\"" + layerName + "\"</li>";
+                }
             });
             message += "</ul>";
 
