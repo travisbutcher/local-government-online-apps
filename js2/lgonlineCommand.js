@@ -2356,7 +2356,7 @@ define("js/lgonlineCommand", [
          */
         share: function () {
             var pThis = this, subjectLine, urlToShare, compressionUrl;
-            subjectLine = encodeURIComponent(this.getSubject());
+            subjectLine = encodeURIComponent(this.getSubject()) || "%20";  // an empty subject line breaks mailto:
             urlToShare = encodeURIComponent(this.getUrlToShare());
 
             if (this.tinyURLServiceURL && this.tinyURLServiceURL.length > 0) {
