@@ -320,7 +320,7 @@
             "parentDiv": "contentFrame",
             "rootClass": "helpMessageBox",
             "horizOffset": -2,
-            "vertOffset": 2,
+            "vertOffset": [2, -2],
             "trigger": "error"
         }
     }, {
