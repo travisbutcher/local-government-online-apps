@@ -1,15 +1,32 @@
-change report #56 at 06/19/2014 14:22:17.54
+change report #57 at 06/23/2014  7:17:17.10
 -
 for git branch
 develop
 in repository local-government-online-apps
-140619084814061920171406191819
+140623103314062312341406201717
 -
 changes in this branch since its last commit
  M CHANGES.txt
-M  apps2/FindEditFilter.json
-M  apps2/FindEditFilter_try_it.json
-M  apps2/Finder.json
-M  apps2/Finder_try_it.json
-M  apps2/GeneralMap.json
-M  apps2/ParcelViewer.json
+ M nls/ar/resources.js
+ M nls/cs/resources.js
+ M nls/da/resources.js
+ M nls/de/resources.js
+ M nls/es/resources.js
+ M nls/et/resources.js
+ M nls/fi/resources.js
+ M nls/fr/resources.js
+ M nls/it/resources.js
+ M nls/ja/resources.js
+ M nls/ko/resources.js
+ M nls/lt/resources.js
+ M nls/lv/resources.js
+ M nls/nb/resources.js
+ M nls/nl/resources.js
+ M nls/pl/resources.js
+ M nls/pt-br/resources.js
+ M nls/pt-pt/resources.js
+ M nls/ro/resources.js
+ M nls/ru/resources.js
+ M nls/sv/resources.js
+ M nls/tr/resources.js
+ M nls/zh-cn/resources.js
