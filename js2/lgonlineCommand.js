@@ -1673,14 +1673,22 @@ define("js/lgonlineCommand", [
             this.ready.reject(this);
             this.inherited(arguments);
         },
+
         /**
          * Determines if a layer can be queried.
-         * @param {object} searchLayer Search layer returned from map
-         * @return {boolean} false if layer is definitely note queryable
+         * @param {string} searchLayerName Name of layer to check
+         * @return {boolean} false if layer is definitely not queryable
          * @memberOf js.LGSearchFeatureLayer#
          */
-        isSearchableLayer: function (searchLayer) {
-            return searchLayer && searchLayer.url && searchLayer.fields;
+        isSearchableLayer: function (searchLayerName) {
+            var isSearchable = false, searchLayerObject;
+
+            searchLayerObject = this.mapObj.getLayer(searchLayerName);
+            if (searchLayerObject && searchLayerObject.url && searchLayerObject.fields) {
+                isSearchable = true;
+            }
+
+            return isSearchable;
         },
 
         /**
@@ -1694,8 +1702,8 @@ define("js/lgonlineCommand", [
             var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            searchLayer = this.mapObj.getLayer(searchLayerName);
-            if (searchLayer && !this.isSearchableLayer(searchLayer)) {
+            searchLayer = this.mapObj.getLayerMeta(searchLayerName);
+            if (searchLayer && !this.isSearchableLayer(searchLayerName)) {
                 // For a search layer with no available fields, just show its name and
                 // some guidance about what to do
                 message += this.checkForSubstitution("@messages.searchLayerNotSearchable");
@@ -2156,14 +2164,22 @@ define("js/lgonlineCommand", [
                 this.showSearchLayerError("");
             }
         },
+
         /**
          * Determines if a layer can be queried.
-         * @param {object} searchLayer Search layer returned from map
-         * @return {boolean} false if layer is definitely note queryable
-         * @memberOf js.LGSearchFeatureLayer#
+         * @param {string} searchLayerName Name of layer to check
+         * @return {boolean} false if layer is definitely not queryable
+         * @memberOf js.LGSearchFeatureLayerMultiplexer#
          */
-        isSearchableLayer: function (searchLayer) {
-            return searchLayer && searchLayer.url && searchLayer.fields;
+        isSearchableLayer: function (searchLayerName) {
+            var isSearchable = false, searchLayerObject;
+
+            searchLayerObject = this.mapObj.getLayer(searchLayerName);
+            if (searchLayerObject && searchLayerObject.url && searchLayerObject.fields) {
+                isSearchable = true;
+            }
+
+            return isSearchable;
         },
 
         /**
@@ -2177,8 +2193,8 @@ define("js/lgonlineCommand", [
             var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            searchLayer = this.mapObj.getLayer(searchLayerName);
-            if (searchLayer && !this.isSearchableLayer(searchLayer)) {
+            searchLayer = this.mapObj.getLayerMeta(searchLayerName);
+            if (searchLayer && !this.isSearchableLayer(searchLayerName)) {
                 // For a search layer with no available fields, just show its name and
                 // some guidance about what to do
                 message += this.checkForSubstitution("@messages.searchLayerNotSearchable");

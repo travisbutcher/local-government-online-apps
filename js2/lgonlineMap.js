@@ -479,18 +479,33 @@ define("js/lgonlineMap", [
         },
 
         /**
-         * Returns the layer with the specified name.
+         * Returns the layer with the specified name: returns the layerObject level.
          * @param {string} name Layer name to look for
          * @return {object} Layer or null
          * @memberOf js.LGMap#
          */
         getLayer: function (name) {
+            var layer = this.getLayerMeta(name);
+            if (layer) {
+                layer = layer.layerObject;
+            }
+            return layer;
+        },
+
+        /**
+         * Returns the layer with the specified name: returns the level that contains
+         * the layerObject.
+         * @param {string} name Layer name to look for
+         * @return {object} Layer or null
+         * @memberOf js.LGMap#
+         */
+        getLayerMeta: function (name) {
             var layer;
 
             // Find the operational layer that matches the specified search layer
             array.some(this.appConfig.itemInfo.itemData.operationalLayers, function (opLayer) {
                 if (opLayer.title === name) {
-                    layer = opLayer.layerObject;
+                    layer = opLayer;
                     return true;
                 }
                 return false;
