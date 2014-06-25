@@ -21,7 +21,7 @@
      ],
     "values": {
         "webmap": "3c33240fbacd42339547a06a966dcbf7",
-        "titleBar.title": "Finder",
+        "titleBar.title": "Finder Try-It",
         "titleBar.iconUrl": "images/onlineapp.png",
         "colorizer.theme": "SeaBlues",
         "searchBox.hint": "Parcel ID",
