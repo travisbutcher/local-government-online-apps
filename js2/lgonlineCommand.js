@@ -267,6 +267,8 @@ define("js/lgonlineCommand", [
                     "title": this.basemapgroupTitle,
                     "owner": this.basemapgroupOwner
                 };
+            } else if (this.appConfig.basemapgroup) {
+                basemapGroup = this.appConfig.basemapgroup;
             }
 
             return basemapGroup;

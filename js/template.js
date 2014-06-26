@@ -15,6 +15,7 @@
  | See the License for the specific language governing permissions and
  | limitations under the License.
  */
+/* @@@commit@@@ */
 define([
     "dojo/_base/declare",
     "dojo/_base/kernel",
@@ -23,6 +24,7 @@ define([
     "dojo/dom-class",
     "dojo/Deferred",
     "dojo/promise/all",
+    "dojo/request/xhr",
     "esri/arcgis/utils",
     "esri/urlUtils",
     "esri/request",
@@ -42,6 +44,7 @@ define([
     domClass,
     Deferred,
     all,
+    xhr,
     arcgisUtils,
     urlUtils,
     esriRequest,
@@ -447,6 +450,11 @@ define([
                     // Get application's file-based template
                     filename = this.config.app;
 
+                    // If we're running in the hosted environment without an appid, the file-based UIs are for previewing
+                    if (this.config.commonConfig) {
+                        filename += "_try_it";
+                    }
+
                 // 4. missing URL parameters
                 } else {
                     // Get apps2/GeneralMap file
@@ -454,16 +462,14 @@ define([
                 }
 
                 // Get the template file
-                esriRequest({
-                    url: filename + ".json",
-                    handleAs: "json"
-                }).then(
+                this.loadJSONFile(filename).then(
                     lang.hitch(this, function (fileTemplate) {
                         this.appConfig.ui = fileTemplate.ui || {};
                         this.appConfig.appValues = fileTemplate.values || {};
 
-                        // Webmap from URL overrides any default webmap from the file-based template
-                        if (!this.config.webmap) {
+                        // If we're running in the hosted environment without an appid or if no webmap id was
+                        // supplied in the URL, use the webmap in the file
+                        if (this.config.commonConfig || !this.config.webmap) {
                             this.config.webmap = fileTemplate.values.webmap;
                         }
 
@@ -504,6 +510,8 @@ define([
                     },
                     callbackParamName: "callback"
                 }).then(lang.hitch(this, function (response) {
+                    var q;
+
                     // get units defined by the org or the org user
                     this.orgConfig.units = "metric";
                     if (response.user && response.user.units) { //user defined units
@@ -513,6 +521,19 @@ define([
                     } else if ((response.user && response.user.region && response.user.region === "US") || (response.user && !response.user.region && response.region === "US") || (response.user && !response.user.region && !response.region) || (!response.user && response.ipCntryCode === "US") || (!response.user && !response.ipCntryCode && kernel.locale === "en-us")) {
                         // use feet/miles only for the US and if nothing is set for a user
                         this.orgConfig.units = "english";
+                    }
+                    //Is there a custom basemap group defined (owner and title or id)
+                    q = this._parseQuery(response.basemapGalleryGroupQuery);
+                    this.orgConfig.basemapgroup = {
+                        id: null,
+                        title: null,
+                        owner: null
+                    };
+                    if (q.id) {
+                        this.orgConfig.basemapgroup.id = q.id;
+                    } else if (q.title && q.owner) {
+                        this.orgConfig.basemapgroup.title = q.title;
+                        this.orgConfig.basemapgroup.owner = q.owner;
                     }
                     // Get the helper services (routing, print, locator etc)
                     this.orgConfig.helperServices = response.helperServices;
@@ -534,6 +555,25 @@ define([
             }
             return deferred.promise;
         },
+        _parseQuery: function (queryString) {
+            var regex = /(AND|OR)?\W*([a-z]+):/ig,
+                fields = {},
+                fieldName,
+                fieldIndex,
+                result = regex.exec(queryString);
+            while (result) {
+                fieldName = result && result[2];
+                fieldIndex = result ? (result.index + result[0].length) : -1;
+
+                result = regex.exec(queryString);
+
+                fields[fieldName] = queryString
+                    .substring(fieldIndex, result ? result.index : queryString.length)
+                    .replace(/^\s+|\s+$/g, "")
+                    .replace(/\"/g, ""); //remove extra quotes in title
+            }
+            return fields;
+        },
         _queryUrlParams: function () {
             // This function demonstrates how to handle additional custom url parameters. For example
             // if you want users to be able to specify lat/lon coordinates that define the map's center or
@@ -543,6 +583,28 @@ define([
             // (center, basemap, theme) are only here as examples and can be removed if you don't plan on
             // supporting additional url parameters in your application.
             this.customUrlConfig.urlValues = this._createUrlParamsObject(this.config.urlItems);
+        },
+        /**
+         * Loads JSON from a file.
+         * @param {string} url The URL of the JSON file
+         * @return {Deferred} Provides a way to test the success or
+         *         failure of loading the file
+         */
+        loadJSONFile: function (url) {
+            var done = new Deferred();
+
+            xhr(url + ".json", {
+                handleAs: "json"
+            }).then(
+                function (uiSpec) {
+                    done.resolve(uiSpec);
+                },
+                function (err) {
+                    done.reject(err);
+                }
+            );
+
+            return done;
         }
     });
 });
