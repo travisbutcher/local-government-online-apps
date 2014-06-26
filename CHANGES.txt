@@ -1,10 +1,12 @@
-change report #72 at 06/27/2014  7:24:03.33
+change report #69 at 06/26/2014 16:39:32.78
 -
 for git branch
-release_3.4
+geoprocessor
 in repository local-government-online-apps
-140627091914062712561406270105
+140626084914062619481406242059
 -
 changes in this branch since its last commit
  M CHANGES.txt
- M js2/lgonlineCommand.js
+ M js2/lgonlineApp.js
+?? apps2/GPFinder.json
+?? js2/lgonlineGeoprocessor.js
