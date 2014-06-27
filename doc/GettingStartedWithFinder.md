@@ -10,6 +10,7 @@
 
 [bconfig]: markdown/BasicConfigurationOfFinder.md
 [How to Host an App on Your Server]: markdown/HowToHostAppOnYourServer.md
+[How to Host an App on ArcGIS Online]: markdown/HowToHostAppOnOnline.md
 [FAQ]: FAQ.md
 [preview]: http://www.arcgis.com/apps/Solutions/s2.html?app=apps2/Finder
 [layertypes]: http://resources.arcgis.com/en/help/arcgisonline/index.html#/Add_layers/010q0000009v000000/
@@ -76,17 +77,29 @@ Finder can be hosted
 
     When your users publish a web map using the Finder template, they have the opportunity to configure basic parameters of the app. The application can be shared publicly or with others in your organization.
 
+	[Learn more about hosting an app using ArcGIS Online][How to Host an App on ArcGIS Online]
+
 - on your web server
 
-    You as the administrator configure the basic parameters using this code that you've downloaded from GitHub. The fully-configured application can then be run from your web server.
+    You, as the administrator, configure the application using this code that you've downloaded from GitHub. The fully-configured application can then be run from your web server.
 
-For additional information, see [Basic Configuration of Finder][bconfig] and [How to Host an App on Your Server][].
+	[Learn more about hosting an app on your server][How to Host an App on Your Server]
 
-#### Customizing the app
+### Configuring Finder
 
-Additional configuration of the application is possible whether the app is hosted in your ArcGIS Online organization or on your server. Default values, the configuration UI, and the widget bar at the top of the application can all be modified.
+Two levels of configuration are available whether your app will be hosted using ArcGIS Online or your own web server.
 
-See [FAQ][] for more information about this level of customization.
+#### Basic configuration
+
+Many aspects of Finder can be configured through the app's configuration panel in ArcGIS Online, including the color scheme, title, and the layers and fields used for searching map content.
+
+[Learn more about configuring Finder][bconfig]
+
+#### Additional configuration
+
+Additional configuration of the application is possible whether the app is hosted in your ArcGIS Online organization or on your server. Default  values, the configuration UI, and the widget bar at the top of the application can all be modified.
+
+[Learn more about additional configuration options][FAQ]
 
 ----------
 Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.

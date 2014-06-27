@@ -245,6 +245,7 @@ define("js/lgonlineCommand", [
                         thumbnailUrl: thumbnailUrl
                     })],
                     showArcGISBasemaps: true,  // ignored if a group is configured
+                    portalUrl: this.appConfig.sharinghost,
                     basemapsGroup: basemapGroup,
                     bingMapsKey: this.appConfig.bingKey,
                     map: this.appConfig.map

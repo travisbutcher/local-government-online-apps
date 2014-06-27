@@ -22,7 +22,9 @@ Finder can be configured in [ArcGIS Online][agol] using the UI configuration exp
 
 **Find Fields and Layers**: These parameters accept a comma-separated list of field names (not aliases), and map layer names, respectively. One or many values may be specified and the fields and layers may be listed in any order. The application will search any field with a listed name that occurs in a listed layer. One result will be returned for each occurrence of the search term.
 
-**Result Display Field**: If this field exists in a layer where a search result was found, the value from this field will appear in the search results list. If this field doesn’t exist in the layer where a result was found, the value of the searched field will be displayed in the search results list. For example, the searched field may contain Parcel IDs, but the addresses of the matching parcel IDs could be displayed in the search results list if the Results Display Field is set to the field containing the addresses of each parcel.
+**Result Display Field**: If this field exists in a layer where a search result was found, the value from this field will appear in the search results list. If this field doesn’t exist in the layer where a result was found, the value of the searched field will be displayed in the search results list. The Result Display Fields must be listed in the same order as the Find Layers to which they apply. Only one Result Display Field can be defined for each Find Layer.
+
+For example, the searched field may contain Parcel IDs, but the addresses of the matching parcel IDs could be displayed in the search results list if the Results Display Field is set to the field containing the addresses of each parcel.
 
 **Zoom Level**: The zoom level the map moves to when displaying a selected search result.
 

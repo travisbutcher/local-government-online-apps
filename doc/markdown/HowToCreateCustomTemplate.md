@@ -21,6 +21,7 @@
 [Red.json]: ../examples2/Red.json
 [Orange.json]: ../examples2/Orange.json
 
+[hostonline]: HowToHostAppOnOnline.md
 [app configuration file]: UnderstandingConfigurationFile.md
 [apps2/ folder]: ../../apps2/
 [Solutions online apps GitHub site]: https://github.com/Esri/local-government-online-apps
@@ -39,7 +40,7 @@
 
 ### Summary
 
-When you [publish a web map using a web application template][]), ArcGIS Online creates an app for you. This app is a go-between that points to your webmap, the web application template that you choose, and some template configuration values (more about this later).
+When you [publish a web map using a web application template][], ArcGIS Online creates an app for you. This app is a go-between that points to your webmap, the web application template that you choose, and some template configuration values (more about this later).
 
 ![web app structure][]
 
@@ -85,65 +86,13 @@ Because a template can be shared by many web apps, your selections during publis
 
 You can create custom web application templates for your organization and use them the same way as the standard ones. Because the publication configuration user interface and its initial values are defined in the template using [JSON][], you can read and change them.
 
-With the Solutions set of web apps such Parcel Viewer, Finder, et al., you can make much bigger changes, such as make the app search a geocoder with a free-form address in addition to searching the feature layers, or show a splash screen when the app starts up. If the underlying app contains the feature, you can use it in your user interface.
+With the Solutions set of web apps such Finder, and Find, Edit, and Filter, , you can make much bigger changes, such as make the app search a geocoder with a free-form address in addition to searching the feature layers, or show a splash screen when the app starts up. If the underlying app contains the feature, you can use it in your user interface.
 
-Creating a custom template is easy, but involves a number of steps.
-
-When you publish a webmap as an app, ArcGIS Online offers a gallery of webmap app templates from Esri. In order to add custom templates, you'll create a group to hold them and then adjust your organization's configuration to use that group as your organization's gallery instead of the Esri default gallery. The [Configure map viewer description][] tells you how to do this under its Web App Templates bullet point.
-
-We'll create a custom app template by modifying an existing web app template. We'll use the Parcel Viewer template from the Solutions set of web apps as the starting point, but these instructions work for any of the Esri default web app templates.
-
-* Sign in to your organization's ArcGIS Online account with an administrator's account.
-
-* Find the model web app template's item description in ArcGIS Online.
-
-    * In the search box in the top-right corner, type the title of the model web app template (e.g., "Parcel Viewer") and then click the "Search for Apps" link in the dropdown box below the search box.
-    * If the template is not in your organization (e.g., it was published by Esri), uncheck "Only search in <i>username</i>" along the left side of the page to expand and refresh the search.
-    * Click on the title of the one that you want; you might find the publisher line "Web Mapping Application by <i>publisher</i>" useful. For example, for the English-language Parcel Viewer published by Esri, the publisher line is "Web Mapping Application by esri_en" and it is located [here][standard Parcel Viewer].
-
-        ![ArcGIS Online Parcel Viewer item summary][]
-
-    * Copy and save
-        * the ArcGIS Online id of the template itself; you can get that from the URL of the ArcGIS Online page URL
-
-            ![web application template's ArcGIS Online id][]
-
-        * the URL to the server hosting the application software
-
-            ![web application template's server URL location][]
-
-* Create the custom template item. The general process is described [here][create a custom template]; below are the specific steps for our configuration.
-
-    * Click on the "MY CONTENT" link at the top of the page.
-    * Navigate to the folder where you want to create the configured template and click on the "Add Item" link to create a new item. Use the following options:
-        * The item is: An application
-        * Web Mapping
-        * URL: use the URL copied from the Parcel Viewer description (e.g., "/apps/Solutions/s2.html?app=apps2/ParcelViewer"); if the pasted URL is modified by the Add Item box, we'll fix it later
-        * Purpose: Configurable
-        * API: JavaScript
-    * Add the title and tags that you want and click the "ADD ITEM" button.
-    * Click on the "EDIT" link after the new item's description page opens.
-    * Update title, thumbnail, summary, description, access and use constraints, tags, and credits as you wish.
-    * Fix the URL property if it doesn't match what you originally entered into the Add Item box.
-
-* Add the custom template's configuration into the new template's "Configuration Parameters" box.
-
-    * Using another browser tab or window, get the configuration JSON. Use the following URL, but replace the "85ec8f162e654968a3740740075b34c6" part with the ArcGIS Online id that you saved earlier for the model app template [http://www.arcgis.com/sharing/content/items/85ec8f162e654968a3740740075b34c6/data?f=pjson][]
-    * Copy the entire contents of the displayed page. This is the configuration information from the esri_en language version of Parcel Viewer, but it is the same for all languages. Language-specific phrases for the app are stored in files with the app's software.
-    * Paste the contents into the "Configuration Parameters" box.
-    * Click the "Save" button.
-
-* Add the custom template to your custom templates group.
-
-    * Click on the "SHARE" link.
-    * Check the box next to the name of your custom templates group.
-    * Click the "OK" button.
-
-Now when your users publish a webmap, they will be able to use your custom template. The resulting app should appear and behave the same as your model web app template.
+[Learn how to host an app using ArcGIS Online][hostonline]
 
 There are a lot of steps, but remember what it gets you: the freedom to configure a hosted app!
 
-The JSON that you copied and pasted into the Configuration Parameters is essentially the same as the JSON that you'll find in the file [apps2/ParcelViewer.json][] in the [Solutions online apps GitHub site][]. (There will be small formatting changes and the hosted version will have a note linking it to the GitHub commit that it came from.)
+The JSON pasted into the Configuration Parameters is essentially the same as the JSON that you'll find in the file [apps2/ParcelViewer.json][] in the [Solutions online apps GitHub site][]. (There will be small formatting changes and the hosted version will have a note linking it to the GitHub commit that it came from.)
 
 For the other configuration configuration articles, we'll start with the file version simply because it is easier to manage files. We'll modify it and paste its contents into the template's Configuration Parameters to create an app template.
 

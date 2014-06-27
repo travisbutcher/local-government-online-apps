@@ -10,7 +10,9 @@
 
 [bconfig]: markdown/BasicConfigurationOfFindEditFilter.md
 [How to Host an App on Your Server]: markdown/HowToHostAppOnYourServer.md
+[How to Host an App on ArcGIS Online]: markdown/HowToHostAppOnOnline.md
 [FAQ]: FAQ.md
+[create a custom template]: markdown/HowToCreateCustomTemplate.md
 [preview]: http://www.arcgis.com/apps/Solutions/s2.html?app=apps2/FindEditFilter
 [layertypes]: http://resources.arcgis.com/en/help/arcgisonline/index.html#/Add_layers/010q0000009v000000/
 [LICENSE.txt]: ../LICENSE.txt
@@ -41,6 +43,7 @@ The basic functions of Find, Edit, and Filter are the following:
 
 ![Help][help] **Application help**: Configurable text for end users of the application.
 
+----------
 ### Requirements
 
 Supported Browsers
@@ -62,11 +65,10 @@ Find, Edit, and Filter cannot be configured to search or filter using fields tha
 
 ![Layer types that can be displayed in Find Edit. Nested layers (2 and 3) and tiled layers (4) cannot be searched.][layers]
 
+----------
 ### Implementation Strategies
 
 Once you're familiar with the application, consider how you will want to make it available to your users.
-
-#### Hosting the app
 
 Find, Edit, and Filter can be hosted
 
@@ -74,17 +76,29 @@ Find, Edit, and Filter can be hosted
 
     When your users publish a web map using the Find, Edit, and Filter template, they have the opportunity to configure basic parameters of the app. The application can be shared publicly or with others in your organization.
 
+	[Learn more about hosting an app using ArcGIS Online][How to Host an App on ArcGIS Online]
+
 - on your web server
 
-    You as the administrator configure the basic parameters using this code that you've downloaded from GitHub. The fully-configured application can then be run from your web server.
+    You, as the administrator, configure the application using this code that you've downloaded from GitHub. The fully-configured application can then be run from your web server.
 
-For additional information, see [Basic Configuration of Find, Edit, and Filter][bconfig] and [How to Host an App on Your Server][].
+	[Learn more about hosting an app on your server][How to Host an App on Your Server].
 
-#### Customizing the app
+### Configuring Find, Edit and Filter
 
-Additional configuration of the application is possible whether the app is hosted in your ArcGIS Online organization or on your server. Default values, the configuration UI, and the widget bar at the top of the application can all be modified.
+Two levels of configuration are available whether your app will be hosted using ArcGIS Online or your own web server.
 
-See [FAQ][] for more information about this level of customization.
+#### Basic configuration
+
+Many aspects of Find, Edit, and Filter can be configured through the app's configuration panel in ArcGIS Online, including the color scheme, title, and the layers and fields used for searching and filtering the map content.
+
+[Learn more about configuring Find, Edit, and Filter][bconfig]
+
+#### Additional configuration
+
+Additional configuration of the application is possible whether the app is [hosted in your ArcGIS Online organization][create a custom template] or [on your server][How to Host an App on Your Server]. Default  values, the configuration UI, and the widget bar at the top of the application can all be modified.
+
+[Learn more about additional configuration options][FAQ]
 
 ----------
 Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.

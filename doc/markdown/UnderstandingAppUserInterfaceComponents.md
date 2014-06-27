@@ -3,6 +3,9 @@
 [CSS]: http://www.w3schools.com/cssref/
 [colors by name]: http://www.w3schools.com/cssref/css_colornames.asp
 [colors by hex value]: http://www.w3schools.com/cssref/css_colorsfull.asp
+[js.LGMap]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGMap.html
+[js.LGHighlighter]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGHighlighter.html
+[js.LGCommand]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGCommand.html
 [nls/ folder]: ../../nls/
 [nls/template.js]: ../../nls/template.js
 [LICENSE.txt]: ../../LICENSE.txt
@@ -19,7 +22,7 @@ A component's description consists of two or three parts in the [JSON format][]:
 * **classname** is the name of the JavaScript class in the Solutions library implementing the component. The web app instantiates (creates) an object of this class using the contents of the config part.
 * **styles** (optional) is a string of [CSS][] that is referenced by the config part. If the component does not use visual elements, then this part may be omitted. It is not necessary to include CSS that has been defined by an earlier component in the script because components share their styles section.
 
-For example, a component of class "js.LGMap" might look like this:
+For example, a component of class "[js.LGMap][]" might look like this:
 
 ```json
     {
@@ -41,7 +44,7 @@ Here is what the various configuration elements mean:
 * **parentDiv** is the name of the element that will contain this element in the app
 * **fill** indicates that this element will fill its parent container
 
-Another example component is "js.LGHighlighter", which is used for highlighting selected graphics on the map. It works with, and thus depends on, a js.LGMap, so you'll see a reference to a map element in its configuration:
+Another example component is "[js.LGHighlighter][]", which is used for highlighting selected graphics on the map. It works with, and thus depends on, a [js.LGMap][], so you'll see a reference to a map element in its configuration:
 
 ```json
     {
@@ -100,7 +103,7 @@ Note how a component is enclosed by braces ("{}"). Because the ui section is a l
     }
 ```
 
-This example also illustrates how the app is able to handle internationalization in the configuration file. The configuration of a js.LGCommand component, which is the class used to show the command buttons in the app, includes the specification of a tooltip. You can put your own tooltip in the configuration of the component, or you can use one of the internationalized phrases that are included with the app. The phrases are in the [nls/ folder] hierarchy: [nls/template.js] contains the JSON structure defining the available phrases, and subdirectories contain the language-specific version of each phrase. In a component, you indicate that you want to use the internationalized phrases by starting a string of text with "@" and supplying the path to the phrase. For example, the component named "basemap" above uses `@tooltips.basemap` as its text. This indicates that
+This example also illustrates how the app is able to handle internationalization in the configuration file. The configuration of a [js.LGCommand][] component, which is the class used to show the command buttons in the app, includes the specification of a tooltip. You can put your own tooltip in the configuration of the component, or you can use one of the internationalized phrases that are included with the app. The phrases are in the [nls/ folder] hierarchy: [nls/template.js] contains the JSON structure defining the available phrases, and subdirectories contain the language-specific version of each phrase. In a component, you indicate that you want to use the internationalized phrases by starting a string of text with "@" and supplying the path to the phrase. For example, the component named "basemap" above uses `@tooltips.basemap` as its text. This indicates that
 
 1. the app looks in the internationalized phrases for the text instead of using the text directly
 2. the phrase is found in variable "basemap" in the "tooltips" structure
