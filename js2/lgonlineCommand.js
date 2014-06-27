@@ -1580,11 +1580,12 @@ define("js/lgonlineCommand", [
             if (this.searchLayerName) {
                 try {
                     searchLayer = this.mapObj.getLayer(this.searchLayerName);
-                    if (searchLayer && searchLayer.url) {
+                    if (searchLayer && searchLayer.url &&
+                            searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
                         this.searchURL = searchLayer.url;
 
                         // Check for existence of fields; start with a list of fields in the search layer
-                        array.forEach(searchLayer.fields, function (layerField) {
+                        array.forEach(searchLayer.resourceInfo.fields, function (layerField) {
                             availableFields += layerField.name + ",";
                         });
 
@@ -1627,7 +1628,7 @@ define("js/lgonlineCommand", [
                         this.searchFields = actualFieldList;
 
                         // Set up our query task now that we have the URL to the layer
-                        this.objectIdField = searchLayer.objectIdField;
+                        this.objectIdField = searchLayer.resourceInfo.objectIdField;
                         this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
 
                         this.searcher = new QueryTask(this.searchURL);
@@ -1637,7 +1638,7 @@ define("js/lgonlineCommand", [
                         this.generalSearchParams.returnGeometry = false;
                         this.generalSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
 
-                        generalOutFields = [searchLayer.objectIdField];
+                        generalOutFields = [searchLayer.resourceInfo.objectIdField];
                         if (this.displayField !== "") {
                             generalOutFields = generalOutFields.concat(this.displayField);
                         }
@@ -1684,10 +1685,10 @@ define("js/lgonlineCommand", [
          * @memberOf js.LGSearchFeatureLayer#
          */
         isSearchableLayer: function (searchLayerName) {
-            var isSearchable = false, searchLayerObject;
+            var isSearchable = false, searchLayer;
 
-            searchLayerObject = this.mapObj.getLayer(searchLayerName);
-            if (searchLayerObject && searchLayerObject.url && searchLayerObject.fields) {
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && searchLayer.url && searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
                 isSearchable = true;
             }
 
@@ -1705,7 +1706,7 @@ define("js/lgonlineCommand", [
             var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            searchLayer = this.mapObj.getLayerMeta(searchLayerName);
+            searchLayer = this.mapObj.getLayer(searchLayerName);
             if (searchLayer && !this.isSearchableLayer(searchLayerName)) {
                 // For a search layer with no available fields, just show its name and
                 // some guidance about what to do
@@ -1736,13 +1737,13 @@ define("js/lgonlineCommand", [
          * @param {array} candidateFields List of fields requested for search or for display
          * @param {string} searchLayerName Name to report for search layer
          * @param {object} searchLayer Details of search layer as returned from map;
-         *        function uses searchLayer.fields
+         *        function uses searchLayer.resourceInfo.fields
          * @memberOf js.LGSearchFeatureLayer#
          */
         showSearchLayerFieldError: function (candidateFields, searchLayerName, searchLayer) {
             var reason = "", message;
 
-            if (searchLayer.fields) {
+            if (searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
                 // List the requested fields
                 array.forEach(candidateFields, function (field) {
                     if (reason.length > 0) {
@@ -1762,7 +1763,7 @@ define("js/lgonlineCommand", [
                 // Add the search layer name and a list of available fields in that layer
                 message += "<br><hr>\"" + searchLayerName + "\"<br>";
                 message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
-                array.forEach(searchLayer.fields, function (layerField) {
+                array.forEach(searchLayer.resourceInfo.fields, function (layerField) {
                     message += "<li>\"" + layerField.name + "\"</li>";
                 });
                 message += "</ul>";
@@ -2175,10 +2176,10 @@ define("js/lgonlineCommand", [
          * @memberOf js.LGSearchFeatureLayerMultiplexer#
          */
         isSearchableLayer: function (searchLayerName) {
-            var isSearchable = false, searchLayerObject;
+            var isSearchable = false, searchLayer;
 
-            searchLayerObject = this.mapObj.getLayer(searchLayerName);
-            if (searchLayerObject && searchLayerObject.url && searchLayerObject.fields) {
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && searchLayer.url && searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
                 isSearchable = true;
             }
 
@@ -2196,7 +2197,7 @@ define("js/lgonlineCommand", [
             var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            searchLayer = this.mapObj.getLayerMeta(searchLayerName);
+            searchLayer = this.mapObj.getLayer(searchLayerName);
             if (searchLayer && !this.isSearchableLayer(searchLayerName)) {
                 // For a search layer with no available fields, just show its name and
                 // some guidance about what to do
