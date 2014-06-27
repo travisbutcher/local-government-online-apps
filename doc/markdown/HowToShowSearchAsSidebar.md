@@ -1,3 +1,5 @@
+[js.LGSearchBoxByText]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGSearchBoxByText.html
+[js.LGGraphic]: http://localgovtemplates2.esri.com/support/local-government-online-apps/doc/js2_doc/js.LGGraphic.html
 [StartWithSplash.json]: ../examples2/StartWithSplash.json
 
 [app configuration file]: UnderstandingConfigurationFile.md
@@ -23,7 +25,7 @@ We will modify an [app configuration file][] in the repository and use its conte
 
 For this article, we'll change the positioning configuration for the search box.
 
-The search box is an instance of class js.LGSearchBoxByText, which has js.LGGraphic as an ancestor. js.LGGraphic has two parameters called horizOffset and vertOffset to guide the positioning of the graphic. These parameters take a single number or a pair of numbers. Numbers greater than zero stand for the offset from the left (for horizOffset) or top (for vertOffset) in pixels; numbers less than zero stand for the offset from the right or bottom; numbers equal to zero indicate centering. A pair of numbers permits you to tie the graphic to both edges. E.g., the original values in the supplied JSON configuration file are
+The search box is an instance of class [js.LGSearchBoxByText][], which has [js.LGGraphic][] as an ancestor. [js.LGGraphic][] has two parameters called horizOffset and vertOffset to guide the positioning of the graphic. These parameters take a single number or a pair of numbers. Numbers greater than zero stand for the offset from the left (for horizOffset) or top (for vertOffset) in pixels; numbers less than zero stand for the offset from the right or bottom; numbers equal to zero indicate centering. A pair of numbers permits you to tie the graphic to both edges. E.g., the original values in the supplied JSON configuration file are
 
     "horizOffset": -2,
     "vertOffset": [2, -2],
@@ -33,7 +35,7 @@ which mean that
 - horizontally, the search box is two pixels from the right edge of the map area
 - vertically, the search box is two pixels from the top and bottom edges of the map area
 
-If a maximum width or height constraint exists in CSS, then the right/bottom constraint in a pair of numbers is overridden by the CSS if the map area is larger than the maximum. In the supplied JSON configuration file, e.g., there is a max-height:224px; in the styles (CSS) part of the js.LGSearchBoxByText configuration, so the search box will not be two pixels from the bottom until the map window gets shorter than 229 pixels.
+If a maximum width or height constraint exists in CSS, then the right/bottom constraint in a pair of numbers is overridden by the CSS if the map area is larger than the maximum. In the supplied JSON configuration file, e.g., there is a max-height:224px; in the styles (CSS) part of the [js.LGSearchBoxByText][] configuration, so the search box will not be two pixels from the bottom until the map window gets shorter than 229 pixels.
 
 ----------
 ### Procedure

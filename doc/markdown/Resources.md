@@ -5,6 +5,7 @@
 [Lint]: http://en.wikipedia.org/wiki/Lint_(software)
 [JSLint]: http://www.jslint.com/
 [JSBeautifier]: http://jsbeautifier.org/
+[JSLint Error Explanations]: http://jslinterrors.com/
 [JSON syntax]: http://www.json.org/
 [LICENSE.txt]: ../../LICENSE.txt
 
@@ -18,7 +19,7 @@ Learn more about
 * [ArcGIS Online][]
 * [ArcGIS API for JavaScript][]
 * [ArcGIS for Local Government maps and apps][]
-* [Lint][]ing for code validation. There are various "linters" available on the web; an example is [JSLint][]. If you use JSLint, a formatter such as [JSBeautifier][] is helpful because JSLint contains formatting rules that must be met in order to check for errors.
+* [Lint][]ing for code validation. There are various "linters" available on the web; an example is [JSLint][]. If you use JSLint, a formatter such as [JSBeautifier][] is helpful because JSLint contains formatting rules that must be met in order to check for errors. The [JSLint Error Explanations] site explains issues raised by linters as well as ways to adjust the JavaScript to avoid the issues.
 * [JSON syntax][]
 
 ----------
