@@ -1797,10 +1797,10 @@ define("js/lgonlineCommand", [
             // Prepare the search term and the search query pattern for the desired casing handling
             if (this.caseInsensitiveSearch === true) {
                 processedSearchText = searchText.toUpperCase();
-                attributePattern = "UPPER(${0}) LIKE '" + this.searchPattern + "'";
+                attributePattern = "UPPER(${0}) LIKE N'" + this.searchPattern + "'";
             } else {
                 processedSearchText = searchText;
-                attributePattern = "${0} LIKE '" + this.searchPattern + "'";
+                attributePattern = "${0} LIKE N'" + this.searchPattern + "'";
             }
 
             // Escape single quotes, which are used to bound the search term in the query

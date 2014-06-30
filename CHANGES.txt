@@ -1,11 +1,10 @@
-change report #73 at 06/27/2014 10:41:37.54
+change report #75 at 06/30/2014 14:59:41.08
 -
 for git branch
-release_3.4
+unicode_in_sql_query
 in repository local-government-online-apps
-140627091914062712561406270105
+140630111314063020311406271800
 -
 changes in this branch since its last commit
  M CHANGES.txt
  M js2/lgonlineCommand.js
- M js2/lgonlineMap.js
