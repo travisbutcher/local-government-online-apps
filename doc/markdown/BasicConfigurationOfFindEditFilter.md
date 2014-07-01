@@ -38,7 +38,7 @@ Find, Edit, Filter can be configured in [ArcGIS Online][agol] using the UI confi
 
 **Result Display Field**: If this field exists in a layer where a search result was found, the value from this field appears in the search results list. If this field doesn't exist in the layer where a result was found, the value of the searched field is displayed in the search results list. The Result Display Fields must be listed in the same order as the Find Layers to which they apply. Only one Result Display Field can be defined for each Find Layer.
 
-For example, the searched field may contain Building IDs, but the names of the buildings could be displayed in the search results list if the Results Display Field is set to the field containing the names of each building. 
+For example, the searched field may contain Building IDs, but the names of the buildings could be displayed in the search results list if the Results Display Field is set to the field containing the names of each building.
 
 **Zoom Level**: The zoom level the map moves to when displaying a selected search result.
 

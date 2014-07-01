@@ -25,7 +25,7 @@ All JavaScript is documented using [JSDoc][] tags so that code documentation may
 
 ### Validation
 
-In order to help catch typographic errors, all JavaScript & JSON in the repository is validated except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. See the [Resources][] page for information about validation.
+In order to help catch typographic errors, all JavaScript & JSON in the repository is validated except for third-party libraries. See the [Resources][] page for information about validation.
 
 ### Compression
 

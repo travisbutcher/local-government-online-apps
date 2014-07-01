@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js,esri,setTimeout,clearTimeout,setInterval,clearInterval */
-/*jslint sloppy:true,plusplus:true */
+﻿/*global define,dojo,js,esri */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
  |
@@ -16,7 +16,26 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", "js/lgonlineMap"], function (Deferred, Color, esriLang) {
+define("js/lgonlineDrawing", [
+    "dojo/Deferred",
+    "dojo/_base/Color",
+    "dojo/on",
+    "esri/lang",
+    "esri/graphic",
+    "esri/symbols/SimpleLineSymbol",
+    "esri/symbols/SimpleMarkerSymbol",
+    "esri/symbols/SimpleFillSymbol",
+    "js/lgonlineMap"
+], function (
+    Deferred,
+    Color,
+    on,
+    esriLang,
+    Graphic,
+    SimpleLineSymbol,
+    SimpleMarkerSymbol,
+    SimpleFillSymbol
+) {
 
     //========================================================================================================================//
 
@@ -38,6 +57,8 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
         constructor: function () {
             // Correct for stringized boolean
             this.showFeaturePopup = this.toBoolean(this.showFeaturePopup, true);
+
+            this.setUpWaitForDependency("js.LGHighlighter");
         },
 
         /**
@@ -47,7 +68,7 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
          * @override
          */
         onDependencyReady: function () {
-            var extent, newMapCenter, pThis = this;
+            var pThis = this;
             // Now that the map (our dependency) is ready, finish setup
 
             // Create a graphics layer to hold the highlights
@@ -63,41 +84,53 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
             this.intervalTerminator = null;
             this.intervalID = null;
 
-            // Cache the URL to the print when triggered
+            // Highlight the supplied item when triggered
             this.subscribeToMessage("highlightItem", function (focalItem) {
-                var geometry, attributes, infoTemplate, highlightGraphics;
+                var extent, newMapCenter, geometry, highlightGraphics;
 
-                // Normalize focal item into attributes, geometry, and infoTemplate components
                 if (!focalItem) {
                     return;
                 }
-                if (focalItem.geometry) {
-                    geometry = focalItem.geometry;
+
+                // We will pan & zoom to the selected item, so we'll start with centering on the
+                // center of the item's extent or the item itself, if a point
+                geometry = focalItem.geometry || focalItem;
+                extent = geometry.getExtent();
+                if (extent) {
+                    newMapCenter = extent.getCenter();  // if geometry not a point
                 } else {
-                    geometry = focalItem;
-                }
-                if (focalItem.attributes) {
-                    attributes = focalItem.attributes;
-                }
-                if (focalItem.infoTemplate) {
-                    infoTemplate = focalItem.infoTemplate;
+                    newMapCenter = geometry;  // for point
                 }
 
                 // Create highlight graphic(s)
-                highlightGraphics = pThis.createHighlightGraphics(geometry, attributes, infoTemplate);
+                highlightGraphics = pThis.createHighlightGraphics(geometry,
+                    focalItem.attributes, focalItem.infoTemplate);
 
                 // Pan & zoom to highlight graphic(s)
                 if (highlightGraphics.length > 0) {
-                    extent = geometry.getExtent();
-                    if (extent) {
-                        newMapCenter = extent.getCenter();
-                    } else {
-                        newMapCenter = geometry;
-                    }
                     pThis.showHighlight(highlightGraphics, newMapCenter, pThis.highlightZoomLevel,
-                        esriLang.isDefined(attributes) && esriLang.isDefined(infoTemplate) && pThis.showFeaturePopup);
+                        esriLang.isDefined(focalItem.attributes)
+                        && esriLang.isDefined(focalItem.infoTemplate)
+                        && pThis.showFeaturePopup, focalItem);
                 }
             });
+
+            // Clear highlight graphics when the popup closes
+            if (this.appConfig.map.infoWindow) {
+                on(this.appConfig.map.infoWindow, "hide", function () {
+                    pThis.highlighterLayer.clear();
+                });
+            }
+
+            // If we're not opening a popup for a selected search result, also clear the highlight
+            // graphics when a popup opens
+            if (!this.showFeaturePopup) {
+                if (this.appConfig.map.infoWindow) {
+                    on(this.appConfig.map.infoWindow, "show", function () {
+                        pThis.highlighterLayer.clear();
+                    });
+                }
+            }
         },
 
         /**
@@ -115,8 +148,8 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
 
             if (geometry.type === "polyline") {
                 // Create a line symbol using the configured line highlight color
-                highlightGraphics.push(new esri.Graphic(geometry,
-                    new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                highlightGraphics.push(new Graphic(geometry,
+                    new SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
                         this.lineHiliteColor, 3),
                     attributes, infoTemplate));
 
@@ -129,11 +162,11 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
 
                     // Create a series of concentric circle symbols using the configured line highlight color
                     for (i = 0; i <= 4; ++i) {
-                        highlightGraphics.push(new esri.Graphic(geometry,
-                            new esri.symbol.SimpleMarkerSymbol(
-                                esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE,
+                        highlightGraphics.push(new Graphic(geometry,
+                            new SimpleMarkerSymbol(
+                                SimpleMarkerSymbol.STYLE_CIRCLE,
                                 (i + 16) * 2.5,
-                                new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
                                     this.lineHiliteColor, 3),
                                 this.concentricCircleFillColor
                             ),
@@ -143,8 +176,8 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
                 } else if (geometry.type) {
                     // Create a polygon symbol using the configured line & fill highlight colors
                     highlightGraphics.push(new esri.Graphic(geometry,
-                        new esri.symbol.SimpleFillSymbol(esri.symbol.SimpleFillSymbol.STYLE_SOLID,
-                            new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                        new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                            new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
                                 this.lineHiliteColor, 3), this.fillHiliteColor),
                         attributes, infoTemplate));
                 }
@@ -163,7 +196,7 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
          *        after pan and zoom are finished; default is to not show
          * @memberOf js.LGHighlighter#
          */
-        showHighlight: function (highlightGraphics, newMapCenter, newZoomLevel, showFeaturePopup) {
+        showHighlight: function (highlightGraphics, newMapCenter, newZoomLevel, showFeaturePopup, focalItem) {
             var focusFinished, zoomFinished, i, increasingRadius, pThis = this;
 
             if (newMapCenter) {
@@ -172,8 +205,8 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
                 focusFinished = new Deferred();
                 focusFinished.resolve();
             }
-            focusFinished.then(  //??? centerAt/setZoom conflict workaround
-                function () {    //??? centerAt/setZoom conflict workaround
+            focusFinished.then(
+                function () {
 
                     if (newZoomLevel) {
                         zoomFinished = pThis.mapObj.setZoom(newZoomLevel);
@@ -181,15 +214,14 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
                         zoomFinished = new Deferred();
                         zoomFinished.resolve();
                     }
-                    zoomFinished.then(  //??? centerAt/setZoom conflict workaround
-                        function () {   //??? centerAt/setZoom conflict workaround
+                    zoomFinished.then(
+                        function () {
 
                             // Clear extant animated highlight and any existing highlight graphics & popup
                             if (pThis.intervalTerminator) {
                                 clearTimeout(pThis.intervalTerminator);
                                 clearInterval(pThis.intervalID);
                             }
-                            pThis.highlighterLayer.clear();
                             pThis.mapObj.hidePopup();
 
                             // Display the highlight graphic
@@ -227,21 +259,15 @@ define("js/lgonlineDrawing", ["dojo/Deferred", "dojo/_base/Color", "esri/lang", 
                                 pThis.highlighterLayer.add(highlightGraphics[0]);
                             }
 
-                            // If we have attributes and a desire to complement the highlight with
-                            // a popup, prep & display the popup
+                            // If we're showing the popup, use the original feature because it will handle
+                            // coded value domains better
                             if (showFeaturePopup) {
-                                //??? centerAt/setZoom conflict workaround
-                                //???(new DeferredList([focusFinished, zoomFinished])).then(
-                                //???    function (results) {
-                                pThis.mapObj.showPopupWithFeature(newMapCenter, highlightGraphics[0]);
-                                //???    }
-                                //???);
+                                pThis.mapObj.showPopupWithFeature(newMapCenter, focalItem);
                             }
-
                         }
-                    );  //??? centerAt/setZoom conflict workaround
+                    );
                 }
-            );  //??? centerAt/setZoom conflict workaround
+            );
         }
     });
 

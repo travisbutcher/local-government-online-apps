@@ -87,9 +87,9 @@ In this case, the change expands the search capability to search Esri's World Ge
 	            ]
 	        }
 	    }, {
-    
 
-    > Note how LGSearchMultiplexer references the rootId values from both  [js.LGSearchFeatureLayerMultiplexer][] (featureSearcher) and [js.LGSearchAddress][] (addressSearcher). 
+
+    > Note how LGSearchMultiplexer references the rootId values from both  [js.LGSearchFeatureLayerMultiplexer][] (featureSearcher) and [js.LGSearchAddress][] (addressSearcher).
 
 4. Copy the "rootId" configuration parameter of the [js.LGSearchMultiplexer][] component that we just added; in this example, it's "multiSearcher".
 
@@ -104,12 +104,12 @@ In this case, the change expands the search capability to search Esri's World Ge
 	becomes
 
 	    "searcher": "multiSearcher",
-	
+
 	This points the search widget at the component that references both the feature search and the address search. Alternatively, you could point the widget at only the address search using:
 
 		"searcher": "addressSearcher"
 
-	which references the rootId from [js.LGSearchAddress][] and will only search using the geocode service. 
+	which references the rootId from [js.LGSearchAddress][] and will only search using the geocode service.
 
 7. Save and lint the configuration file, then copy its contents into the Configuration Parameters section if the Item Details page of a new custom template. Publish a map, and when your user searches, the search will look in both the address geocoder and in the feature layers.
 
@@ -225,6 +225,6 @@ The tag in the "values" section is a compound name (e.g., `featureSearcher.searc
 
 All app source code is available from the [Solutions online apps GitHub site][]; this article's template configuration is [SearchAddress.json][] in the repository's [doc/examples2/ folder][].
 
-Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. Additional information is available on the [Resources][] page.
+Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries. Additional information is available on the [Resources][] page.
 
 Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.

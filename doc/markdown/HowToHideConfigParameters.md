@@ -32,12 +32,12 @@ For this article, our change removes the option to change the icon in the app he
 
 * Open RemoveIcon.json in a text editor and search for the icon parameter settings:
 
-	    {
-			"label": "Icon URL",
-		    "fieldName": "titleBar.iconUrl",
-		    "type": "string",
-		    "tooltip": "Icon in top left corner of application. Icon should be 48px high."
-		},
+        {
+            "label": "Icon URL",
+            "fieldName": "titleBar.iconUrl",
+            "type": "string",
+            "tooltip": "Icon in top left corner of application. Icon should be 48px high."
+        },
 
 * Delete this section from the configuration file to remove the parameter.
 * The application expects an icon to display in the header, so the URL to a graphic must be defined in the "values" section of the RemoveIcon.json file:
@@ -51,6 +51,6 @@ For this article, our change removes the option to change the icon in the app he
 
 All app source code is available from the [Solutions online apps GitHub site][].
 
-Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. Additional information is available on the [Resources][] page.
+Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries. Additional information is available on the [Resources][] page.
 
 Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.

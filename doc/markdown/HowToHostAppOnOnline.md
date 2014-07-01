@@ -36,7 +36,7 @@ Your configuration will be applied to an existing template, and the new applicat
 
 	![ArcGIS Online Parcel Viewer item summary][]
 
-5. Copy and save the URL to the server hosting the application template. 
+5. Copy and save the URL to the server hosting the application template.
 
 	![web application template's server URL location][]
 
@@ -68,9 +68,9 @@ The general process for adding a new application item to ArcGIS Online is descri
 ### Add the template to your template gallery
 
 1. At the top of the ArcGIS Online page, click the "MY ORGANIZATION" link.
- 
+
 3. Click "EDIT SETTINGS" and open the "Map" tab.
- 
+
 4. If the group currently selected in the Web App Templates section is Esri Default, [create a new group][] and choose that group from this drop-down menu.
 
 5. [Share][] your new application item with your organization's Web App Templates group.

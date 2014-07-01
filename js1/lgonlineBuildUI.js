@@ -1,8 +1,6 @@
-/*global define,dojo,esri,setTimeout,location,clearTimeout,window,document,js,unescape,console */
-/*jslint sloppy:true,evil:true,regexp:true,unparam:true */
+﻿/*global define,dojo,esri,js,unescape,console */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,evil:true,regexp:true */
 /** @license
- | ArcGIS Solutions
- | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -254,7 +252,7 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
              * @member {object} i18n
              * @memberOf js.LGUIBuilder#
              */
-            this.i18n = dojo.i18n.getLocalization("esriTemplate", "template");
+            this.i18n = dojo.i18n.getLocalization("esriTemplate", "resources");
 
             // We need two things:  the UI specification and configured values,
             // whether default or overridden
@@ -427,7 +425,10 @@ define("js/lgonlineBuildUI", ["dojo/_base/Deferred", "dojo/DeferredList", "esri/
                 if (overwrite) {
                     map[key] = value;
                 } else {
-                    (map[key] = map[key] || []).push(value);
+                    // Modified original assignment for new JSLint rule
+                    //(map[key] = map[key] || []).push(value);
+                    map[key] = map[key] || [];
+                    map[key].push(value);
                 }
             });
             return map;

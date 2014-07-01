@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js,window,document */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2012 Esri
  |
@@ -16,7 +16,20 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineFrame", ["dojo/dom-construct", "dojo/on", "dojo/dom-style", "dojo/_base/array", "dojo/_base/lang", "js/lgonlineBase"], function (domConstruct, on, domStyle, array, lang) {
+define("js/lgonlineFrame", [
+    "dojo/dom-construct",
+    "dojo/on",
+    "dojo/dom-style",
+    "dojo/_base/array",
+    "dojo/_base/lang",
+    "js/lgonlineBase"
+], function (
+    domConstruct,
+    on,
+    domStyle,
+    array,
+    lang
+) {
 
     //========================================================================================================================//
 

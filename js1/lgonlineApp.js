@@ -1,8 +1,6 @@
-/*global define,dojo,document,js,window,esri,Modernizr,navigator,alert,console,setTimeout,clearTimeout,touchScroll */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js,esri,Modernizr,alert,console,touchScroll */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /** @license
- | ArcGIS Solutions
- | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -2182,10 +2180,10 @@ define("js/lgonlineApp", ["dijit", "dijit/registry", "dojo/dom-construct", "dojo
 
                             // Otherwise, use the geometry service
                             } else if (esri.config.defaults.geometryService) {
-                                var params = new esri.tasks.ProjectParameters();
-                                params.geometries = [newCenterPoint];
-                                params.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(params).then(
+                                var params2 = new esri.tasks.ProjectParameters();
+                                params2.geometries = [newCenterPoint];
+                                params2.outSR = pThis.mapInfo.map.spatialReference;
+                                esri.config.defaults.geometryService.project(params2).then(
                                     function (geometries) {
                                         newCenterPoint = geometries[0];
                                         pThis.highlightPoint(newCenterPoint);

@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js,console,esri,touchScroll,setTimeout,alert */
-/*jslint sloppy:true,nomen:true */
+﻿/*global define,dojo,js,console,esri,touchScroll,alert */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2013 Esri
  |
@@ -16,7 +16,30 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_base/lang", "dojo/_base/Color",  "dojo/aspect", "esri/dijit/editing/TemplatePicker", "esri/dijit/editing/Editor", "esri/toolbars/draw", "esri/graphic", "js/lgonlineBase", "js/lgonlineMap", "js/lgonlineCommand"], function (domConstruct, array, lang, Color, aspect, TemplatePicker, Editor, Draw, Graphic) {
+define("js/lgonlineEditing", [
+    "dojo/dom-construct",
+    "dojo/_base/array",
+    "dojo/_base/lang",
+    "dojo/_base/Color",
+    "dojo/aspect",
+    "esri/dijit/editing/TemplatePicker",
+    "esri/dijit/editing/Editor",
+    "esri/toolbars/draw",
+    "esri/graphic",
+    "js/lgonlineBase",
+    "js/lgonlineMap",
+    "js/lgonlineCommand"
+], function (
+    domConstruct,
+    array,
+    lang,
+    Color,
+    aspect,
+    TemplatePicker,
+    Editor,
+    Draw,
+    Graphic
+) {
 
     //========================================================================================================================//
 
@@ -57,6 +80,8 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                 colorizer.foregroundColor() + "!important;background-color:" + colorizer.alternateBackgroundColor() +
                 "!important}";
             this.injectCSS(styleString);
+
+            this.setUpWaitForDependency("js.LGEditTemplatePicker");
         },
 
         /**
@@ -66,63 +91,78 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
          * @override
          */
         onDependencyReady: function () {
-            var mapInfo, allFieldsInfos, layerInfo;
+            var opLayers, allFieldsInfos, layerInfo, canEdit = true;
 
-            // Build a list of editable layers in this map
-            mapInfo = this.mapObj.mapInfo;
-            this.layerInfos = [];
-            this.layers = [];
-            array.forEach(mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
-                var visibleFieldInfos, eLayer = mapLayer.layerObject;
-                if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
-                    if ((mapLayer.capabilities === null || mapLayer.capabilities !== "Query")
-                            && (eLayer.capabilities === null || eLayer.capabilities !== "Query")) {
-                        // If "capabilities" is set to "Query", editing is disabled in the web map
-                        // (the mapLayer check is for the webmap; the eLayer check is for the underlying feature service)
-
-                        // Layer info list for esri.dijit.editing.Editor; we'll hide invisible fields before
-                        // adding the layer info
-                        layerInfo = {
-                            "featureLayer": eLayer
-                        };
-
-                        allFieldsInfos = null;
-                        if (mapLayer.popupInfo && mapLayer.popupInfo.fieldInfos) {
-                            allFieldsInfos = mapLayer.popupInfo.fieldInfos;
-                        } else if (eLayer.infoTemplate && eLayer.infoTemplate.info && eLayer.infoTemplate.info.fieldInfos) {
-                            allFieldsInfos = eLayer.infoTemplate.info.fieldInfos;
-                        }
-                        if (allFieldsInfos) {
-                            // We have field info, so we can remove the invisibles
-                            visibleFieldInfos = [];
-                            array.forEach(allFieldsInfos, function (fieldInfo) {
-                                if (fieldInfo.visible) {
-                                    visibleFieldInfos.push(fieldInfo);
-                                }
-                            });
-                            layerInfo.fieldInfos = visibleFieldInfos;
-                        }
-
-                        this.layerInfos.push(layerInfo);
-
-                        // Layers list for esri.dijit.editing.TemplatePicker
-                        this.layers.push(eLayer);
+            // Test for editing permission
+            if (this.appConfig.userPrivileges) {
+                canEdit = false;
+                array.some(this.appConfig.userPrivileges, function (privilege) {
+                    if (privilege === "features:user:edit") {
+                        canEdit = true;
+                        return true;
                     }
+                    return false;
+                });
+            }
+
+            // Build a list of editable layers in this map if this user can edit
+            if (canEdit) {
+                opLayers = this.appConfig.itemInfo.itemData.operationalLayers;
+                this.layerInfos = [];
+                this.layers = [];
+                array.forEach(opLayers, lang.hitch(this, function (mapLayer) {
+                    var visibleFieldInfos, eLayer = mapLayer.layerObject;
+                    if (eLayer instanceof esri.layers.FeatureLayer && eLayer.isEditable()) {
+                        if ((mapLayer.capabilities === null || mapLayer.capabilities !== "Query")
+                                && (eLayer.capabilities === null || eLayer.capabilities !== "Query")) {
+                            // If "capabilities" is set to "Query", editing is disabled in the web map
+                            // (the mapLayer check is for the webmap; the eLayer check is for the underlying feature service)
+
+                            // Layer info list for esri.dijit.editing.Editor; we'll hide invisible fields before
+                            // adding the layer info
+                            layerInfo = {
+                                "featureLayer": eLayer
+                            };
+
+                            allFieldsInfos = null;
+                            if (mapLayer.popupInfo && mapLayer.popupInfo.fieldInfos) {
+                                allFieldsInfos = mapLayer.popupInfo.fieldInfos;
+                            } else if (eLayer.infoTemplate && eLayer.infoTemplate.info && eLayer.infoTemplate.info.fieldInfos) {
+                                allFieldsInfos = eLayer.infoTemplate.info.fieldInfos;
+                            }
+                            if (allFieldsInfos) {
+                                // We have field info, so we can remove the invisibles
+                                visibleFieldInfos = [];
+                                array.forEach(allFieldsInfos, function (fieldInfo) {
+                                    if (fieldInfo.visible) {
+                                        visibleFieldInfos.push(fieldInfo);
+                                    }
+                                });
+                                layerInfo.fieldInfos = visibleFieldInfos;
+                            }
+
+                            this.layerInfos.push(layerInfo);
+
+                            // Layers list for esri.dijit.editing.TemplatePicker
+                            this.layers.push(eLayer);
+                        }
+                    }
+                }));
+
+                if (this.layers.length === 0) {
+                    // If there are no editable layers, we won't display the empty picker
+                    this.setShowable(false);
+
+                } else {
+                    // Create a place for template picker and editor combination within the dropdown
+                    this.templatePickerHolder = domConstruct.create("div",
+                        { className: this.templatePickerHolderClass });
+                    domConstruct.place(this.templatePickerHolder, this.rootId);
+                    touchScroll(this.templatePickerHolder);
                 }
-            }));
-
-            if (this.layers.length === 0) {
-                // If there are no editable layers, we won't display the empty picker
-                this.setShowable(false);
-
             } else {
-                this.map = mapInfo.map;
-
-                // Create a place for template picker and editor combination within the dropdown
-                this.templatePickerHolder = domConstruct.create("div",
-                    { className: this.templatePickerHolderClass });
-                domConstruct.place(this.templatePickerHolder, this.rootId);
-                touchScroll(this.templatePickerHolder);
+                // If editing is not an option, we won't display the empty picker
+                this.setShowable(false);
             }
 
             this.inherited(arguments);
@@ -140,9 +180,9 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                 //------------------------- Template Picker dijit -------------------------
 
                 // The template picker will not size properly if its containing divs have no
-                // substance, so we'll hide the divs but give them substance (i.e., "display" is
-                // "block" and "visibility" is "hidden")
-                this.setIsVisible(false, true);
+                // substance, so we'll make the divs "visible" during construction (their containers
+                // keep them from flashing onscreen)
+                this.setIsVisible(true, true);
 
                 // Create a div that will become the picker
                 templatePickerDiv = domConstruct.create("div");
@@ -168,7 +208,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
                 // Create an editing tool linked to the template picker
                 editorSettings = {
-                    map: this.map,
+                    map: this.appConfig.map,
                     templatePicker: templatePicker,
                     toolbarVisible: false,
                     layerInfos: this.layerInfos
@@ -218,7 +258,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
         /**
          * Makes the graphic visible and creates the class' editor.
-         * @memberOf js.LGGraphic#
+         * @memberOf js.LGEditTemplatePicker#
          * @override
          */
         show: function () {
@@ -228,7 +268,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
         /**
          * Makes the graphic invisible and deletes the class' editor.
-         * @memberOf js.LGGraphic#
+         * @memberOf js.LGEditTemplatePicker#
          * @override
          */
         hide: function () {
@@ -274,12 +314,18 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
         /**
          * Constructs an LGEditTemplatePickerWithDefaults.
          *
+         * @constructor
          * @class
          * @name js.LGEditTemplatePickerWithDefaults
          * @extends js.LGEditTemplatePicker, js.LGDefaults
          * @classdesc
          * Displays an Editing Template Picker that contains default values for specified fields.
          */
+        constructor: function () {
+            this.changeDefaults();
+
+            this.setUpWaitForDependency("js.LGEditTemplatePickerWithDefaults");
+        },
 
         /**
          * Preprocesses a set of "add" edits for a layer.
@@ -301,12 +347,16 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
         /**
          * Constructs an LGFeatureByClick.
          *
+         * @constructor
          * @class
          * @name js.LGFeatureByClick
          * @extends js.LGObject, js.LGMapDependency
          * @classdesc
          * Connects a map click with a feature.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGFeatureByClick");
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -343,12 +393,16 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
         /**
          * Constructs an LGAddFeatureByClick.
          *
+         * @constructor
          * @class
          * @name js.LGAddFeatureByClick
          * @extends js.LGFeatureByClick
          * @classdesc
          * Converts a map click into a feature.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGAddFeatureByClick");
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -361,7 +415,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
 
             // Prepare a drawing toolbar
             esri.bundle.toolbars.draw.addPoint = this.checkForSubstitution("@tooltips.collect");
-            this.drawingToolbar = new Draw(this.mapObj.mapInfo.map, {});
+            this.drawingToolbar = new Draw(this.appConfig.map, {});
             this.drawingToolbarActive = false;
             this.drawingToolbar.on("draw-end", lang.hitch(this, this.handleDrawEnd));
         },
@@ -407,7 +461,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
                         new Color([255, 0, 0]), 1),
                     new Color([0, 255, 0, 0.25])
                 ));
-            this.mapObj.mapInfo.map.graphics.add(graphic);
+            this.appConfig.map.graphics.add(graphic);
 
             // Displays an info window that permits the entry or editing of a graphics attributes.
             // Get the attributes from the user via a form defined in the webmap
@@ -421,7 +475,7 @@ define("js/lgonlineEditing", ["dojo/dom-construct", "dojo/_base/array", "dojo/_b
             // Remove the placeholder graphics
             setTimeout(function () {  //???
                 alert(pThis.checkForSubstitution("@messages.yourContentSubmitted"));
-                pThis.mapObj.mapInfo.map.graphics.remove(graphic);
+                pThis.appConfig.map.graphics.remove(graphic);
             }, 2000);
         }
     });

@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js,require */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2014 Esri
  |
@@ -16,7 +16,14 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineDijit", ["dojo/Deferred", "dojo/dom-construct", "js/lgonlineMap"], function (Deferred, domConstruct) {
+define("js/lgonlineDijit", [
+    "dojo/Deferred",
+    "dojo/dom-construct",
+    "js/lgonlineMap"
+], function (
+    Deferred,
+    domConstruct
+) {
 
     //========================================================================================================================//
 
@@ -34,6 +41,8 @@ define("js/lgonlineDijit", ["dojo/Deferred", "dojo/dom-construct", "js/lgonlineM
          */
         constructor: function () {
             this.ready = new Deferred();
+
+            this.setUpWaitForDependency("js.LGMapDijitContainer");
         },
 
         /**
@@ -54,9 +63,9 @@ define("js/lgonlineDijit", ["dojo/Deferred", "dojo/dom-construct", "js/lgonlineM
             var pThis = this;
 
             // Bring in the dijit's AMD, and then construct the dijit
-            require([this.dijitAmd], function (dijitConstructor) {
-                pThis.dijit = new dijitConstructor({
-                    map: pThis.mapObj.mapInfo.map
+            require([this.dijitAmd], function (DijitConstructor) {
+                pThis.dijit = new DijitConstructor({
+                    map: pThis.appConfig.map
                 }, domConstruct.create("div", null, pThis.rootDiv)).startup();
 
                 pThis.ready.resolve(pThis);

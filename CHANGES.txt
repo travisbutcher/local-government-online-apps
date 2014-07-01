@@ -1,10 +1,11 @@
-change report #35 at 03/02/2014 11:17:53.28
+change report #74 at 06/30/2014  9:58:27.61
 -
 for git branch
-upgrade_amd
+release_3.4
 in repository local-government-online-apps
+140630111314063015491406271800
 -
 changes in this branch since its last commit
  M CHANGES.txt
- M js2/lgonlineDrawing.js
- M js2/lgonlineEditing.js
+ M s1.html
+ M s2.html

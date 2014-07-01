@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js,window,touchScroll,Modernizr,navigator,esri,alert,setTimeout,clearTimeout */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js,touchScroll,Modernizr,esri,alert */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2012 Esri
  |
@@ -16,7 +16,63 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo/Deferred", "dojo/DeferredList", "dojo/dom-style", "dojo/dom-class", "dojo/_base/array", "dojo/_base/lang", "dojo/string", "dijit/form/TextBox", "dijit/layout/ContentPane", "esri/dijit/Legend", "esri/dijit/BasemapGallery", "esri/dijit/Basemap", "esri/tasks/PrintTask", "esri/tasks/PrintParameters", "esri/tasks/PrintTemplate", "esri/tasks/LegendLayer", "esri/dijit/PopupTemplate", "js/lgonlineBase", "js/lgonlineMap"], function (domConstruct, dom, on, Deferred, DeferredList, domStyle, domClass, array, lang, string, TextBox, ContentPane, Legend, BasemapGallery, Basemap, PrintTask, PrintParameters, PrintTemplate, LegendLayer, PopupTemplate) {
+define("js/lgonlineCommand", [
+    "dojo/dom-construct",
+    "dojo/dom",
+    "dojo/on",
+    "dojo/Deferred",
+    "dojo/DeferredList",
+    "dojo/dom-style",
+    "dojo/dom-class",
+    "dojo/_base/array",
+    "dojo/_base/lang",
+    "dojo/request/xhr",
+    "dojo/string",
+    "dijit/form/TextBox",
+    "dijit/layout/ContentPane",
+    "dojox/gfx",
+    "dojox/gfx/utils",
+    "esri/dijit/Legend",
+    "esri/dijit/BasemapGallery",
+    "esri/dijit/Basemap",
+    "esri/tasks/locator",
+    "esri/tasks/PrintTask",
+    "esri/tasks/PrintParameters",
+    "esri/tasks/PrintTemplate",
+    "esri/tasks/LegendLayer",
+    "esri/tasks/query",
+    "esri/tasks/QueryTask",
+    "esri/dijit/PopupTemplate",
+    "js/lgonlineBase",
+    "js/lgonlineMap"
+], function (
+    domConstruct,
+    dom,
+    on,
+    Deferred,
+    DeferredList,
+    domStyle,
+    domClass,
+    array,
+    lang,
+    xhr,
+    string,
+    TextBox,
+    ContentPane,
+    gfx,
+    gfxUtils,
+    Legend,
+    BasemapGallery,
+    Basemap,
+    Locator,
+    PrintTask,
+    PrintParameters,
+    PrintTemplate,
+    LegendLayer,
+    Query,
+    QueryTask,
+    PopupTemplate
+) {
 
     //========================================================================================================================//
 
@@ -41,15 +97,26 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
             // Start listening for activation/deactivation call
             if (this.trigger) {
-                this.subscribeToMessage("command", function (sendingTrigger) {
-                    if (sendingTrigger !== pThis.trigger) {
-                        pThis.setIsVisible(false);
-                    }
-                });
+                this.setUpListeningForCommands();
+
                 this.subscribeToMessage(this.trigger, function (data) {
                     pThis.handleTrigger(data);
                 });
             }
+        },
+
+        /**
+         * Set up a listener for generic command activation.
+         * @memberOf js.LGDropdownBox#
+         */
+        setUpListeningForCommands: function () {
+            var pThis = this;
+
+            this.subscribeToMessage("command", function (sendingTrigger) {
+                if (sendingTrigger !== pThis.trigger) {
+                    pThis.setIsVisible(false);
+                }
+            });
         },
 
         /**
@@ -94,6 +161,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         constructor: function () {
             this.ready = new Deferred();
+
+            this.setUpWaitForDependency("js.LGMapBasedMenuBox");
         },
 
         /**
@@ -114,6 +183,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * Constructs an LGBasemapBox.
          *
+         * @constructor
          * @class
          * @name js.LGBasemapBox
          * @extends js.LGMapBasedMenuBox
@@ -121,6 +191,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Provides a UI holder for the JavaScript API's basemap
          * gallery.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGBasemapBox");
+        },
 
         /**
          * Performs class-specific setup when the dependency is
@@ -129,7 +202,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         onDependencyReady: function () {
-            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup();
+            var galleryId, galleryHolder, basemapGallery, basemapGroup = this.getBasemapGroup(),
+                thumbnailUrl, webmapThumbnailUrl, testForWebmapThumbnail;
 
             galleryId = this.rootId + "_gallery";
 
@@ -139,22 +213,48 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             }).placeAt(this.rootDiv);
             touchScroll(galleryId);
 
-            // Create the gallery, adding in the basemap from the webmap (even if it is already represented
-            // via the ArcGIS basemaps or the custom basemap group
-            basemapGallery = new BasemapGallery({
-                basemaps: [new Basemap({
-                    layers: this.mapObj.mapInfo.itemInfo.itemData.baseMap.baseMapLayers,
-                    title: this.mapObj.mapInfo.itemInfo.itemData.baseMap.title,
-                    thumbnailUrl: this.webmapThumbnail || "images/webmap.png"
-                })],
-                showArcGISBasemaps: true,  // ignored if a group is configured
-                basemapsGroup: basemapGroup,
-                bingMapsKey: this.mapObj.commonConfig.bingMapsKey,
-                map: this.mapObj.mapInfo.map
-            }, domConstruct.create('div')).placeAt(this.rootDiv);
-            galleryHolder.set('content', basemapGallery.domNode);
+            // We'll try to use the webmap's thumbnail to represent its basemap, but have a fallback to the configured
+            // value and then to a static value
+            thumbnailUrl = this.webmapThumbnail || "images/webmap.png";
+            testForWebmapThumbnail = new Deferred();
+            try {
+                if (this.appConfig.proxyurl && this.appConfig.itemInfo.item.thumbnail) {
+                    webmapThumbnailUrl =
+                        this.appConfig.sharinghost + "/sharing/rest/content/items/" + this.appConfig.itemInfo.item.id
+                        + "/info/" + this.appConfig.itemInfo.item.thumbnail;
+                    xhr(this.appConfig.proxyurl + "?" + webmapThumbnailUrl).then(function () {
+                        thumbnailUrl = webmapThumbnailUrl;
+                        testForWebmapThumbnail.resolve();
+                    }, function (err) {
+                        testForWebmapThumbnail.resolve();
+                    });
+                } else {
+                    testForWebmapThumbnail.resolve();
+                }
+            } catch (err) {
+                testForWebmapThumbnail.resolve();
+            }
 
-            basemapGallery.startup();
+            testForWebmapThumbnail.then(lang.hitch(this, function () {
+                // Create the gallery, adding in the basemap from the webmap (even if it is already represented
+                // via the ArcGIS basemaps or the custom basemap group
+                basemapGallery = new BasemapGallery({
+                    basemaps: [new Basemap({
+                        layers: this.appConfig.itemInfo.itemData.baseMap.baseMapLayers,
+                        title: this.appConfig.itemInfo.itemData.baseMap.title,
+                        thumbnailUrl: thumbnailUrl
+                    })],
+                    showArcGISBasemaps: true,  // ignored if a group is configured
+                    portalUrl: this.appConfig.sharinghost,
+                    basemapsGroup: basemapGroup,
+                    bingMapsKey: this.appConfig.bingKey,
+                    map: this.appConfig.map
+                }, domConstruct.create('div')).placeAt(this.rootDiv);
+                galleryHolder.set('content', basemapGallery.domNode);
+
+                basemapGallery.startup();
+
+            }));
 
             this.inherited(arguments);
         },
@@ -168,6 +268,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     "title": this.basemapgroupTitle,
                     "owner": this.basemapgroupOwner
                 };
+            } else if (this.appConfig.basemapgroup) {
+                basemapGroup = this.appConfig.basemapgroup;
             }
 
             return basemapGroup;
@@ -181,12 +283,16 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * Constructs an LGDijitLegendBox.
          *
+         * @constructor
          * @class
          * @name js.LGDijitLegendBox
          * @extends js.LGMapBasedMenuBox
          * @classdesc
          * Provides a UI holder for the JavaScript API's dijit.Legend.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGDijitLegendBox");
+        },
 
         /**
          * Performs class-specific setup when the map dependency is satisfied.
@@ -194,7 +300,6 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         onDependencyReady: function () {
-
             try {
 
                 var legendHolder, layerInfo, legendDijit,
@@ -209,10 +314,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 //https://developers.arcgis.com/en/javascript/jsapi/esri.arcgis.utils-amd.html#getlegendlayers
                 //Get the layerInfos list to be passed into the Legend constructor.
                 //It will honor show/hide legend settings of each layer and will not include the basemap layers.
-                layerInfo = esri.arcgis.utils.getLegendLayers(this.mapObj.mapInfo);
+                layerInfo = esri.arcgis.utils.getLegendLayers({
+                    map: this.appConfig.map,
+                    itemInfo: this.appConfig.itemInfo
+                });
 
                 legendDijit = new Legend({
-                    map: this.mapObj.mapInfo.map,
+                    map: this.appConfig.map,
                     layerInfos: layerInfo
                 }, domConstruct.create('legendDiv')).placeAt(this.rootDiv);
                 legendHolder.set('content', legendDijit.domNode);
@@ -221,7 +329,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 this.inherited(arguments);
 
             } catch (error) {
-                this.log("LGCallMethods_1: " + error.toString());
+                this.log("LGDijitLegendBox_1: " + error.toString());
             }
         }
     });
@@ -279,18 +387,51 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Builds and manages a UI object that represents a button.
          */
         constructor: function () {
-            var attrs;
+            var attrs, colorizer;
 
-            this.applyTheme(true);
+            if (this.iconJson) {
+                // Get the coloring
+                this.foregroundColor = "#000";
+                this.hoverColor = "#00f";
 
-            // If we have an icon, add it to the face of the button
-            if (this.iconUrl) {
-                attrs = {src: this.iconUrl};
-                if (this.iconClass) {
-                    attrs.className = this.iconClass;
+                if (this.iconColorizerId) {
+                    colorizer = dom.byId(this.iconColorizerId);
+                    if (colorizer) {
+                        colorizer = colorizer.getLGObject();
+                        this.foregroundColor = colorizer.foregroundColor();
+                        this.hoverColor = colorizer.hoverColor();
+                    }
                 }
-                this.iconImg = domConstruct.create("img", attrs, this.rootDiv);
+
+                // Use theme without hover
+                this.applyTheme(false);
+
+                this.rootDiv.surface = this.createSVGIcon(this.iconJson);
+
+                // Manually handle hover
+                on(this.rootDiv, "mouseover", lang.hitch(this, function (evt) {
+                    this.onMouseOver(evt);
+                }));
+                on(this.rootDiv, "mouseout", lang.hitch(this, function (evt) {
+                    if (this.mouseOut(evt)) {
+                        this.onMouseOut(evt);
+                    }
+                }));
+
+            } else {
+                // Use theme with hover
+                this.applyTheme(true);
+
+                // If we have an icon, add it to the face of the button
+                if (this.iconUrl) {
+                    attrs = {src: this.iconUrl};
+                    if (this.iconClass) {
+                        attrs.className = this.iconClass;
+                    }
+                    this.iconImg = domConstruct.create("img", attrs, this.rootDiv);
+                }
             }
+
             // If we have text, add it to the face of the button
             if (this.displayText) {
                 attrs = {innerHTML: this.checkForSubstitution(this.displayText)};
@@ -303,7 +444,132 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             if (this.tooltip) {
                 this.rootDiv.title = this.checkForSubstitution(this.tooltip);
             }
+        },
+
+        /**
+         * Creates a 32x32 SVG item in the root div.
+         * @param {object} definition JSON text describing the SVG item, e.g.,
+         * "[{'shape':{'type':'circle','cx':13,'cy':13,'r':10},...,'style':'solid','width':2,'cap':'butt','join':4}}]"
+         * Its color(s) for lines and text fill are ignored
+         * @param {object} initialColor The initial color to be applied to the
+         * item's vectors; uses this.foregroundColor if omitted or undefined
+         * @return {object} The created SVG surface
+         * @memberOf js.LGButton#
+         */
+        createSVGIcon: function (definition, initialColor) {
+            var surface;
+
+            // Create the vectors from the JSON description
+            surface = gfx.createSurface(this.rootDiv, 32, 32);
+            gfxUtils.fromJson(surface, definition);
+
+            // Have to change the color of the icon from the beginning, regardless of the
+            // color definition in the JSON description. Shouldn't be necessary, and isn't
+            // necessary in the sample in the Dojo page
+            // http://livedocs.dojotoolkit.org/dojox/gfx/utils/fromJson ,
+            // but seems to be required in this app and in every sample that I've written.
+            if (!initialColor) {
+                initialColor = this.foregroundColor;
+            }
+            this.changeColor(surface, initialColor);
+
+            // Apply any icon class from the configuration
+            if (this.iconClass) {
+                // domClass.add doesn't work with SVG node;
+                // workaround by Simon Speich: https://bugs.dojotoolkit.org/ticket/16309
+                surface.rawNode.setAttribute("class", this.iconClass);
+            }
+
+            return surface;
+        },
+
+        /**
+         * Performs the object's mouse over action
+         * @param {object} evt A mouseover event
+         * @memberOf js.LGButton#
+         */
+        onMouseOver: function (evt) {
+            // Manually handle hover by changing the color of the vectors
+            // Note that "this" refers to the LGButton
+            this.changeColor(evt.currentTarget.surface, this.hoverColor);
+        },
+
+        /**
+         * Performs the object's mouse out action
+         * @param {object} evt A mouseout event, pre-screened to be sure
+         * that it's really a mouseout and not just passing over a nested
+         * item
+         * @memberOf js.LGButton#
+         */
+        onMouseOut: function (evt) {
+            // Manually handle hover by changing the color of the vectors
+            // Note that "this" refers to the LGButton
+            this.changeColor(evt.currentTarget.surface, this.foregroundColor);
+        },
+
+        /**
+         * Tests to see if the cursor is really leaving the target or if it is
+         * just passing over a nested item.
+         * @param {object} evt A mouseover event
+         * @return {boolean} True if the cursor is really leaving the bounds of
+         * the target
+         * @memberOf js.LGButton#
+         */
+        mouseOut: function (evt) {
+            // Dan
+            // http://blog.syedgakbar.com/2012/08/html-nested-elements-onmouseout-event/
+            // see also http://www.quirksmode.org/js/events_mouse.html
+            // With comments added, changes to make it lintable, and catch for missing related target
+            var child, target;
+
+            // "The EventTarget whose EventListeners are currently being processed.
+            // As the event capturing and bubbling occurs this value changes."
+            // https://developer.mozilla.org/en-US/docs/Web/API/Event/Comparison_of_Event_Targets
+            target = evt.currentTarget || evt.srcElement;
+
+            // "which EventTarget the pointing device exited to"
+            // https://developer.mozilla.org/en-US/docs/Web/API/event.relatedTarget
+            child = evt.relatedTarget || evt.toElement;
+
+            // Fast mouse movement can cause us to miss the exit, so if there's no
+            // related target, assume that we've exited
+            if (!child) {
+                return true;
+            }
+
+            // Run up the ancestry to see if we're still in the item
+            while (child.parentElement) {
+                if (target === child) {
+                    return false;
+                }
+                child = child.parentElement;
+            }
+            return true;
+        },
+
+        /**
+         * Changes the color of the children of an SVG surface.
+         * @param {object} surface An SVG surface
+         * @param {object} newColor The new color as "a named color, hex color,
+         * linear gradient, or radial gradient"
+         * (http://dojotoolkit.org/documentation/tutorials/1.9/gfx/)
+         * @memberOf js.LGButton#
+         */
+        changeColor: function (surface, newColor) {
+            array.forEach(surface.children, function (component) {
+                // Text is filled
+                if (component.shape.type === "text") {
+                    component.setFill(newColor);
+
+                // Lines are stroked
+                } else {
+                    var stroke = component.getStroke();
+                    stroke.color = newColor;
+                    component.setStroke(stroke);
+                }
+            });
         }
+
     });
 
     //========================================================================================================================//
@@ -350,10 +616,58 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         setIsOn: function (isOn) {
             this.isOn = isOn;
-            if (this.isOn) {
-                this.applyThemeAltBkgd(true);
+
+            if (this.rootDiv.surface) {
+                if (this.isOn) {
+                    this.changeColor(this.rootDiv.surface, this.hoverColor);
+                } else {
+                    this.changeColor(this.rootDiv.surface, this.foregroundColor);
+                }
+
             } else {
-                this.applyTheme(true);
+                if (this.isOn) {
+                    this.applyThemeAltBkgd(true);
+                } else {
+                    this.applyTheme(true);
+                }
+            }
+        },
+
+        /**
+         * Performs the object's mouse over action
+         * @param {object} evt A mouseover event
+         * @memberOf js.LGRadioButton#
+         * @override
+         */
+        onMouseOver: function (evt) {
+            if (this.rootDiv.surface) {
+                // Manually handle hover by changing the color of the vectors
+                // Note that "this" refers to the LGButton
+                if (!this.isOn) {
+                    this.changeColor(this.rootDiv.surface, this.hoverColor);
+                }
+            } else {
+                this.inherited(arguments);
+            }
+        },
+
+        /**
+         * Performs the object's mouse out action
+         * @param {object} evt A mouseout event, pre-screened to be sure
+         * that it's really a mouseout and not just passing over a nested
+         * item
+         * @memberOf js.LGRadioButton#
+         * @override
+         */
+        onMouseOut: function (evt) {
+            if (this.rootDiv.surface) {
+                // Manually handle hover by changing the color of the vectors
+                // Note that "this" refers to the LGButton
+                if (!this.isOn) {
+                    this.changeColor(this.rootDiv.surface, this.foregroundColor);
+                }
+            } else {
+                this.inherited(arguments);
             }
         },
 
@@ -520,6 +834,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             if (this.publish) {
                 this.clickHandler = on(this.rootDiv, "click", this.handleClick);
             }
+
+            this.setUpWaitForDependency("js.LGCommand");
         },
 
         /**
@@ -577,8 +893,17 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         constructor: function () {
             var pThis = this;
 
+            // Create the button's disabled-state icon as SVG or image
+            if (this.rootDiv.surface) {
+                if (domClass.contains(document.body, "okIE")) {
+                    this.iconDisabledJson = this.iconDisabledJson || this.iconJson;
+                    this.rootDiv.surface2 = this.createSVGIcon(this.iconDisabledJson);
+                }
+            } else {
+                this.iconDisabledUrl = this.iconDisabledUrl || this.iconUrl;
+            }
+
             // Set initial state
-            this.iconDisabledUrl = this.iconDisabledUrl || this.iconUrl;
             this.isEnabled = this.toBoolean(this.isEnabled, true);
             pThis.setIsEnabled(this.isEnabled);
 
@@ -612,6 +937,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     pThis.setIsVisible(pThis.isVisible);
                 });
             }
+
+            this.setUpWaitForDependency("js.LGCommandToggle");
         },
 
         /**
@@ -622,12 +949,28 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         setIsEnabled: function (isEnabled) {
             this.isEnabled = isEnabled;
-            if (this.isEnabled) {
-                this.iconImg.src = this.iconUrl;
-                domClass.add(this.rootDiv, "appThemeHover");
+
+            // For an SVG icon, switch between the two SVG surfaces
+            if (this.rootDiv.surface) {
+                if (domClass.contains(document.body, "okIE")) {
+                    if (this.isEnabled) {
+                        domStyle.set(this.rootDiv.surface.rawNode, "display", "inline-block");
+                        domStyle.set(this.rootDiv.surface2.rawNode, "display", "none");
+                    } else {
+                        domStyle.set(this.rootDiv.surface.rawNode, "display", "none");
+                        domStyle.set(this.rootDiv.surface2.rawNode, "display", "inline-block");
+                    }
+                }
+
+            // For an image icon, switch between the two icon URLs and also enable/disable hover
             } else {
-                this.iconImg.src = this.iconDisabledUrl;
-                domClass.remove(this.rootDiv, "appThemeHover");
+                if (this.isEnabled) {
+                    this.iconImg.src = this.iconUrl;
+                    domClass.add(this.rootDiv, "appThemeHover");
+                } else {
+                    this.iconImg.src = this.iconDisabledUrl;
+                    domClass.remove(this.rootDiv, "appThemeHover");
+                }
             }
         },
 
@@ -698,6 +1041,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 rootId: this.rootId + "_landscape",
                 parentDiv: this.rootId,
                 iconUrl: this.landscapeButtonIconUrl,
+                iconJson: this.landscapeButtonIconJson,
+                iconColorizerId: this.iconColorizerId,
                 rootClass: this.orientationButtonClass,
                 iconClass: this.orientationButtonIconClass,
                 tooltip: this.checkForSubstitution(this.landscapeButtonTooltip),
@@ -711,6 +1056,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 rootId: this.rootId + "_portrait",
                 parentDiv: this.rootId,
                 iconUrl: this.portraitButtonIconUrl,
+                iconJson: this.portraitButtonIconJson,
+                iconColorizerId: this.iconColorizerId,
                 rootClass: this.orientationButtonClass,
                 iconClass: this.orientationButtonIconClass,
                 tooltip: this.checkForSubstitution(this.portraitButtonTooltip),
@@ -742,6 +1089,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 rootId: this.rootId + "_doPrint",
                 parentDiv: this.rootId,
                 iconUrl: this.printButtonIconUrl,
+                iconJson: this.printButtonIconJson,
+                iconColorizerId: this.iconColorizerId,
                 rootClass: this.printButtonClass,
                 iconClass: this.printButtonIconClass,
                 tooltip: this.checkForSubstitution(this.printButtonTooltip)
@@ -775,8 +1124,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 selectedLayout = selectedLayout ? selectedLayout.value : null;
 
                 printParams = new PrintParameters();
-                printParams.map = pThis.mapObj.mapInfo.map;
-                printParams.outSpatialReference = pThis.mapObj.mapInfo.map.spatialReference;
+                printParams.map = pThis.appConfig.map;
+                printParams.outSpatialReference = pThis.appConfig.map.spatialReference;
 
                 printParams.template = new PrintTemplate();
                 printParams.template.format = pThis.format || "PDF";
@@ -795,8 +1144,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     function (result) {
                         /* success */
                         // Broadcast status
-                        pThis.publishMessage(pThis.publishReady);
                         pThis.publishMessage(pThis.publishPrintUrl, result.url);
+                        pThis.publishMessage(pThis.publishReady);
                     }, function (error) {
                         /* failure */
                         // Broadcast status
@@ -805,6 +1154,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                     }
                     );
             });
+
+            this.setUpWaitForDependency("js.LGPrintMap");
         },
 
         /**
@@ -816,11 +1167,11 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         checkPrerequisites: function () {
-            if (this.commonConfig.helperServices &&
-                    this.commonConfig.helperServices.printTask &&
-                    this.commonConfig.helperServices.printTask.url) {
+            if (this.appConfig.helperServices &&
+                    this.appConfig.helperServices.printTask &&
+                    this.appConfig.helperServices.printTask.url) {
                 this.printTask = new PrintTask(
-                    this.commonConfig.helperServices.printTask.url,
+                    this.appConfig.helperServices.printTask.url,
                     {
                         async: false  // depends on print service
                     }
@@ -850,6 +1201,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             this.fetchPrintUrl = null;
             this.printAvailabilityTimeoutMinutes = this.toNumber(this.printAvailabilityTimeoutMinutes, 10);  // minutes
             this.printTimeouter = null;
+
+            this.setUpWaitForDependency("js.LGFetchPrintedMap");
         },
 
         /**
@@ -1083,11 +1436,13 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Provides a searcher for addresses.
          */
         constructor: function () {
-            this.searcher = new esri.tasks.Locator(this.searchUrl);
+            this.searcher = new Locator(this.searchUrl);
             this.searcher.outSpatialReference = new esri.SpatialReference({"wkid": this.outWkid});
             this.params = {};
             this.params.outFields = this.outFields;
             this.ready = new Deferred();
+
+            this.setUpWaitForDependency("js.LGSearchAddress");
         },
 
         /**
@@ -1097,7 +1452,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @override
          */
         onDependencyReady: function () {
-            this.params.searchExtent = this.mapObj.mapInfo.map.extent;
+            this.params.searchExtent = this.appConfig.map.extent;
             this.ready.resolve(this);
             this.inherited(arguments);
         },
@@ -1206,6 +1561,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             } else {
                 this.displayField = "";
             }
+
+            this.setUpWaitForDependency("js.LGSearchFeatureLayer");
         },
 
         /**
@@ -1223,11 +1580,12 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             if (this.searchLayerName) {
                 try {
                     searchLayer = this.mapObj.getLayer(this.searchLayerName);
-                    if (searchLayer && searchLayer.url) {
+                    if (searchLayer && searchLayer.url &&
+                            searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
                         this.searchURL = searchLayer.url;
 
                         // Check for existence of fields; start with a list of fields in the search layer
-                        array.forEach(searchLayer.fields, function (layerField) {
+                        array.forEach(searchLayer.resourceInfo.fields, function (layerField) {
                             availableFields += layerField.name + ",";
                         });
 
@@ -1270,32 +1628,33 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                         this.searchFields = actualFieldList;
 
                         // Set up our query task now that we have the URL to the layer
-                        this.objectIdField = searchLayer.objectIdField;
+                        this.objectIdField = searchLayer.resourceInfo.objectIdField;
                         this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
 
-                        this.searcher = new esri.tasks.QueryTask(this.searchURL);
+                        this.searcher = new QueryTask(this.searchURL);
 
                         // Set up the general layer query task: pattern match
-                        this.generalSearchParams = new esri.tasks.Query();
+                        this.generalSearchParams = new Query();
                         this.generalSearchParams.returnGeometry = false;
-                        this.generalSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+                        this.generalSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
 
-                        generalOutFields = [searchLayer.objectIdField];
+                        generalOutFields = [searchLayer.resourceInfo.objectIdField];
                         if (this.displayField !== "") {
                             generalOutFields = generalOutFields.concat(this.displayField);
                         }
                         this.generalSearchParams.outFields = generalOutFields.concat(this.searchFields);
 
                         // Set up the specific layer query task: object id
-                        this.objectSearchParams = new esri.tasks.Query();
+                        this.objectSearchParams = new Query();
                         this.objectSearchParams.returnGeometry = true;
-                        this.objectSearchParams.outSpatialReference = this.mapObj.mapInfo.map.spatialReference;
+                        this.objectSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
                         this.objectSearchParams.outFields = ["*"];
 
                         // Get the popup for this layer & save it with the layer
-                        opLayers = this.mapObj.mapInfo.itemInfo.itemData.operationalLayers;
+                        opLayers = this.appConfig.itemInfo.itemData.operationalLayers;
                         array.some(opLayers, function (layer) {
                             if (layer.title === pThis.searchLayerName) {
+                                pThis.layer = layer;
                                 pThis.popupTemplate = new PopupTemplate(layer.popupInfo);
                                 return true;
                             }
@@ -1320,6 +1679,23 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         },
 
         /**
+         * Determines if a layer can be queried.
+         * @param {string} searchLayerName Name of layer to check
+         * @return {boolean} false if layer is definitely not queryable
+         * @memberOf js.LGSearchFeatureLayer#
+         */
+        isSearchableLayer: function (searchLayerName) {
+            var isSearchable = false, searchLayer;
+
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && searchLayer.url && searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
+                isSearchable = true;
+            }
+
+            return isSearchable;
+        },
+
+        /**
          * Reports layers that don't appear in the map.
          * @param {string} searchLayerName Name to report for search layer
          * @param {string} [reason] Error message; if omitted, "@messages.searchLayerMissing"
@@ -1327,19 +1703,28 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @memberOf js.LGSearchFeatureLayer#
          */
         showSearchLayerError: function (searchLayerName, reason) {
-            var message;
-
-            if (!reason) {
-                reason = this.checkForSubstitution("@messages.searchLayerMissing");
-            }
+            var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            message += reason + "<br><hr>";
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && !this.isSearchableLayer(searchLayerName)) {
+                // For a search layer with no available fields, just show its name and
+                // some guidance about what to do
+                message += this.checkForSubstitution("@messages.searchLayerNotSearchable");
+
+            } else {
+                if (!reason) {
+                    reason = this.checkForSubstitution("@messages.searchLayerMissing");
+                }
+                message += reason;
+            }
 
             // Add map layers to message
-            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+            message += "<br><hr>" + this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
-                message += "<li>\"" + layerName + "\"</li>";
+                if (pThis.isSearchableLayer(layerName)) {
+                    message += "<li>\"" + layerName + "\"</li>";
+                }
             });
             message += "</ul>";
 
@@ -1352,38 +1737,45 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @param {array} candidateFields List of fields requested for search or for display
          * @param {string} searchLayerName Name to report for search layer
          * @param {object} searchLayer Details of search layer as returned from map;
-         *        function uses searchLayer.fields
+         *        function uses searchLayer.resourceInfo.fields
          * @memberOf js.LGSearchFeatureLayer#
          */
         showSearchLayerFieldError: function (candidateFields, searchLayerName, searchLayer) {
             var reason = "", message;
 
-            // List the requested fields
-            array.forEach(candidateFields, function (field) {
-                if (reason.length > 0) {
-                    reason += ",";
+            if (searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
+                // List the requested fields
+                array.forEach(candidateFields, function (field) {
+                    if (reason.length > 0) {
+                        reason += ",";
+                    }
+                    reason += field;
+                });
+
+                // Add a message to the field list
+                message = "\"" + reason + "\"<br>";
+                if (candidateFields.length > 1) {
+                    message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
+                } else {
+                    message += this.checkForSubstitution("@messages.searchFieldMissing");
                 }
-                reason += field;
-            });
 
-            // Add a message to the field list
-            message = "\"" + reason + "\"<br>";
-            if (candidateFields.length > 1) {
-                message += this.checkForSubstitution("@messages.allSearchFieldsMissing");
+                // Add the search layer name and a list of available fields in that layer
+                message += "<br><hr>\"" + searchLayerName + "\"<br>";
+                message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
+                array.forEach(searchLayer.resourceInfo.fields, function (layerField) {
+                    message += "<li>\"" + layerField.name + "\"</li>";
+                });
+                message += "</ul>";
+
+                // Log it
+                this.log(message, true);
+
             } else {
-                message += this.checkForSubstitution("@messages.searchFieldMissing");
+                // For a search layer with no available fields, just show its name and
+                // some guidance about what to do
+                this.showSearchLayerError(searchLayerName);
             }
-
-            // Add the search layer name and a list of available fields in that layer
-            message += "<br><hr>\"" + searchLayerName + "\"<br>";
-            message += this.checkForSubstitution("@prompts.layerFields") + "<br><ul>";
-            array.forEach(searchLayer.fields, function (layerField) {
-                message += "<li>\"" + layerField.name + "\"</li>";
-            });
-            message += "</ul>";
-
-            // Log it
-            this.log(message, true);
         },
 
         /**
@@ -1505,12 +1897,15 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
 
             // Search for the supplied object id
             this.objectSearchParams.where = this.objectIdField + "=" + data;
-            this.searcher.execute(this.objectSearchParams, function (results) {
+            this.layer.layerObject.queryFeatures(this.objectSearchParams, function (results) {
                 if (results && results.features && 0 < results.features.length) {
                     item = results.features[0];
 
                     // Assign the layer's popup (if any) to the item
                     item.infoTemplate = pThis.popupTemplate;
+
+                    // Assign the layer to the item
+                    item._graphicsLayer = pThis.layer.layerObject;
 
                     if (pThis.publishPointsOnly) {
                         // Find a point that can be used to represent this item
@@ -1707,6 +2102,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * Constructs an LGSearchFeatureLayerMultiplexer.
          *
+         * @constructor
          * @class
          * @name js.LGSearchFeatureLayerMultiplexer
          * @extends js.LGSearchMultiplexer, js.LGMapDependency
@@ -1714,6 +2110,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Provides a searcher that multiplexes the work of LGSearchFeatureLayer searchers,
          * selecting them by feature layer name
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGSearchFeatureLayerMultiplexer");
+        },
 
         /**
          * Initializes the object's list of searchers.
@@ -1738,10 +2137,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             for (i = 0; i < featureLayerNames.length; i = i + 1) {
                 searcherName = this.rootId + "_" + this.searchers.length;
                 searcher = new js.LGSearchFeatureLayer({
-                    app: this.app,
-                    commonConfig: this.commonConfig,
-                    i18n: this.i18n,
-                    webmap: this.webmap,
+                    appConfig: this.appConfig,
                     rootId: searcherName,
                     parentDiv: this.parentDiv,
                     dependencyId: this.dependencyId,
@@ -1774,6 +2170,23 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         },
 
         /**
+         * Determines if a layer can be queried.
+         * @param {string} searchLayerName Name of layer to check
+         * @return {boolean} false if layer is definitely not queryable
+         * @memberOf js.LGSearchFeatureLayerMultiplexer#
+         */
+        isSearchableLayer: function (searchLayerName) {
+            var isSearchable = false, searchLayer;
+
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && searchLayer.url && searchLayer.resourceInfo && searchLayer.resourceInfo.fields) {
+                isSearchable = true;
+            }
+
+            return isSearchable;
+        },
+
+        /**
          * Reports layers that don't appear in the map.
          * @param {string} searchLayerName Name to report for search layer
          * @param {string} [reason] Error message; if omitted, "@messages.searchLayerMissing"
@@ -1781,17 +2194,28 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * @memberOf js.LGSearchFeatureLayerMultiplexer#
          */
         showSearchLayerError: function (searchLayerName, reason) {
-            var message;
-
-            if (!reason) {
-                reason = this.checkForSubstitution("@messages.searchLayerMissing");
-            }
+            var message, searchLayer, pThis = this;
 
             message = "\"" + (searchLayerName || "") + "\"<br>";
-            message += reason + "<br><hr>";
-            message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
+            searchLayer = this.mapObj.getLayer(searchLayerName);
+            if (searchLayer && !this.isSearchableLayer(searchLayerName)) {
+                // For a search layer with no available fields, just show its name and
+                // some guidance about what to do
+                message += this.checkForSubstitution("@messages.searchLayerNotSearchable");
+
+            } else {
+                if (!reason) {
+                    reason = this.checkForSubstitution("@messages.searchLayerMissing");
+                }
+                message += reason;
+            }
+
+            // Add map layers to message
+            message += "<br><hr>" + this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
             array.forEach(this.mapObj.getLayerNameList(), function (layerName) {
-                message += "<li>\"" + layerName + "\"</li>";
+                if (pThis.isSearchableLayer(layerName)) {
+                    message += "<li>\"" + layerName + "\"</li>";
+                }
             });
             message += "</ul>";
 
@@ -1952,7 +2376,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         share: function () {
             var pThis = this, subjectLine, urlToShare, compressionUrl;
-            subjectLine = encodeURIComponent(this.getSubject());
+            subjectLine = encodeURIComponent(this.getSubject()) || "%20";  // an empty subject line breaks mailto:
             urlToShare = encodeURIComponent(this.getUrlToShare());
 
             if (this.tinyURLServiceURL && this.tinyURLServiceURL.length > 0) {
@@ -2034,6 +2458,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
         /**
          * LGShareAppExtents
          *
+         * @constructor
          * @class
          * @name js.LGShareAppExtents
          * @extends js.LGShare, js.LGMapDependency
@@ -2041,6 +2466,9 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          * Extends simple sharing to include the app's map's current
          * extents.
          */
+        constructor: function () {
+            this.setUpWaitForDependency("js.LGShareAppExtents");
+        },
 
         /**
          * Returns the subject message to use in the sharing.
@@ -2107,6 +2535,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 this.switchDelaySecs = 1000 * this.toNumber(this.ieSwitchDelaySecs, 3.0);
                 this.switchDelayMultiplier = 3;  // we'll reset this to 1 after the first use
             @*/
+
+            this.setUpWaitForDependency("js.LGFilterLayers1");
         },
 
         /**
@@ -2122,7 +2552,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
                 // Build a list of layers that contain the managed field.
                 // Loop through all the operation layers added to the map. If layer type is Feature layer, find if layer has
                 // the managed field.  If so, push the field type and layer object to an array of objects.
-                array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+                array.forEach(this.appConfig.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                     var field, layerAndDefExpObject;
 
                     if (mapLayer.layerObject) {
@@ -2194,7 +2624,7 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
             // Add map layers to message
             message += this.checkForSubstitution("@prompts.mapLayers") + "<br><ul>";
 
-            array.forEach(this.mapObj.mapInfo.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
+            array.forEach(this.appConfig.itemInfo.itemData.operationalLayers, lang.hitch(this, function (mapLayer) {
                 var field;
 
                 if (mapLayer.layerObject) {
@@ -2308,6 +2738,8 @@ define("js/lgonlineCommand", ["dojo/dom-construct", "dojo/dom", "dojo/on", "dojo
          */
         constructor: function () {
             this.changeDefaults();
+
+            this.setUpWaitForDependency("js.LGFilterLayers1WithDefaults");
         },
 
         /**

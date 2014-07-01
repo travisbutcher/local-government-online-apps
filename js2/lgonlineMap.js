@@ -1,5 +1,5 @@
-﻿/*global define,dojo,js,window,esri */
-/*jslint sloppy:true */
+﻿/*global define,dojo,js,esri */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /*
  | Copyright 2012 Esri
  |
@@ -16,7 +16,34 @@
  | limitations under the License.
  */
 //============================================================================================================================//
-define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "dojo/_base/array", "dojo/Deferred", "esri/arcgis/utils", "esri/dijit/Popup", "js/lgonlineBase"], function (domConstruct, on, lang, array, Deferred, utils, Popup) {
+define("js/lgonlineMap", [
+    "dojo/dom-construct",
+    "dojo/dom",
+    "dojo/on",
+    "dojo/_base/lang",
+    "dojo/_base/array",
+    "dojo/Deferred",
+    "dojo/dom-class",
+    "dojo/dom-attr",
+    "esri/arcgis/utils",
+    "esri/dijit/Popup",
+    "esri/layers/GraphicsLayer",
+    "esri/tasks/ProjectParameters",
+    "js/lgonlineBase"
+], function (
+    domConstruct,
+    dom,
+    on,
+    lang,
+    array,
+    Deferred,
+    domClass,
+    domAttr,
+    utils,
+    Popup,
+    GraphicsLayer,
+    ProjectParameters
+) {
 
     //========================================================================================================================//
 
@@ -53,8 +80,8 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * Constructs an LGMap.
          * <br><b>N.B.: this implementation does not support more
          * than one map per app.</b>
-         * <br>All four extents parameters must be supplied in order for
-         * extents to be modified; otherwise, web map's extents are
+         * <br>All four extent parameters must be supplied in order for
+         * extent to be modified; otherwise, web map's extent are
          * used.
          * <br>Listens for "position" messages of the form
          * {latitude:<number>, longitude:<number>}, recenters the map to
@@ -101,7 +128,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          *        extent
          * @param {string|number} [args.values.ymax] Northernmost map
          *        extent
-         * @param {string|number} [args.values.wkid] wkid for extents
+         * @param {string|number} [args.values.wkid] wkid for extent
          *        coordinates
          *
          * @param {object} [args.i18n] Key-value pairs for text
@@ -114,8 +141,8 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @classdesc
          * Provides a UI web map display.
          */
-        constructor: function () {
-            var options, extents = null, pThis = this;
+        constructor: function (args) {
+            var extent = null, urlExtent = null, pThis = this, map, saveInitialExtent, projectionParams;
 
             /**
              * Provides a way to test the success or failure of the map
@@ -125,168 +152,168 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
              */
             this.ready = new Deferred();
 
-            options = { ignorePopups: this.toBoolean(this.ignorePopups, false) };
-            options.mapOptions = this.mapOptions || {};
-            options.mapOptions.showAttribution = true;
+            map = this.appConfig.map;
 
-            this.popup = new Popup(null, domConstruct.create("div"));
-            options.mapOptions.infoWindow = this.popup;
+            // Save the initial map extent to re-apply it to the map after the map's div
+            // is reparented (and perhaps resized) if no other source of extent is provided
+            saveInitialExtent = map.extent;
 
-            // Set up configured extents
+            // Replace the standard div associated with this object with the one created
+            // by the application boilerplate
+            domConstruct.destroy(this.rootDiv);
+            this.rootDiv = dom.byId("mapDiv");
+            domConstruct.place(this.rootDiv, this.parentDiv);
+
+            // Patch the map div to have the expected attributes
+            domClass.add(this.rootDiv, this.rootClass);
+            domAttr.set(this.rootDiv, "id", this.rootId);
+            this.rootDiv.getLGObject = function () {
+                return pThis;
+            };
+
+            // The map div may have been resized if it has gone from filling the window to being
+            // contained within the parent, so fix its sizing
+            this.handleWindowResize();
+            map.resize(true);
+            map.reposition();
+
+            // Update the initial extent. There are three sources for the initial extent, listed in increasing importance:
+            //   1. webmap visible extent when saved
+            //   2. application extent on the application item
+            //   3. configured in LGMap item
+            //   4. supplied in the URL using the format ex=xmin,ymin,xmax,ymax[,wkid=102100],
+            //      e.g., ex=-9279312,5238092,-9259324,5256972,102100
             if (this.xmin && this.ymin && this.xmax && this.ymax) {
                 try {
-                    extents = {
+                    extent = {
                         xmin: this.xmin,
                         ymin: this.ymin,
                         xmax: this.xmax,
                         ymax: this.ymax
                     };
 
-                    extents.spatialReference = {};
+                    extent.spatialReference = {};
                     if (this.wkid) {
-                        extents.spatialReference.wkid = Number(this.wkid);
+                        extent.spatialReference.wkid = Number(this.wkid);
                     } else {
-                        extents.spatialReference.wkid = 102100;
+                        extent.spatialReference.wkid = 102100;
                     }
-                    extents = new esri.geometry.Extent(extents);
+                    extent = new esri.geometry.Extent(extent);
                 } catch (err1) {
-                    extents = null;
+                    extent = null;
                 }
             }
 
             // Override the initial extent from the configuration with URL extent values;
             // need to have a complete set of the latter
-            if (this.ex) {
-                extents = this.getExtentsFromString(this.ex);
-            }
-
-            // Do we have a Bing maps key?
-            if (this.commonConfig && this.commonConfig.bingMapsKey) {
-                options.bingMapsKey = this.commonConfig.bingMapsKey;
-            }
-
-            // Create the map
-            if (this.webmap) {
-                this.mapId = this.webmap;
-            }
-
-            utils.createMap(this.mapId, this.rootDiv, options).then(
-                function (response) {
-                    var projectionParams;
-                    pThis.mapInfo = response;
-
-                    // For some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
-                    // This is a bit of a hack to set it manually
-                    if (!response.map.spatialReference) {
-                        pThis.mapInfo.map.spatialReference = new esri.SpatialReference(102100);
-                    }
-
-                    //pThis.listeners.push(
-                    //    dojo.connect(pThis.mapInfo.map, "onUnload", function () {  // release event listeners upon unload
-                    //        // http://help.arcgis.com/en/webapi/javascript/arcgis/jshelp/inside_events.html
-                    //        dojo.forEach(var fred in pThis.listeners) {
-                    //            dojo.disconnect(fred);
-                    //        }
-                    //    });
-                    //);
-                    //pThis.listeners.push(
-                    on(window, "resize", lang.hitch(pThis.mapInfo.map, function () {
-                        pThis.mapInfo.map.resize();
-                        pThis.mapInfo.map.reposition();
-                    }));
-                    //);
-
-                    // Jump to the initial extents
-                    if (extents) {
-                        // Set the initial extent, but keep the map's spatial reference,
-                        // so we have to convert the extents to match the map
-                        if (extents.spatialReference.wkid !== pThis.mapInfo.map.spatialReference.wkid) {
-                            if (esri.config.defaults.geometryService) {
-                                projectionParams = new esri.tasks.ProjectParameters();
-                                projectionParams.geometries = [extents];
-                                projectionParams.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(projectionParams).then(
-                                    function (geometries) {
-                                        extents = geometries[0];
-                                        pThis.mapInfo.map.setExtent(extents);
-                                    }
-                                );
-                            } else {
-                                pThis.log("LGMap_1: " + "Need geometry service to convert extents from wkid "
-                                    + extents.spatialReference.wkid
-                                    + " to map's " + pThis.mapInfo.map.spatialReference.wkid);
-                            }
-                        } else {
-                            pThis.mapInfo.map.setExtent(extents);
-                        }
-                    }
-
-                    // Set up a graphics layer for receiving position updates and feature highlights
-                    pThis.tempGraphicsLayer = pThis.createGraphicsLayer("tempGraphicsLayer");
-
-                    // Start listening for position updates
-                    pThis.positionHandle = pThis.subscribeToMessage("position", function (newCenterPoint) {
-                        var projectionParams2;
-
-                        // Highlight the point's position if it's in the same coord system as the map
-                        if (newCenterPoint.spatialReference.wkid === pThis.mapInfo.map.spatialReference.wkid) {
-                            pThis.publishMessage("highlightItem", newCenterPoint);
-
-                        // Otherwise, convert the position into the map's spatial reference before highlighting it
-                        } else {
-                            // Use a shortcut routine for the geographic --> web mercator conversion
-                            if (newCenterPoint.spatialReference.wkid === 4326
-                                    && pThis.mapInfo.map.spatialReference.wkid === 102100) {
-                                newCenterPoint = esri.geometry.geographicToWebMercator(newCenterPoint);
-                                pThis.publishMessage("highlightItem", newCenterPoint);
-
-                            // Otherwise, use the geometry service
-                            } else if (esri.config.defaults.geometryService) {
-                                projectionParams2 = new esri.tasks.ProjectParameters();
-                                projectionParams2.geometries = [newCenterPoint];
-                                projectionParams2.outSR = pThis.mapInfo.map.spatialReference;
-                                esri.config.defaults.geometryService.project(projectionParams2).then(
-                                    function (geometries) {
-                                        newCenterPoint = geometries[0];
-                                        pThis.publishMessage("highlightItem", newCenterPoint);
-                                    }
-                                );
-
-                            // If we can't convert, we can't highlight
-                            } else {
-                                pThis.log("LGMap_1: " + "Need geometry service to convert position from wkid "
-                                    + newCenterPoint.spatialReference.wkid
-                                    + " to map's " + pThis.mapInfo.map.spatialReference.wkid);
-                            }
-                        }
-                    });
-
-                    // Start listening for feature highlights
-                    pThis.showFeatureHandle = pThis.subscribeToMessage("showFeature", function (feature) {
-                        pThis.publishMessage("highlightItem", feature);
-                    });
-
-                    // Start broadcasting map clicks
-                    pThis.clickHandle = on(pThis.mapInfo.map, "click", function (evt) {
-                        pThis.publishMessage("mapClick", evt);
-                    });
-
-                    pThis.ready.resolve(pThis);
-                },
-                function () {
-                    pThis.ready.reject(pThis);
+            if (this.appConfig.urlValues.ex) {
+                urlExtent = this.getExtentsFromString(this.appConfig.urlValues.ex);
+                if (urlExtent) {
+                    extent = urlExtent;
                 }
-            );
-        },
+            }
 
-        /**
-         * Returns the object's mapInfo object, which contains the
-         * webmap creation information and the ArcGIS API map object.
-         * @return {object} Object's mapInfo object
-         * @memberOf js.LGMap#
-         */
-        mapInfo: function () {
-            return this.mapInfo;
+            // Jump to the initial extent
+            if (extent) {
+                // Set the initial extent, but keep the map's spatial reference,
+                // so we have to convert the extent to match the map
+                if (extent.spatialReference.wkid !== map.spatialReference.wkid) {
+                    if (esri.config.defaults.geometryService) {
+                        projectionParams = new ProjectParameters();
+                        projectionParams.geometries = [extent];
+                        projectionParams.outSR = map.spatialReference;
+                        esri.config.defaults.geometryService.project(projectionParams).then(
+                            function (geometries) {
+                                extent = geometries[0];
+                                map.setExtent(extent);
+                            }
+                        );
+                    } else {
+                        this.log("LGMap_1: " + "Need geometry service to convert extent from wkid "
+                            + extent.spatialReference.wkid
+                            + " to map's " + map.spatialReference.wkid);
+                    }
+                } else {
+                    map.setExtent(extent);
+                }
+            } else {
+                // Re-apply the initial extent
+                map.setExtent(saveInitialExtent);
+            }
+
+
+            // For some reason if the webmap uses a bing map basemap the response doesn't have a spatialReference defined.
+            // This is a bit of a hack to set it manually
+            if (!map.spatialReference) {
+                map.spatialReference = new esri.SpatialReference(102100);
+            }
+
+            //this.listeners.push(
+            //    dojo.connect(pThis.appConfig.map, "onUnload", function () {  // release event listeners upon unload
+            //        // http://help.arcgis.com/en/webapi/javascript/arcgis/jshelp/inside_events.html
+            //        dojo.forEach(var fred in this.listeners) {
+            //            dojo.disconnect(fred);
+            //        }
+            //    });
+            //);
+            //pThis.listeners.push(
+            on(window, "resize", lang.hitch(this, function () {
+                map.resize();
+                map.reposition();
+            }));
+            //);
+
+            // Set up a graphics layer for receiving position updates and feature highlights
+            this.tempGraphicsLayer = this.createGraphicsLayer("tempGraphicsLayer");
+
+            // Start listening for position updates
+            this.positionHandle = this.subscribeToMessage("position", function (newCenterPoint) {
+                var projectionParams2;
+
+                // Highlight the point's position if it's in the same coord system as the map
+                if (newCenterPoint.spatialReference.wkid === pThis.appConfig.map.spatialReference.wkid) {
+                    pThis.publishMessage("highlightItem", newCenterPoint);
+
+                // Otherwise, convert the position into the map's spatial reference before highlighting it
+                } else {
+                    // Use a shortcut routine for the geographic --> web mercator conversion
+                    if (newCenterPoint.spatialReference.wkid === 4326
+                            && pThis.appConfig.map.spatialReference.wkid === 102100) {
+                        newCenterPoint = esri.geometry.geographicToWebMercator(newCenterPoint);
+                        pThis.publishMessage("highlightItem", newCenterPoint);
+
+                    // Otherwise, use the geometry service
+                    } else if (esri.config.defaults.geometryService) {
+                        projectionParams2 = new esri.tasks.ProjectParameters();
+                        projectionParams2.geometries = [newCenterPoint];
+                        projectionParams2.outSR = pThis.appConfig.map.spatialReference;
+                        esri.config.defaults.geometryService.project(projectionParams2).then(
+                            function (geometries) {
+                                newCenterPoint = geometries[0];
+                                pThis.publishMessage("highlightItem", newCenterPoint);
+                            }
+                        );
+
+                    // If we can't convert, we can't highlight
+                    } else {
+                        pThis.log("LGMap_1: " + "Need geometry service to convert position from wkid "
+                            + newCenterPoint.spatialReference.wkid
+                            + " to map's " + pThis.appConfig.map.spatialReference.wkid);
+                    }
+                }
+            });
+
+            // Start listening for feature highlights
+            this.showFeatureHandle = this.subscribeToMessage("showFeature", function (feature) {
+                pThis.publishMessage("highlightItem", feature);
+            });
+
+            // Start broadcasting map clicks
+            this.clickHandle = on(map, "click", function (evt) {
+                pThis.publishMessage("mapClick", evt);
+            });
+
+            this.ready.resolve(this);
         },
 
         /**
@@ -296,9 +323,11 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         showPopupWithFeature: function (popupLocation, feature) {
-            this.popup.clearFeatures();
-            this.popup.setContent(feature.getContent());
-            this.mapInfo.map.infoWindow.show(this.mapInfo.map.toScreen(popupLocation));
+            var infoWin = this.appConfig.map.infoWindow;
+
+            infoWin.clearFeatures();
+            infoWin.setContent(feature.getContent());
+            infoWin.show(popupLocation);
         },
 
         /**
@@ -306,7 +335,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         hidePopup: function () {
-            this.mapInfo.map.infoWindow.hide();
+            this.appConfig.map.infoWindow.hide();
         },
 
         /**
@@ -315,7 +344,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         setExtent: function (extent) {
-            return this.mapInfo.map.setExtent(extent);
+            return this.appConfig.map.setExtent(extent);
         },
 
         /**
@@ -324,7 +353,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         centerAt: function (mapPoint) {
-            return this.mapInfo.map.centerAt(mapPoint);
+            return this.appConfig.map.centerAt(mapPoint);
         },
 
         /**
@@ -335,118 +364,118 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         setZoom: function (zoom) {
-            var minZoom = this.mapInfo.map.getMinZoom(),
-                maxZoom = this.mapInfo.map.getMaxZoom();
+            var minZoom = this.appConfig.map.getMinZoom(),
+                maxZoom = this.appConfig.map.getMaxZoom();
 
             // Constrain the zoom to the map's zoom levels if the map has them
             if (minZoom >= 0 && maxZoom >= 0) {
                 zoom = Math.max(minZoom, Math.min(maxZoom, zoom));
             }
-            return this.mapInfo.map.setZoom(zoom);
+            return this.appConfig.map.setZoom(zoom);
         },
 
         /**
-         * Creates a string from the map's current extents.
-         * @return {string} Comma-separated extents in the order xmin,
+         * Creates a string from the map's current extent.
+         * @return {string} Comma-separated extent in the order xmin,
          *         ymin, xmax, ymax, spatial reference's wkid
          * @memberOf js.LGMap#
          */
         getMapExtentsAsString: function () {
-            var extentsString = "";
-            if (this.mapInfo && this.mapInfo.map) {
-                extentsString = this.getStringFromExtents(this.mapInfo.map.extent);
+            var extentString = "";
+            if (this.appConfig.map) {
+                extentString = this.getStringFromExtents(this.appConfig.map.extent);
             }
-            return extentsString;
+            return extentString;
         },
 
         /**
-         * Creates a string from extents.
-         * @param {object} extents Extents structure
-         * @return {string} Comma-separated extents in the order xmin,
+         * Creates a string from extent.
+         * @param {object} extent Extent structure
+         * @return {string} Comma-separated extent in the order xmin,
          *         ymin, xmax, ymax, spatial reference's wkid or wkt
          * @see getExtentsFromString
          * @memberOf js.LGMap#
          */
-        getStringFromExtents: function (extents) {
-            var extentsString =
-                    extents.xmin.toFixed().toString() + "," +
-                    extents.ymin.toFixed().toString() + "," +
-                    extents.xmax.toFixed().toString() + "," +
-                    extents.ymax.toFixed().toString(),
-                sr = extents.spatialReference;
+        getStringFromExtents: function (extent) {
+            var extentString =
+                    extent.xmin.toFixed().toString() + "," +
+                    extent.ymin.toFixed().toString() + "," +
+                    extent.xmax.toFixed().toString() + "," +
+                    extent.ymax.toFixed().toString(),
+                sr = extent.spatialReference;
 
             if (sr) {
                 if (sr.wkid) {
-                    extentsString = extentsString + "," + sr.wkid.toString();
+                    extentString = extentString + "," + sr.wkid.toString();
                 } else if (sr.wkt) {
-                    extentsString = extentsString + "," + encodeURIComponent(sr.wkt);
+                    extentString = extentString + "," + encodeURIComponent(sr.wkt);
                 }
             }
-            return extentsString;
+            return extentString;
         },
 
         /**
-         * Creates extents from a string.
-         * @param {string} extentsString String containing comma-
+         * Creates extent from a string.
+         * @param {string} extentString String containing comma-
          *         separated xmin, ymin, xmax, ymax, and (optionally)
          *         the spatial reference's wkid or wkt; comma separator
          *         may take the escaped form "%2C"
-         * @return {object} Extents object containing xmin,
+         * @return {object} Extent object containing xmin,
          *         ymin, xmax, ymax set to the first four numbers
          *         in the string; if the string contains a fifth
-         *         number, it is used as the wkid of the extents'
+         *         number, it is used as the wkid of the extent'
          *         spatial reference; if it contains a fifth element,
          *         it is used as the wkt of the spatial reference;
          *         otherwise 102100 is used
          * @see getStringFromExtents
          * @memberOf js.LGMap#
          */
-        getExtentsFromString: function (extentsString) {
-            var minmax, extents = null, wkid, iPROJCS;
+        getExtentsFromString: function (extentString) {
+            var minmax, extent = null, wkid, iPROJCS;
 
             // Get the four to five comma-separated parts
-            minmax = extentsString.split(",");
+            minmax = extentString.split(",");
 
             // If there are no commas, then they're escaped.
             if (minmax.length === 1) {
                 // Split the string on "PROJCS" if it exists
-                iPROJCS = extentsString.indexOf("PROJCS");
+                iPROJCS = extentString.indexOf("PROJCS");
                 if (iPROJCS > 0) {
                     // Split the numbers on the escaped commas
-                    minmax = extentsString.substr(0, iPROJCS).split("%2C");
+                    minmax = extentString.substr(0, iPROJCS).split("%2C");
 
                     // And put the wkt in the list's last slot
-                    minmax[4] = (extentsString.substr(iPROJCS));
+                    minmax[4] = (extentString.substr(iPROJCS));
                 } else {
                     // Split the whole string on the escaped commas
-                    minmax = extentsString.split("%2C");
+                    minmax = extentString.split("%2C");
                 }
             }
 
             try {
-                extents = {
+                extent = {
                     xmin: Number(minmax[0]),
                     ymin: Number(minmax[1]),
                     xmax: Number(minmax[2]),
                     ymax: Number(minmax[3])
                 };
 
-                extents.spatialReference = {};
+                extent.spatialReference = {};
                 if (minmax.length > 4) {
                     wkid = Number(minmax[4]);
                     if (!isNaN(wkid)) {
-                        extents.spatialReference.wkid = wkid;
+                        extent.spatialReference.wkid = wkid;
                     } else {
-                        extents.spatialReference.wkt = decodeURIComponent(minmax[4]);
+                        extent.spatialReference.wkt = decodeURIComponent(minmax[4]);
                     }
                 } else {
-                    extents.spatialReference.wkid = 102100;
+                    extent.spatialReference.wkid = 102100;
                 }
-                extents = new esri.geometry.Extent(extents);
+                extent = new esri.geometry.Extent(extent);
             } catch (err2) {
-                extents = null;
+                extent = null;
             }
-            return extents;
+            return extent;
         },
 
         /**
@@ -459,9 +488,9 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
             var layer;
 
             // Find the operational layer that matches the specified search layer
-            array.some(this.mapInfo.itemInfo.itemData.operationalLayers, function (opLayer) {
+            array.some(this.appConfig.itemInfo.itemData.operationalLayers, function (opLayer) {
                 if (opLayer.title === name) {
-                    layer = opLayer.layerObject;
+                    layer = opLayer;
                     return true;
                 }
                 return false;
@@ -478,7 +507,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
         getLayerNameList: function () {
             var layerNameList = [];
 
-            array.forEach(this.mapInfo.itemInfo.itemData.operationalLayers, function (layer) {
+            array.forEach(this.appConfig.itemInfo.itemData.operationalLayers, function (layer) {
                 layerNameList.push(layer.title);
             });
 
@@ -491,7 +520,7 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         getOperationalLayers: function () {
-            return this.mapInfo.itemInfo.itemData.operationalLayers;
+            return this.appConfig.itemInfo.itemData.operationalLayers;
         },
 
         /**
@@ -501,12 +530,12 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          * @memberOf js.LGMap#
          */
         createGraphicsLayer: function (layerId) {
-            var gLayer = new esri.layers.GraphicsLayer();
+            var gLayer = new GraphicsLayer();
             gLayer.id = layerId;
             on(gLayer, "graphic-add", function () {
                 gLayer.disableMouseEvents();
             });
-            return this.mapInfo.map.addLayer(gLayer);
+            return this.appConfig.map.addLayer(gLayer);
         },
 
         /**
@@ -517,8 +546,8 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          */
         enablePopups: function () {
             // Not usable until we've created the map
-            if (this.mapInfo && this.mapInfo.clickEventListener) {
-                this.mapInfo.clickEventHandle = on(this.mapInfo.map, "click", this.mapInfo.clickEventListener);
+            if (this.appConfig.mapInfo.clickEventListener) {
+                this.appConfig.mapInfo.clickEventHandle = on(this.appConfig.map, "click", this.appConfig.mapInfo.clickEventListener);
             }
         },
 
@@ -530,8 +559,8 @@ define("js/lgonlineMap", ["dojo/dom-construct", "dojo/on", "dojo/_base/lang", "d
          */
         disablePopups: function () {
             // Not usable until we've created the map
-            if (this.mapInfo && this.mapInfo.clickEventHandle) {
-                this.mapInfo.clickEventHandle.remove();
+            if (this.appConfig.mapInfo.clickEventHandle) {
+                this.appConfig.mapInfo.clickEventHandle.remove();
             }
         }
     });

@@ -27,8 +27,8 @@ For this article, we'll change the positioning configuration for the search box.
 
 The search box is an instance of class [js.LGSearchBoxByText][], which has [js.LGGraphic][] as an ancestor. [js.LGGraphic][] has two parameters called horizOffset and vertOffset to guide the positioning of the graphic. These parameters take a single number or a pair of numbers. Numbers greater than zero stand for the offset from the left (for horizOffset) or top (for vertOffset) in pixels; numbers less than zero stand for the offset from the right or bottom; numbers equal to zero indicate centering. A pair of numbers permits you to tie the graphic to both edges. E.g., the original values in the supplied JSON configuration file are
 
-	"horizOffset": -2,
-	"vertOffset": [2, -2],
+    "horizOffset": -2,
+    "vertOffset": [2, -2],
 
 which mean that
 
@@ -44,33 +44,33 @@ If a maximum width or height constraint exists in CSS, then the right/bottom con
 
 * Open Sidebar.json in a text editor and search for
 
-		"classname": "js.LGSearchBoxByText",
+        "classname": "js.LGSearchBoxByText",
 
 * Change horizOffset's value to 2
 - Remove the max-height:224px; text from the item's styles.
 
-	The new search box definition becomes
+    The new search box definition becomes
 
-		}, {
-		    "classname": "js.LGSearchBoxByText",
-		    "styles": ".searchBox{display:none;width:200px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .searchBox{border-radius:8px}.resultsListBox{width:96%;top:53px;overflow:auto}.okIE .resultsListBox{position:absolute;bottom:4px}.lt-ie9 .resultsListBox{width:100%;height:182px}.resultsListTable{width:97%;margin:4px}.lt-ie9 .resultsListTable{width:87%}.resultsListBody{width:80%}.resultsListSearching{background-image:url('images/loading.gif');background-position:center center;background-repeat:no-repeat;width:100%;height:1.5em}.resultsListEntry{width:84%;margin:2px;padding:4px;cursor:pointer}",
-		    "config": {
-		        "trigger": "search",
-		        "publish": "showFeature",
-		        "parentDiv": "contentFrame",
-		        "rootId": "searchBox",
-		        "rootClass": "searchBox",
-		        "horizOffset": 2,
-		        "vertOffset": [2, -2],
-		        "searcher": "featureSearcher",
-		        "showPrompt": "@prompts.search",
-		        "resultsListBoxClass": "resultsListBox",
-		        "resultsListTableClass": "resultsListTable",
-		        "resultsListBodyClass": "resultsListBody",
-		        "resultsListSearchingClass": "resultsListSearching",
-		        "resultsListEntryClass": "resultsListEntry"
-		    }
-		}, {
+        }, {
+            "classname": "js.LGSearchBoxByText",
+            "styles": ".searchBox{display:none;width:200px;padding:4px;position:absolute;overflow:hidden;z-index:40;word-wrap:break-word}.okIE .searchBox{border-radius:8px}.resultsListBox{width:96%;top:53px;overflow:auto}.okIE .resultsListBox{position:absolute;bottom:4px}.lt-ie9 .resultsListBox{width:100%;height:182px}.resultsListTable{width:97%;margin:4px}.lt-ie9 .resultsListTable{width:87%}.resultsListBody{width:80%}.resultsListSearching{background-image:url('images/loading.gif');background-position:center center;background-repeat:no-repeat;width:100%;height:1.5em}.resultsListEntry{width:84%;margin:2px;padding:4px;cursor:pointer}",
+            "config": {
+                "trigger": "search",
+                "publish": "showFeature",
+                "parentDiv": "contentFrame",
+                "rootId": "searchBox",
+                "rootClass": "searchBox",
+                "horizOffset": 2,
+                "vertOffset": [2, -2],
+                "searcher": "featureSearcher",
+                "showPrompt": "@prompts.search",
+                "resultsListBoxClass": "resultsListBox",
+                "resultsListTableClass": "resultsListTable",
+                "resultsListBodyClass": "resultsListBody",
+                "resultsListSearchingClass": "resultsListSearching",
+                "resultsListEntryClass": "resultsListEntry"
+            }
+        }, {
 
 
 * Save and lint StartWithSplash.json; copy its contents into a new custom template's Configuration Parameters. Publish a map, and the search widget will appear in the new location.
@@ -80,6 +80,6 @@ If a maximum width or height constraint exists in CSS, then the right/bottom con
 
 All app source code is available from the [Solutions online apps GitHub site][].
 
-Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries and the computer-generated language-specific phrase files in the [nls/ folder][]. Additional information is available on the [Resources][] page.
+Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries. Additional information is available on the [Resources][] page.
 
 Copyright 2013 Esri. Licensed under the Apache License, Version 2.0; a copy of the license is available in the repository's [LICENSE.txt][] file.

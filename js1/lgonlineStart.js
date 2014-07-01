@@ -1,8 +1,6 @@
-/*global require,dojo,window,Modernizr,console,js,location,esri */
-/*jslint sloppy:true */
+﻿/*global require,dojo,Modernizr,console,js,esri */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
 /** @license
- | ArcGIS Solutions
- | Version 10.1.2
  | Copyright 2012 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,13 +24,13 @@ require(["dojo/ready", "dojo/_base/Deferred", "esri/map", "dojo/i18n"], function
         // By Pradeep Kumar Mishra
         // http://stackoverflow.com/a/498995
         if (!String.prototype.trim) {
-            String.prototype.trim = function() {
+            String.prototype.trim = function () {
                 return this.replace(/^\s+|\s+$/g, '');
             };
         }
 
         // Bring in language files
-        dojo.requireLocalization("esriTemplate", "template");
+        dojo.requireLocalization("esriTemplate", "resources");
 
         // Normalize the browser features
         Modernizr.load([{
