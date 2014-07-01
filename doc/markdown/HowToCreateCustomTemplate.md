@@ -39,6 +39,8 @@
 > Apps with configuration changes may be hosted in ArcGIS Online or on your server.
 
 ### Customizing the configuration experience
+For the latest Finder and Find, Edit, and Filter documentation, see the content on the Local Government Solutions site:
+
 - [Finder](http://solutions.arcgis.com/local-government/help/finder/get-started/additional-configuration/#configuration-panel)
 - [Find, Edit, Filter](http://solutions.arcgis.com/local-government/help/find-edit-filter/get-started/additional-configuration/#configuration-panel)
 
