@@ -25,8 +25,8 @@
 Additional information is available on the [Resources][] page.
 
 ### Getting Started
-- [How do I host an app on my server?](#hostserver)
-- [How do I host a configured app in ArcGIS Online?](#hostonline)
+- How do I host an app on my server? ([Finder](http://solutions.arcgis.com/local-government/help/finder/get-started/host-finder-on-your-web-server/), [Find, Edit, and Filter](http://solutions.arcgis.com/local-government/help/find-edit-filter/get-started/host-find-edit-filter-on-your-web-server/))
+- How do I host a configured app in ArcGIS Online? ([Finder](http://solutions.arcgis.com/local-government/help/finder/get-started/host-your-configuration-on-arcgis-online/), [Find, Edit, and Filter](http://solutions.arcgis.com/local-government/help/find-edit-filter/get-started/host-your-configuration-on-arcgis-online/))
 - [Can I host these apps in a secure environment?](#secure)
 
 ### Understanding the project
@@ -38,22 +38,15 @@ Additional information is available on the [Resources][] page.
 - [Why the emphasis on linting JavaScript and JSON?](#linting)
 
 ### Configuring
-- [How do I create a custom template?](#createcustom)
-- [How do I search for geocoded addresses?](#geocoded)
+- How do I create a custom template? ([Finder](http://solutions.arcgis.com/local-government/help/finder/get-started/host-your-configuration-on-arcgis-online/), [Find, Edit, and Filter](http://solutions.arcgis.com/local-government/help/find-edit-filter/get-started/host-your-configuration-on-arcgis-online/))
+- How do I search for geocoded addresses? ([Finder](http://solutions.arcgis.com/local-government/help/finder/get-started/additional-configuration/#locator-search), [Find, Edit, and Filter](http://solutions.arcgis.com/local-government/help/find-edit-filter/get-started/additional-configuration/#locator-search))
+- How do I show a splash screen? ([Finder](http://solutions.arcgis.com/local-government/help/finder/get-started/additional-configuration/#splash-screen), [Find, Edit, and Filter](http://solutions.arcgis.com/local-government/help/find-edit-filter/get-started/additional-configuration/#splash-screen))
 - [How do I search indexed feature layers?](#searchindexed)
-- [How do I show a splash screen?](#splashscreen)
 
 ### Customizing
 - [What is customization?](#custom)
 
 ----------
-### Getting started
-
-#### How do I host an app on my server?<a name="hostserver"></a>
-Whether you are choosing to deploy these apps on your own server or are just using your server to develop and test app configuration changes before installing them in your ArcGIS Online organization, these instructions show you how to set up the project on your server. [More...][host an app on my server]
-
-#### How do I host a configured app in ArcGIS Online?<a name="hostonline"></a>
-Just because you've configured one of the Local Government Online apps using the configuration file doesn't mean that you have to host the app on your own web server. Learn how to host your configured app in your ArcGIS Online organization. [More...][host an app on online]
 
 #### Can I host these apps in a secure environment?<a name="secure"></a>
 Yes. Applications hosted and configured fully using ArcGIS Online take care of this for you automatically, but if you are hosting the app yourself in a secure environment, you'll need to update each reference to *http://* to the correct protocol, such as *https://*.
@@ -100,18 +93,8 @@ See the [Resources][] page for information about validation.
 > Configuration hides/exposes/moves existing functionality only and these changes are supported by [Esri Support][].
 > Apps with configuration changes may be hosted in ArcGIS Online or on your server.
 
-#### How do I create a custom template?<a name="createcustom"></a>
-If you're configuring an app beyond the optins available in the app's configuration panel and using ArcGIS Online to host the app, you'll need to store the configuration in a new web app template. Using this template, your users can publish web  maps to create web apps. [More...][create a custom template]
-
-#### How do I search for geocoded addresses?<a name="geocoded"></a>
-The standard app configurations search for text in feature layers, but are capable of using Esri's World Geocode Service or another geocoder to search for an address instead of, or in addition to, searching one or more feature layers. [More...][search for geocoded addresses]
-
 #### How do I search indexed feature layers?<a name="searchindexed"></a>
 The standard app configurations search for text in feature layers using a wildcard search with leading and trailing wildcard characters. This search matches any feature that has the search term in at least one of the search fields, which is very flexible, but also means that an index can't be used on the feature layer. By configuring the search to not use an initial wildcard, very large feature layers can be searched more efficiently. [More...][search indexed feature layers]
-
-#### How do I show a splash screen?<a name="splashscreen"></a>
-The apps have a help display that can be shown by clicking the help icon in the app's menu bar. The app can be configured to show this display by default when the app initially loads. [More...][show a splash screen]
-
 
 ----------
 ### Customizing

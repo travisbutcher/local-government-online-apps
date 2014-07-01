@@ -38,7 +38,11 @@
 > Configuration hides/exposes/moves existing functionality only and these changes are supported by [Esri Support][].
 > Apps with configuration changes may be hosted in ArcGIS Online or on your server.
 
-### Summary
+### Customizing the configuration experience
+- [Finder](http://solutions.arcgis.com/local-government/help/finder/get-started/additional-configuration/#configuration-panel)
+- [Find, Edit, Filter](http://solutions.arcgis.com/local-government/help/find-edit-filter/get-started/additional-configuration/#configuration-panel)
+
+### Understanding the components of web app templates
 
 When you [publish a web map using a web application template][], ArcGIS Online creates an app for you. This app is a go-between that points to your webmap, the web application template that you choose, and some template configuration values (more about this later).
 
@@ -86,75 +90,10 @@ Because a template can be shared by many web apps, your selections during publis
 
 You can create custom web application templates for your organization and use them the same way as the standard ones. Because the publication configuration user interface and its initial values are defined in the template using [JSON][], you can read and change them.
 
-With the Solutions set of web apps such Finder, and Find, Edit, and Filter, , you can make much bigger changes, such as make the app search a geocoder with a free-form address in addition to searching the feature layers, or show a splash screen when the app starts up. If the underlying app contains the feature, you can use it in your user interface.
-
-[Learn how to host an app using ArcGIS Online][hostonline]
-
-There are a lot of steps, but remember what it gets you: the freedom to configure a hosted app!
-
-The JSON pasted into the Configuration Parameters is essentially the same as the JSON that you'll find in the file [apps2/ParcelViewer.json][] in the [Solutions online apps GitHub site][]. (There will be small formatting changes and the hosted version will have a note linking it to the GitHub commit that it came from.)
-
-For the other configuration configuration articles, we'll start with the file version simply because it is easier to manage files. We'll modify it and paste its contents into the template's Configuration Parameters to create an app template.
-
-We'll take the Parcel Viewer template from the Solutions set of web apps and make a small change to see template configuration in action.
-
-#### Change the color offering
-
-As an example configuration, we'll change the color theme of the app.
-
-When you look at the ParcelViewer.json configuration file -- whether it is from a [template in ArcGIS Online][] or from the [file in GitHub][apps2/ParcelViewer.json] -- you'll see that it's a nested structure of tags and values, where values can be quoted text, a number, a structure (a structure is enclosed in braces ("{" to "}")), or an array (enclosed in square brackets ("[" to "]")). [JSON.org][] provides JSON syntax information.
-
-The top level of the configuration file contains four items: "license", "values", "configurationSettings", and "ui". "configurationSettings" and "values" are in every ArcGIS Online web application template: they're the publishing configuration user interface and initial values for that interface, respectively. (See [ArcGIS Resources][] for more about configuration.)  "license" is license text for our open source software. "ui" is the web app's user interface. We'll make a very small change to one of the theme colors offered during publication just to show that we can, indeed, create a configured template.
-
-----------
-### Procedure
-
-* Make a copy of apps2/ParcelViewer.json; we'll call it StartWithSplash.json for this exercise, but the name doesn't matter.
-
-* Open StartWithSplash.json in a text editor and search for
-
-
-
-* Make a copy of apps2/ParcelViewer.json; we'll call it Red.json for this exercise, but the name doesn't matter.
-* Open Red.json in a text editor.
-* Find the three places where there is the text "Orange" and change them to "Red". The third location, at about line 166, will be followed by a line that looks like
-
-    ```json
-    "colors": ["#fff", "#cd8500", "#ffb122", "#ffb122"]
-    ```
-
-The four items inside the square brackets (array) are the foreground color (text), background color, highlight color (for when the cursor is over a command), and alternate background color.
-
-We'll change the background color from "#cd8500" to "darkred" and the highlight color from "#cd8500" to "red". (Note that this set of articles is not about aesthetics.)
-
-```json
-"colors": ["#fff", "darkred", "red", "#ffb122"]
-```
-
-Copy everything in the text editor and paste it into your custom template's Configuration Parameters. When you publish a map using this custom template and get to the publication configuration, you'll see that one of your color options is "Red" and that it will use the background and highlight colors that we just set up. With this modification, we've changed the publishing user interface as well as the underlying color table used by the app.
-
-![user interface changed to white on red][]
-
-One doesn't have to change the publishing user interface to configure. Perhaps you like having Orange as an option, but want a brighter orange with black text. In this case, you just change the color table definition for Orange from
-
-```json
-"theme": "Orange",
-"colors": ["#fff", "#cd8500", "#ffb122", "#ffb122"]
-```
-
-to, for example,
-
-```json
-"theme": "Orange",
-"colors": ["black", "#ffa500", "#996300", "#996300"]
-```
-
-![user interface changed to black on orange][]
+With the Solutions set of web apps such Finder and Find, Edit, and Filter you can make much bigger changes, such as make the app search a geocoder with a free-form address in addition to searching the feature layers, or show a splash screen when the app starts up. If the underlying app contains the feature, you can use it in your user interface.
 
 ----------
 ### Related information
-
-All app source code is available from the [Solutions online apps GitHub site][]; this article's template configurations are [Red.json][] and [Orange.json][] in the repository's [doc/examples2/ folder][].
 
 Because it can be very easy to make a small typing error, we strongly recommend "linting" your changed files to validate their syntax. All JavaScript & JSON in the repository is validated except for third-party libraries. Additional information is available on the [Resources][] page.
 
