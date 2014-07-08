@@ -1628,7 +1628,12 @@ define("js/lgonlineCommand", [
                         this.searchFields = actualFieldList;
 
                         // Set up our query task now that we have the URL to the layer
-                        this.objectIdField = searchLayer.resourceInfo.objectIdField;
+                        this.objectIdField = "ObjectID";
+                        if (searchLayer.resourceInfo && searchLayer.resourceInfo.objectIdField) {
+                            this.objectIdField = searchLayer.resourceInfo.objectIdField;
+                        } else if (searchLayer.layerObject && searchLayer.layerObject.objectIdField) {
+                            this.objectIdField = searchLayer.layerObject.objectIdField;
+                        }
                         this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
 
                         this.searcher = new QueryTask(this.searchURL);
@@ -1638,7 +1643,7 @@ define("js/lgonlineCommand", [
                         this.generalSearchParams.returnGeometry = false;
                         this.generalSearchParams.outSpatialReference = this.appConfig.map.spatialReference;
 
-                        generalOutFields = [searchLayer.resourceInfo.objectIdField];
+                        generalOutFields = [this.objectIdField];
                         if (this.displayField !== "") {
                             generalOutFields = generalOutFields.concat(this.displayField);
                         }
