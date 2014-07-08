@@ -1,4 +1,4 @@
-change report #76 at 07/07/2014 21:51:34.08
+change report #77 at 07/08/2014  1:15:59.30
 -
 for git branch
 hotfix_search_outfields

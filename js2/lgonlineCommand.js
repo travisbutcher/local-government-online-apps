@@ -1628,8 +1628,10 @@ define("js/lgonlineCommand", [
                         this.searchFields = actualFieldList;
 
                         // Set up our query task now that we have the URL to the layer
-                        this.objectIdField = searchLayer.resourceInfo.objectIdField;
-                        if (!this.objectIdField && searchLayer.layerObject) {
+                        this.objectIdField = "ObjectID";
+                        if (searchLayer.resourceInfo && searchLayer.resourceInfo.objectIdField) {
+                            this.objectIdField = searchLayer.resourceInfo.objectIdField;
+                        } else if (searchLayer.layerObject && searchLayer.layerObject.objectIdField) {
                             this.objectIdField = searchLayer.layerObject.objectIdField;
                         }
                         this.publishPointsOnly = (typeof this.publishPointsOnly === "boolean") ? this.publishPointsOnly : true;
