@@ -1839,6 +1839,7 @@ define("js/lgonlineCommand", [
             var pThis = this, resultsList = [], possibleLabel, representativeLabel,
                 processedSearchText = searchText.toUpperCase();
 
+
             if (results && results.features && 0 < results.features.length) {
                 // Create the results list
                 array.forEach(results.features, function (item) {
@@ -1877,6 +1878,9 @@ define("js/lgonlineCommand", [
                 resultsList.sort(pThis.sortByLabel);
             }
 
+            if (resultsList.length == 1) {
+                pThis.publish("showFeature", resultsList[0].data);
+            };
             return resultsList;
         },
 
@@ -2311,7 +2315,7 @@ define("js/lgonlineCommand", [
                                 pThis.log("retd " + resultsList.length + " items in "
                                     + (now - thisSearchTime) / 1000 + " secs");
 
-                                if (resultsList.length > 0) {
+                                if (resultsList.length > 1) {
                                     array.forEach(resultsList, function (item) {
                                         var tableRow, tableCell;
 
